@@ -626,6 +626,23 @@ def test_derived_statement_may_cite_numbers_its_quote_does_not(workspace, text):
     assert checks[-1].outcome is Outcome.VERIFIED, checks[-1].detail
 
 
+def test_a_formula_given_as_a_picture_is_filled_in_only_where_it_was():
+    text = ManuscriptText(
+        ["For the sample X = {xi} of size N, the fit converged in every case."]
+    )
+    quote = "For the sample of size N, the fit converged in every case."
+    place = quote.index("of size")
+    filled = text.filled(quote, [place])
+    assert filled == "For the sample X={xi} of size N, the fit converged in every case."
+    assert text.filled(quote) is None  # too long to put in elsewhere
+    assert text.filled(quote, [quote.index("in every")]) is None
+
+
+def test_the_increment_sign_matches_a_capital_delta():
+    text = ManuscriptText(["The change ∆t was 2 ms."])
+    assert text.find("The change Δt was 2 ms.", loose=True) == [1]
+
+
 def test_a_quote_is_filled_in_only_where_the_page_has_a_few_characters_more():
     text = ManuscriptText(
         ["When the likelihood point ˆθ is on the boundary, we stop here."]

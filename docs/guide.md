@@ -277,8 +277,9 @@ rigoraudit extract
 With the XML, the paragraph breaks are exact, but its words can still
 differ from the printed PDF, and quotes are checked against the PDF.
 Where the XML only leaves out a few characters the PDF prints (a "∼"
-before a number, a "θ̂", an item's "2."), the tool puts them in from the
-PDF and lists the sentence as the XML had it under `from_pdf`. Any other
+before a number, a "θ̂", an item's "2.", or a formula it has only as a
+picture), the tool puts them in from the PDF and lists the sentence as the
+XML had it under `from_pdf`. Any other
 sentence not found in the PDF is listed under `not_in_pdf`: check those,
 and fix the paragraph before segmenting. With the PDF alone, the breaks between
 paragraphs are a best guess: open the file and fix any paragraph that was
@@ -289,8 +290,8 @@ existing paragraphs file, which may hold your corrections, is left alone.
 Extracting again after later steps is safe as long as the paragraphs keep
 their numbers: the next time the record is built (`rigoraudit record`, or
 the guide's last step), each quote is found again in its paragraph, and
-takes in the few characters the new text puts in from the PDF (a "∼",
-an "x̄", an item's "2."; never a word). A quote whose words changed
+takes in what the new text puts in from the PDF (a "∼", an "x̄", an
+item's "2.", a formula; never a word). A quote whose words changed
 stops the build and is named, with what to do. The cross-claim step then
 asks again about values whose quotes changed.
 

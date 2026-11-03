@@ -1115,6 +1115,30 @@ def test_locate_places_a_sentence_the_pdf_writes_differently_by_its_words():
     assert paras[0]["not_in_pdf"] == [text]
 
 
+def test_a_formula_given_as_a_picture_is_put_in_from_the_pdf():
+    root = ET.fromstring(
+        "<article><body><sec><title>Methods</title><p>We fit the sample "
+        '<inline-formula><inline-graphic href="f1.gif"/></inline-formula> of '
+        "size N to the model [Equation 2] and the fit was then repeated for "
+        '<inline-formula><inline-graphic href="f2.gif"/></inline-formula> '
+        "every block of trials in the session.</p></sec></body></article>"
+    )
+    [para] = extract.jats_paragraphs(root)
+    text = para["text"]
+    assert "sample of size" in text and "for every block" in text
+    assert para["formulas"] == [text.index("of size"), text.index("every block")]
+    page = (
+        "We fit the sample X = {xi} of size N to the model (2) and the fit "
+        "was then repeated for b ∈ B every block of trials in the session."
+    )
+    assert extract.fill_in([para], ManuscriptText([page]), []) == 2
+    assert para["text"] == (
+        "We fit the sample X={xi} of size N to the model [Equation 2] and the "
+        "fit was then repeated for b∈B every block of trials in the session."
+    )
+    assert "formulas" not in para
+
+
 def test_fill_in_puts_back_what_the_xml_leaves_out():
     text = (
         "Each group comprised 50 participants. It rose to 90% [Equation 2]. "

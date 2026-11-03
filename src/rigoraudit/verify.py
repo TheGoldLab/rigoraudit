@@ -84,7 +84,9 @@ _HYPHENATION = re.compile(r"(?<=[^\W\d_])\s*-(?:\s+|(?=[^\W\d_]))")
 """A hyphen after a letter that ends a line or joins another letter.
 
 Extraction can put a space before it ("perfor -\\nmance")."""
-_QUOTE_MARKS = str.maketrans({"’": "'", "‘": "'", "“": '"', "”": '"'})
+_LOOKALIKES = str.maketrans({"’": "'", "‘": "'", "“": '"', "”": '"', "∆": "Δ"})
+"""Characters that print alike: curly and straight quote marks, and the
+increment sign and Greek capital delta."""
 _LETTER_TILDE = re.compile(r"(?<=[^\W\d_])[~˜]")
 """A tilde typed after a letter as its accent ("S~" for S with a tilde)."""
 
@@ -94,14 +96,15 @@ def _normalize(text: str, *, loose: bool) -> str:
 
     Loose matching absorbs hyphenation in extracted PDF text ("accumu-\\nlation",
     "rule- based" vs "rule-based") but keeps minus signs and range dashes,
-    so "−0.08" never matches "0.08". All dashes and minus signs compare equal.
+    so "−0.08" never matches "0.08". All dashes and minus signs compare
+    equal, and so do characters that print alike ("∆" and "Δ").
     It also drops accents, which a PDF can place before their letter rather
     than after, and a tilde typed after a letter in their place; a tilde
     before a number ("~100") is kept.
     """
     if loose:
         text = _LETTER_TILDE.sub("", text)
-        text = unicodedata.normalize("NFKD", text).translate(_QUOTE_MARKS)
+        text = unicodedata.normalize("NFKD", text).translate(_LOOKALIKES)
         text = "".join(c for c in text if unicodedata.category(c) != "Mn")
         text = _HYPHENATION.sub("", _DASHES.sub("-", text))
     return _WHITESPACE.sub("", text)
@@ -114,6 +117,9 @@ MAX_EXTRA = 3
 """Characters (whitespace removed) found in only one of the quote and the
 page that a mismatch's detail names, or :meth:`ManuscriptText.filled`
 puts back, such as a ``"∼"`` the quote leaves out."""
+MAX_FORMULA = 40
+"""Characters (whitespace removed) :meth:`ManuscriptText.filled` puts in
+where the quote's source had a formula as a picture."""
 ANCHOR = 15
 """Characters (whitespace removed) at a quote's start or end that
 :meth:`ManuscriptText.filled` finds it by."""
@@ -237,20 +243,24 @@ class ManuscriptText:
                         found.add(p)
         return sorted(found)
 
-    def filled(self, quote: str) -> str | None:
+    def filled(self, quote: str, formulas: Sequence[int] = ()) -> str | None:
         """``quote`` with the few characters it leaves out put back, as the
         text has them, or ``None``.
 
         For text taken from elsewhere (the publisher's XML) that the text
         layer prints with a symbol more, such as ``"∼50"`` for ``"50"``: up
         to :data:`MAX_EXTRA` characters at a place, and nothing else
-        different. Only a result the text layer has is returned.
+        different. ``formulas`` are the places in ``quote`` where its source
+        had a formula as a picture; there up to :data:`MAX_FORMULA`
+        characters may be put in (``"X = {xi}"``). Only a result the text
+        layer has is returned.
         """
         needle = _normalize(quote, loose=True)
         if len(needle) < 2 * ANCHOR or EQUATION_MARK.search(quote):
             return None
         text, _ = self._levels[True]
-        room = len(needle) + 4 * MAX_EXTRA
+        places = [len(_normalize(quote[:at], loose=True)) for at in formulas]
+        room = len(needle) + 4 * MAX_EXTRA + MAX_FORMULA * len(places)
         windows = [
             (i, min(len(text), i + room), True)
             for i in _occurrences(text, needle[:ANCHOR])
@@ -267,7 +277,14 @@ class ManuscriptText:
             inserts = [(i, window[j:k]) for op, i, _, j, k in ops if op == "insert"]
             if not inserts or any(op not in ("equal", "insert") for op, *_ in ops):
                 continue
-            if any(len(extra) > MAX_EXTRA for _, extra in inserts):
+            if not all(
+                len(extra) <= MAX_EXTRA
+                or (
+                    len(extra) <= MAX_FORMULA
+                    and any(abs(at - p) <= MAX_EXTRA for p in places)
+                )
+                for at, extra in inserts
+            ):
                 continue
             out = _put_in(quote, inserts)
             if out is not None and self.find(out, loose=True):

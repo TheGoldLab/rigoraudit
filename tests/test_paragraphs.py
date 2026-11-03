@@ -109,6 +109,21 @@ def test_a_quote_with_other_changes_is_not_found(text):
         p.locate(QUOTE)
 
 
+def test_a_quote_is_found_with_what_extracting_put_in_from_the_pdf(tmp_path):
+    xml = "Each fit used the mean of the samples to set the starting rate."
+    text = (
+        "Each fit used the mean y = (Σ yi)/N of the samples to set the starting rate."
+    )
+    path = write(tmp_path, [{"section": "Methods", "paragraph": 1, "text": text,
+                             "from_pdf": [xml]}])  # fmt: skip
+    [p] = read_paragraphs(path)
+    assert p.locate(xml[:-1]) == (0, text[:-1])
+    # the same words in a paragraph extracting did not change are not taken
+    other = Paragraph("M1.1", "Methods", 1, text)
+    with pytest.raises(ValueError, match="does not have this quote word for word"):
+        other.locate(xml[:-1])
+
+
 def test_page_starts_follow_a_split_and_a_join():
     head, tail = split_page_starts([[0, 4], [10, 5]], 6)
     assert (head, tail) == ([[0, 4]], [[0, 4], [4, 5]])

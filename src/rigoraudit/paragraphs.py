@@ -62,6 +62,9 @@ class Paragraph:
     """Typed in from a figure's image, so not in the PDF's text layer."""
     page_starts: tuple[tuple[int, int], ...] = ()
     """(offset in ``text``, page) where each of its pages starts."""
+    from_pdf: frozenset[str] = frozenset()
+    """What extracting put into the text from the PDF, whitespace removed
+    (``"X={xi}"``)."""
 
     def page_at(self, offset: int) -> int | None:
         """The page the character at ``offset`` is printed on."""
@@ -77,17 +80,26 @@ class Paragraph:
 
         A quote accepted before the paragraphs were extracted again may lack
         a few characters the new text puts in from the PDF (a "∼" before a
-        number, an item's "2."). Such a quote is still found if the text
-        differs from it only by insertions of at most :data:`PUT_IN`
-        characters each, with no two letters A–Z or a–z in a row (a symbol
-        such as "x̄" may be put in, a word such as "no" may not), and only
-        one place in the text fits; the text's version is returned. Otherwise
+        number, an item's "2.", a formula). Such a quote is still found if
+        the text differs from it only by insertions, each either what
+        extracting put in from the PDF (:attr:`from_pdf`) or at most
+        :data:`PUT_IN` characters with no two letters A–Z or a–z in a row (a
+        symbol such as "x̄" may be put in, a word such as "no" may not), and
+        only one place in the text fits; the text's version is returned. Otherwise
         a :class:`ValueError` says which quote is missing and what to do.
         """
         at = self.text.find(quote)
         if at >= 0:
             return at, quote
-        found = _put_in(self.text, quote)
+        found = {
+            (at, span)
+            for at, span, extras in _put_in(self.text, quote)
+            if all(
+                "".join(x.split()) in self.from_pdf
+                or (len(x) <= PUT_IN and not re.search("[A-Za-z]{2}", x))
+                for x in extras
+            )
+        }
         if len(found) == 1:
             return found.pop()
         n = next(n for n in range(len(quote), -1, -1) if quote[:n] in self.text)
@@ -124,17 +136,17 @@ _ENDS = 15
 """Characters at a quote's start or end :meth:`Paragraph.locate` finds it by."""
 
 
-def _put_in(text: str, quote: str) -> set[tuple[int, str]]:
-    """Every (start, span) of ``text`` that is ``quote`` with a few
-    characters put in (see :meth:`Paragraph.locate`)."""
+def _put_in(text: str, quote: str) -> list[tuple[int, str, list[str]]]:
+    """Every (start, span, what was put in) where ``text`` is ``quote`` with
+    something put in at places (see :meth:`Paragraph.locate`)."""
     if len(quote) < 2 * _ENDS:
-        return set()
-    room = len(quote) + 4 * PUT_IN
+        return []
+    room = 2 * len(quote) + 4 * PUT_IN
     windows = [(i, i + room, True) for i in _starts(text, quote[:_ENDS])] + [
         (max(0, i + _ENDS - room), i + _ENDS, False)
         for i in _starts(text, quote[-_ENDS:])
     ]
-    found = set()
+    found = []
     for start, end, from_head in windows:
         window = text[start:end]
         ops = SequenceMatcher(None, quote, window, autojunk=False).get_opcodes()
@@ -146,10 +158,8 @@ def _put_in(text: str, quote: str) -> set[tuple[int, str]]:
         extras = [window[j:k] for op, _, _, j, k in ops if op == "insert"]
         if any(op not in ("equal", "insert") for op, *_ in ops) or not extras:
             continue
-        if any(len(x) > PUT_IN or re.search("[A-Za-z]{2}", x) for x in extras):
-            continue
         a, b = ops[0][3], ops[-1][4]
-        found.add((start + a, window[a:b]))
+        found.append((start + a, window[a:b], extras))
     return found
 
 
@@ -190,6 +200,12 @@ def read_paragraphs(path: Path) -> list[Paragraph]:
                 page,
                 bool(e.get("transcribed")),
                 tuple((int(a), int(b)) for a, b in e.get("page_starts", ())),
+                frozenset(
+                    "".join(x.split())
+                    for was in e.get("from_pdf", ())
+                    for *_, xs in _put_in(e["text"], was)
+                    for x in xs
+                ),
             )
         )
     seen: set[str] = set()

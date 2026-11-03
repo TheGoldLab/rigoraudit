@@ -286,7 +286,13 @@ def _chars(e: ET.Element) -> str:
         elif _local(c.tag) == "disp-formula":
             inner += f" {equation_mark(_number(c))} "
         inner += c.tail or ""
+    if name == "inline-formula" and not inner.strip():
+        return FORMULA_PICTURE
     return inner
+
+
+FORMULA_PICTURE = "\ufffc"
+"""Stands, while the XML is read, for a formula given only as a picture."""
 
 
 def _number(formula: ET.Element) -> str | None:
@@ -302,9 +308,21 @@ def _number(formula: ET.Element) -> str | None:
 
 def text_of(e: ET.Element | None) -> str:
     """An element's printed text, with whitespace collapsed."""
+    return _text_and_formulas(e)[0]
+
+
+def _text_and_formulas(e: ET.Element | None) -> tuple[str, list[int]]:
+    """An element's printed text, with whitespace collapsed, and the places
+    in it of formulas given only as pictures (which it leaves out)."""
     if e is None:
-        return ""
-    return " ".join(_chars(e).translate(INVISIBLE).split())
+        return "", []
+    text, formulas = "", []
+    for n, part in enumerate(_chars(e).translate(INVISIBLE).split(FORMULA_PICTURE)):
+        part = " ".join(part.split())
+        if n:
+            formulas.append(len(text) + (1 if text and part else 0))
+        text = " ".join(t for t in (text, part) if t)
+    return text, formulas
 
 
 def _article(root: ET.Element):
@@ -333,7 +351,7 @@ class _Collector:
         paragraphs, whose mark goes at the end of the one before."""
         last = self.out[-1] if self.out and self.count[section] else None
         if _local(e.tag) != "disp-formula":
-            self.add(section, text_of(e))
+            self.add(section, *_text_and_formulas(e))
             last = self.out[-1] if self.count[section] else None
         elif last is not None:
             last["text"] += " " + equation_mark(_number(e))
@@ -359,12 +377,14 @@ class _Collector:
                 }
             )
 
-    def add(self, section: str, text: str) -> None:
+    def add(self, section: str, text: str, formulas: list[int] | None = None) -> None:
         if text:
             self.count[section] += 1
             self.out.append(
                 {"section": section, "paragraph": self.count[section], "text": text}
             )
+            if formulas:
+                self.out[-1]["formulas"] = formulas
 
     def section(self, e: ET.Element, path: list[str]) -> None:
         """A section and its subsections; an untitled one stays in ``path``."""
@@ -386,7 +406,7 @@ class _Collector:
         self.add(f"{label} {kind}", text_of(_child(cap, "title")))
         for p in cap:
             if _local(p.tag) == "p":
-                self.add(f"{label} {kind}", text_of(p))
+                self.add(f"{label} {kind}", *_text_and_formulas(p))
 
 
 def jats_paragraphs(root: ET.Element) -> list[dict]:
@@ -396,7 +416,9 @@ def jats_paragraphs(root: ET.Element) -> list[dict]:
     list), then figure legends, table captions, and table rows. Sections are
     named by their titles, levels joined by ``" › "``. Peer reviews and
     replies published with the article are left out, and so are display
-    equations (:func:`jats_equations`).
+    equations (:func:`jats_equations`). Formulas given only as pictures are
+    left out too; a paragraph with any lists their places in its text under
+    ``formulas``, for :func:`fill_in`.
     """
     return _collect(root).out
 
@@ -447,29 +469,51 @@ def fill_in(
     PDF prints (``"∼50"`` for ``"50"``), and return how many sentences
     changed.
 
-    Each changed sentence is listed under ``from_pdf`` as the XML had it,
-    and the places of later equations' marks in the paragraph move with
-    the text.
+    Where the XML has a formula only as a picture (a paragraph's
+    ``formulas``), the formula's text is put in from the PDF as well. A
+    sentence with display equations' marks is filled in part by part. Each
+    changed sentence or part is listed under ``from_pdf`` as the XML had it,
+    and the places of later equations' marks in the paragraph move with the
+    text. ``formulas`` is removed.
     """
     changed = 0
     for p in paragraphs:
         text, offset, was = p["text"], 0, []
-        for s in SENTENCE.split(p["text"]):
-            at = text.index(s, offset)
-            offset = at + len(s)
-            if manuscript.find(s, loose=True) or manuscript.find_split(s):
-                continue
-            new = manuscript.filled(s)
-            if new is None:
-                continue
-            grown = len(new) - len(s)
-            for e in equations:
-                here = (e["section"], e["paragraph"]) == (p["section"], p["paragraph"])
-                if here and e["at"] is not None and e["at"] >= offset:
-                    e["at"] += grown
-            text = text[:at] + new + text[offset:]
-            offset += grown
-            was.append(s)
+        formulas, end = p.pop("formulas", []), 0
+        for sentence in SENTENCE.split(p["text"]):
+            found = manuscript.find(sentence, loose=True) or manuscript.find_split(
+                sentence
+            )
+            # else the parts between display equations' marks, one by one
+            pieces = (
+                [sentence]
+                if found
+                else [x.strip() for x in EQUATION_MARK.sub("\0", sentence).split("\0")]
+            )
+            for s in pieces:
+                if not s:
+                    continue
+                at = text.index(s, offset)
+                offset = at + len(s)
+                start = p["text"].index(s, end)
+                end = start + len(s)
+                if found or manuscript.find(s, loose=True):
+                    continue
+                here = [f - start for f in formulas if start <= f <= start + len(s)]
+                new = manuscript.filled(s, here)
+                if new is None:
+                    continue
+                grown = len(new) - len(s)
+                for e in equations:
+                    here = (e["section"], e["paragraph"]) == (
+                        p["section"],
+                        p["paragraph"],
+                    )
+                    if here and e["at"] is not None and e["at"] >= offset:
+                        e["at"] += grown
+                text = text[:at] + new + text[offset:]
+                offset += grown
+                was.append(s)
         if was:
             p["text"], p["from_pdf"] = text, was
             changed += len(was)
@@ -2277,6 +2321,8 @@ def extract(
             text = read_text(workspace / TEXT)
             filled = fill_in(paragraphs, text, records)
             locate(paragraphs, text)
+        for p in paragraphs:
+            p.pop("formulas", None)
         result = Result(
             "xml",
             len(paragraphs),
@@ -2384,9 +2430,9 @@ def _describe(result: Result) -> str:
         if result.filled:
             text += (
                 f" {result.filled} sentences left out a few characters the PDF "
-                "prints (such as a '∼' before a number); they were put in from "
-                "the PDF, and each sentence as the XML had it is listed under "
-                "from_pdf."
+                "prints (such as a '∼' before a number, or a formula the XML has "
+                "only as a picture); they were put in from the PDF, and each "
+                "sentence as the XML had it is listed under from_pdf."
             )
         if result.not_found:
             text += (
