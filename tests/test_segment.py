@@ -379,6 +379,21 @@ def test_depends_on_and_no_stated_support():
 EXAMPLE = Path(__file__).parent.parent / "examples" / "example-audit"
 
 
+def test_record_claims_follow_paragraphs_extracted_again(tmp_path):
+    ws = workspace_with(tmp_path)
+    write_handoffs(ws)
+    left = [{"paragraph": "R1.2", "quote": "40 trials", "reason": "design"}]
+    accept(ws, "segment-R1.1", GOOD[:1], left)
+    again = [dict(e) for e in EXTRACT]
+    again[1]["text"] = "Overall, " + PARAGRAPHS["R1.1"].replace("block A", "block A†")
+    (ws / "work/extract/paragraphs.json").write_text(
+        json.dumps(again), encoding="utf-8"
+    )
+    [c] = record_claims(ws, "manuscript.txt")
+    assert c.anchor.quote == GOOD[0]["quote"].replace("block A", "block A†")
+    assert again[1]["text"][c.anchor.char_start : c.anchor.char_end] == c.anchor.quote
+
+
 def test_record_claims_match_the_example_audits_hand_built_claims(tmp_path):
     extract = json.loads(
         (EXAMPLE / "work/extract/paragraphs.json").read_text(encoding="utf-8")

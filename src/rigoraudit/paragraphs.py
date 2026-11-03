@@ -34,6 +34,7 @@ import json
 import re
 from collections.abc import Sequence
 from dataclasses import dataclass
+from difflib import SequenceMatcher
 from pathlib import Path, PurePosixPath
 
 from rigoraudit.numbering import NUMBER
@@ -71,6 +72,40 @@ class Paragraph:
             page = p
         return page
 
+    def locate(self, quote: str) -> tuple[int, str]:
+        """Where ``quote`` starts in the text, and the quote as the text has it.
+
+        A quote accepted before the paragraphs were extracted again may lack
+        a few characters the new text puts in from the PDF (a "∼" before a
+        number, an item's "2."). Such a quote is still found if the text
+        differs from it only by insertions of at most :data:`PUT_IN`
+        characters each, with no two letters A–Z or a–z in a row (a symbol
+        such as "x̄" may be put in, a word such as "no" may not), and only
+        one place in the text fits; the text's version is returned. Otherwise
+        a :class:`ValueError` says which quote is missing and what to do.
+        """
+        at = self.text.find(quote)
+        if at >= 0:
+            return at, quote
+        found = _put_in(self.text, quote)
+        if len(found) == 1:
+            return found.pop()
+        n = next(n for n in range(len(quote), -1, -1) if quote[:n] in self.text)
+        at = self.text.find(quote[:n]) + n
+        where = (
+            f"; it matches through …{quote[max(0, n - 30) : n]!r}, then the "
+            f"quote has {quote[n : n + 30]!r} and the paragraph "
+            f"{self.text[at : at + 30]!r}"
+            if n >= _ENDS
+            else ""
+        )
+        raise ValueError(
+            f"Paragraph {self.label} does not have this quote word for word: "
+            f"{quote!r}{where}. If the paragraphs were extracted again since the "
+            "answer was accepted, fix the paragraph to read as before, or "
+            "delete the answer that quotes it and hand that step off again."
+        )
+
     @property
     def top(self) -> str:
         """The top-level section, e.g. ``"Results"``."""
@@ -80,6 +115,51 @@ class Paragraph:
     def place(self) -> str:
         """Where the paragraph is, for people: ``"Results › Learning ¶2"``."""
         return f"{self.section} ¶{self.number}"
+
+
+PUT_IN = 3
+"""Most characters :meth:`Paragraph.locate` lets the text put into a quote
+at one place."""
+_ENDS = 15
+"""Characters at a quote's start or end :meth:`Paragraph.locate` finds it by."""
+
+
+def _put_in(text: str, quote: str) -> set[tuple[int, str]]:
+    """Every (start, span) of ``text`` that is ``quote`` with a few
+    characters put in (see :meth:`Paragraph.locate`)."""
+    if len(quote) < 2 * _ENDS:
+        return set()
+    room = len(quote) + 4 * PUT_IN
+    windows = [(i, i + room, True) for i in _starts(text, quote[:_ENDS])] + [
+        (max(0, i + _ENDS - room), i + _ENDS, False)
+        for i in _starts(text, quote[-_ENDS:])
+    ]
+    found = set()
+    for start, end, from_head in windows:
+        window = text[start:end]
+        ops = SequenceMatcher(None, quote, window, autojunk=False).get_opcodes()
+        # the window runs past the quote at one end
+        if ops and ops[-1 if from_head else 0][0] == "insert":
+            ops = ops[:-1] if from_head else ops[1:]
+        if not ops or ops[0][0] != "equal" or ops[-1][0] != "equal":
+            continue
+        extras = [window[j:k] for op, _, _, j, k in ops if op == "insert"]
+        if any(op not in ("equal", "insert") for op, *_ in ops) or not extras:
+            continue
+        if any(len(x) > PUT_IN or re.search("[A-Za-z]{2}", x) for x in extras):
+            continue
+        a, b = ops[0][3], ops[-1][4]
+        found.add((start + a, window[a:b]))
+    return found
+
+
+def _starts(text: str, part: str) -> list[int]:
+    """Every place ``part`` starts in ``text``."""
+    out, at = [], text.find(part)
+    while at >= 0:
+        out.append(at)
+        at = text.find(part, at + 1)
+    return out
 
 
 def read_paragraphs(path: Path) -> list[Paragraph]:

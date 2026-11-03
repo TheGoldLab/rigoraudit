@@ -286,6 +286,13 @@ split or run together before going on. Do it before segmenting, since claim
 IDs follow the paragraph numbers. If you find the XML later, put it beside
 the PDF and run `rigoraudit extract --replace`; without `--replace` an
 existing paragraphs file, which may hold your corrections, is left alone.
+Extracting again after later steps is safe as long as the paragraphs keep
+their numbers: the next time the record is built (`rigoraudit record`, or
+the guide's last step), each quote is found again in its paragraph, and
+takes in the few characters the new text puts in from the PDF (a "∼",
+an "x̄", an item's "2."; never a word). A quote whose words changed
+stops the build and is named, with what to do. The cross-claim step then
+asks again about values whose quotes changed.
 
 A paragraph you type in yourself, such as text printed inside a figure,
 is marked `"transcribed": true`: its quotes cannot be found in the PDF's

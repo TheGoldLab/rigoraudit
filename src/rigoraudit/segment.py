@@ -474,7 +474,8 @@ def record_claims(workspace: Path, manuscript: str) -> tuple[Claim, ...]:
 
     ``manuscript`` is the manuscript file the paragraphs were extracted from,
     relative to ``materials/``. Each claim is anchored by the character span
-    of its quote in its paragraph. The claims are checked together, so a
+    of its quote in its paragraph as now extracted
+    (:meth:`~rigoraudit.paragraphs.Paragraph.locate`). The claims are checked together, so a
     ``restates`` or ``depends_on`` naming a claim no answer has is an error.
     Every claim's trace is pending; tracing sets it.
     """
@@ -482,12 +483,12 @@ def record_claims(workspace: Path, manuscript: str) -> tuple[Claim, ...]:
     order = {label: i for i, label in enumerate(paragraphs)}
     found = [c for a in read_accepted(workspace) for c in a.answer.claims]
     found.sort(
-        key=lambda c: (order[c.paragraph], paragraphs[c.paragraph].text.index(c.quote))
+        key=lambda c: (order[c.paragraph], paragraphs[c.paragraph].locate(c.quote)[0])
     )
     claims = []
     for c in found:
         p = paragraphs[c.paragraph]
-        start = p.text.index(c.quote)
+        start, quote = p.locate(c.quote)
         claims.append(
             Claim(
                 id=c.id,
@@ -497,9 +498,9 @@ def record_claims(workspace: Path, manuscript: str) -> tuple[Claim, ...]:
                     section=p.section,
                     paragraph=p.number,
                     char_start=start,
-                    char_end=start + len(c.quote),
+                    char_end=start + len(quote),
                     page=p.page_at(start),
-                    quote=c.quote,
+                    quote=quote,
                 ),
                 depends_on=c.depends_on,
                 citations=c.citations,

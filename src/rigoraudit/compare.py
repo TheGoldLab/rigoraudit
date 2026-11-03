@@ -609,7 +609,7 @@ def build_record(workspace: Path, settings: Settings) -> AuditRecord:
             ]
     findings += checked
     pages = {(p.section, p.number): p for p in read_paragraphs(workspace / PARAGRAPHS)}
-    findings = [_with_pages(f, pages) for f in findings]
+    findings = [_placed(f, pages) for f in findings]
     return AuditRecord(
         drafted_by=drafter,
         claims=tuple(claims),
@@ -630,17 +630,26 @@ def tool_findings(workspace: Path, settings: Settings) -> list[Finding]:
     return found
 
 
-def _with_pages(f: Finding, paragraphs: dict[tuple[str, int], Paragraph]) -> Finding:
-    """The finding with each quote's page taken from the paragraphs as now
-    extracted, so extracting again corrects it."""
+def _placed(f: Finding, paragraphs: dict[tuple[str, int], Paragraph]) -> Finding:
+    """The finding with each quote found again in the paragraphs as now
+    extracted (:meth:`Paragraph.locate`), so extracting again moves it and
+    takes in the characters put in from the PDF."""
     observations = []
     for o in f.observations:
         a = o.anchor
         p = paragraphs.get((a.section, a.paragraph)) if a.kind == "manuscript" else None
         if p is not None:
+            start, quote = p.locate(a.quote)
             o = o.model_copy(
                 update={
-                    "anchor": a.model_copy(update={"page": p.page_at(a.char_start)})
+                    "anchor": a.model_copy(
+                        update={
+                            "char_start": start,
+                            "char_end": start + len(quote),
+                            "page": p.page_at(start),
+                            "quote": quote,
+                        }
+                    )
                 }
             )
         observations.append(o)

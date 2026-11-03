@@ -1076,8 +1076,7 @@ def procedure_observations(
             if c.id not in claims:
                 continue
             p = paragraphs[claims[c.id].paragraph]
-            quote = claims[c.id].quote
-            start = p.text.index(quote)
+            start, quote = p.locate(claims[c.id].quote)
             own = Observation(
                 source=Source.METHODS if _is_methods(p) else Source.RESULTS,
                 statement=quote,
@@ -1161,7 +1160,7 @@ class Citations:
 
     def methods(self, m: MethodsCite, statement: str | None = None) -> Observation:
         p = self.paragraphs[m.paragraph]
-        start = p.text.index(m.quote)
+        start, quote = p.locate(m.quote)
         return Observation(
             source=Source.METHODS,
             statement=statement or m.states,
@@ -1171,9 +1170,9 @@ class Citations:
                 section=p.section,
                 paragraph=p.number,
                 char_start=start,
-                char_end=start + len(m.quote),
+                char_end=start + len(quote),
                 page=p.page_at(start),
-                quote=m.quote,
+                quote=quote,
             ),
         )
 

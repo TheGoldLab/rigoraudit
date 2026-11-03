@@ -589,7 +589,7 @@ def results_observations(
             p = paragraphs[where[c.id]]
             out[c.id] = {}
             for f in c.facets:
-                start = p.text.index(f.quote)
+                start, quote = p.locate(f.quote)
                 values = []
                 for v in f.values:
                     printed = read_printed(v.printed)
@@ -614,9 +614,9 @@ def results_observations(
                         section=p.section,
                         paragraph=p.number,
                         char_start=start,
-                        char_end=start + len(f.quote),
+                        char_end=start + len(quote),
                         page=p.page_at(start),
-                        quote=f.quote,
+                        quote=quote,
                     ),
                     values=tuple(values),
                 )

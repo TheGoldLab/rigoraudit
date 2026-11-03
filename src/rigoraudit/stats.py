@@ -881,7 +881,7 @@ def _unit_findings(
 
 
 def _anchor(p: Paragraph, quote: str, manuscript: str) -> ManuscriptAnchor:
-    start = p.text.index(quote)
+    start, quote = p.locate(quote)
     return ManuscriptAnchor(
         file=manuscript,
         section=p.section,
