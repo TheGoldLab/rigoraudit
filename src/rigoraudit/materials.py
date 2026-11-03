@@ -548,10 +548,10 @@ def write_list(workspace: Path, settings: Settings) -> bool:
 
 
 def gap_notes(workspace: Path, settings: Settings, gaps: Sequence[Gap]) -> list[str]:
-    """For each gap, the names it gives that are in the materials: a data
-    file, a name saved in one, a function defined inside a code file of
-    another name, or a package folder (``+name``). Code files a gap names
-    are left out: gaps name the scripts they are about."""
+    """For each gap that names things in the materials, one note listing
+    them: a data file, a name saved in one, a function defined inside a
+    code file of another name, or a package folder (``+name``). Code files a
+    gap names are left out: gaps name the scripts they are about."""
     files = list_files(workspace, settings)
     root = workspace / "materials"
     where: dict[str, set[str]] = defaultdict(set)
@@ -566,15 +566,16 @@ def gap_notes(workspace: Path, settings: Settings, gaps: Sequence[Gap]) -> list[
                 continue
             for name, line in codeindex.index_lines(f.path, lines).functions:
                 if name.lower() != p.stem.lower():
-                    where[name.lower()].add(f"{f.path} line {line} (defines {name})")
+                    where[name.lower()].add(f"{f.path} line {line}")
             continue
         if f.kind == "data":
             where[p.name.lower()].add(f.path)
             where[p.stem.lower()].add(f.path)
         for name in f.names:
-            where[name.lower()].add(f"{f.path} (holds {name})")
+            where[name.lower()].add(f"{f.path} holds it")
     out = []
     for i, g in enumerate(gaps, start=1):
+        named = []
         for word in dict.fromkeys(re.findall(r"[+@]?[A-Za-z_][\w.]*\w", g.missing)):
             key = word.lower()
             if len(key) < 4 or not re.search(r"[_.\d+@]|[a-z][A-Z]", word):
@@ -582,9 +583,8 @@ def gap_notes(workspace: Path, settings: Settings, gaps: Sequence[Gap]) -> list[
             if key not in where:
                 continue
             found = sorted(where[key])
-            more = f", and {len(found) - 3} more" if len(found) > 3 else ""
-            out.append(
-                f"Gap {i} names {word}, which is in the materials: "
-                f"{'; '.join(found[:3])}{more}."
-            )
+            more = f", and {len(found) - 1} more" if len(found) > 1 else ""
+            named.append(f"{word} ({found[0]}{more})")
+        if named:
+            out.append(f"Gap {i} names {'; '.join(named)}, in the materials.")
     return out

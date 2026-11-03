@@ -194,8 +194,9 @@ def describe(result: Result) -> str:
         lines += [
             "",
             (
-                f"LOOK AGAIN: {note} Make sure what the gap calls missing is not "
-                f"there ({materials.LIST.as_posix()} lists every file)."
+                f"LOOK AGAIN: {note} If the gap names them to say what is "
+                f"there, nothing to do. If not, make sure what it calls missing "
+                f"is not there ({materials.LIST.as_posix()} lists every file)."
             ),
         ]
     verdict = (

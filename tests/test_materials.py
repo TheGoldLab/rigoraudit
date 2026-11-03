@@ -87,11 +87,13 @@ def test_gap_notes_name_data_and_functions_but_not_scripts(tmp_path):
         Gap(missing="The list of cell_id values."),
     )
     notes = materials.gap_notes(ws, S, gaps)
-    assert [n.split(",")[0] for n in notes] == [
-        "Gap 1 names smooth_rates",
-        "Gap 2 names +stats",
-        "Gap 2 names cell_lists.csv",
-        "Gap 3 names cell_id",
+    assert notes == [
+        "Gap 1 names smooth_rates (code/run_all.m line 2), in the materials.",
+        (
+            "Gap 2 names +stats (code/+stats/); "
+            "cell_lists.csv (code/out/cell_lists.csv), in the materials."
+        ),
+        "Gap 3 names cell_id (code/out/cell_lists.csv holds it), in the materials.",
     ]
 
 

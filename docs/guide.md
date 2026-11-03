@@ -597,9 +597,10 @@ report's status paragraph says whether they are current. The check also
 fails if a gap in the manifest names a claim the record does not have. It
 says LOOK AGAIN, without failing, when a gap names something that is in
 the materials: a data file, a name saved in one, a function defined inside
-another code file, or a package folder. Gaps often name files that are
-there on purpose ("each session has its trial lists but not these"); the
-note asks you to make sure that what the gap calls missing is not.
+another code file, or a package folder. Gaps often name things that are
+there on purpose ("each session has its trial lists but not these"); then
+there is nothing to do. If not, make sure what the gap calls missing is
+not there.
 
 The check also sets side by side the values the paper prints in more than
 one claim, such as a count in the Results and again in a figure legend
