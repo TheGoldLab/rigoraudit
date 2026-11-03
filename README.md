@@ -52,8 +52,8 @@ please [report them](docs/guide.md#feedback). Known limits:
   when tracing claims to code. A derivation script may be allowed to start
   MATLAB without asking; one that starts any other program waits for you to
   read it and agree.
-- **Tried only on a Mac.** Windows and Linux should work but have not been
-  tried.
+- **Audits run only on a Mac so far.** The tests pass on Windows and Linux
+  too, but no real audit has been run on them yet.
 
 ## Install
 
