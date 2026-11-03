@@ -478,47 +478,84 @@ def fill_in(
 
 def locate(paragraphs: list[dict], manuscript: ManuscriptText) -> None:
     """Add each paragraph's PDF pages, where in its text each page starts,
-    and the sentences not found there."""
+    and the sentences not found there.
+
+    The pages are the ones the paragraph runs over, from its first; a
+    sentence also printed elsewhere (a legend's sentence repeated in
+    another legend) does not add that page.
+    """
     for p in paragraphs:
-        pages: set[int] = set()
         starts: list[list[int]] = []
         missing = []
         offset = 0
         for s in SENTENCE.split(p["text"]):
             at, offset = p["text"].index(s, offset), offset + len(s)
             found = manuscript.find(s, loose=True) or manuscript.find_split(s)
-            pages.update(found)
-            if not found:
+            if found:
+                pieces = [(at, s, found)]
+            else:  # place it by its runs of words the PDF has
                 missing.append(s)
-            # the sentence's page: the one it is on from the last one on
-            later = [n for n in found if not starts or n >= starts[-1][1]]
-            if later and (not starts or min(later) != starts[-1][1]):
-                starts.append([0 if not starts else at, min(later)])
-            cut = _next_page_starts(s, starts[-1][1], manuscript) if starts else None
-            if cut is not None:
-                pages.add(starts[-1][1] + 1)
-                starts.append([at + cut, starts[-1][1] + 1])
-        p["pages"] = sorted(pages)
+                pieces = [(at + i, run, f) for i, run, f in _runs(s, manuscript)]
+            for at_piece, piece, found in pieces:
+                # the piece's page: the one it is on from the last one on, at
+                # most two on (past a page holding only a figure)
+                later = [n for n in found if not starts or 0 <= n - starts[-1][1] <= 2]
+                if later and (not starts or min(later) != starts[-1][1]):
+                    starts.append([0 if not starts else at_piece, min(later)])
+                turn = (
+                    _next_page_starts(piece, starts[-1][1], manuscript)
+                    if starts
+                    else None
+                )
+                if turn is not None:
+                    starts.append([at_piece + turn[0], turn[1]])
+        p["pages"] = sorted({page for _, page in starts})
         if len(starts) > 1:
             p["page_starts"] = starts
         p["not_in_pdf"] = missing
 
 
+def _runs(
+    sentence: str, manuscript: ManuscriptText
+) -> list[tuple[int, str, list[int]]]:
+    """Runs of whole words, of at least :data:`RUN` characters, that make up
+    ``sentence``, each with where it starts and the pages the PDF has it
+    on; runs the PDF writes differently (a symbol, a formula) are left out."""
+    out, start = [], None
+    for m in re.finditer(r"\S+", sentence):
+        start = m.start() if start is None else start
+        if m.end() - start >= RUN or m.end() == len(sentence):
+            run = sentence[start : m.end()]
+            if found := manuscript.find(run, loose=True) or manuscript.find_split(run):
+                out.append((start, run, found))
+            start = None
+    return out
+
+
+RUN = 40
+"""Characters in a run of words :func:`_runs` looks for."""
+
+
 def _next_page_starts(
     sentence: str, page: int, manuscript: ManuscriptText
-) -> int | None:
+) -> tuple[int, int] | None:
     """Where in a sentence printed from ``page`` the next page starts, if it
-    runs onto it: the earliest word from which the rest is on that page."""
+    runs onto it, and that page: the earliest word from which the rest is on
+    the next page, or the one after past a page holding only a figure."""
     words = [m.start() for m in re.finditer(r"\S+", sentence)]
     ending = next((i for i in reversed(words) if len(sentence) - i >= TAIL), None)
     if not ending:
         return None
     found = manuscript.find(sentence[ending:], loose=True)
-    if page + 1 not in found or page in found:
+    later = [n for n in found if page < n <= page + 2]
+    if not later or page in found:
         return None
-    return next(
-        i for i in words[1:] if page + 1 in manuscript.find(sentence[i:], loose=True)
+    to = min(later)
+    cut = next(
+        (i for i in words[1:] if to in manuscript.find(sentence[i:], loose=True)),
+        ending,
     )
+    return cut, to
 
 
 TAIL = 15

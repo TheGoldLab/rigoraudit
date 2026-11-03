@@ -1087,6 +1087,34 @@ def test_locate_finds_pages_and_lists_what_is_missing():
     assert paras[0]["not_in_pdf"] == ["It was not 90%."]
 
 
+def test_locate_skips_a_page_where_a_sentence_is_also_printed():
+    # a legend's sentence also in another legend, on an earlier page
+    text = "Lever presses by block. Error bars show the standard error of the mean."
+    paras = [{"section": "Figure 2 legend", "paragraph": 1, "text": text}]
+    pages = ["Error bars show the standard error of the mean.", "Intro.",
+             "Lever presses by block. Error bars show the standard error of the mean."]  # fmt: skip
+    extract.locate(paras, ManuscriptText(pages))
+    assert paras[0]["pages"] == [3]
+
+
+def test_locate_places_a_sentence_the_pdf_writes_differently_by_its_words():
+    # the PDF writes a symbol differently, and the page turns inside it
+    text = (
+        "The mean response time was computed for every block of trials "
+        "and then the estimate of β was compared across all of the sessions."
+    )
+    paras = [{"section": "Methods", "paragraph": 1, "text": text}]
+    pages = [
+        "Intro. The mean response time was computed for every block of trials",
+        "Figure 1.",  # a page holding only a figure
+        "and then the estimate of b was compared across all of the sessions.",
+    ]
+    extract.locate(paras, ManuscriptText(pages))
+    assert paras[0]["pages"] == [1, 3]
+    assert paras[0]["page_starts"] == [[0, 1], [text.index("and then"), 3]]
+    assert paras[0]["not_in_pdf"] == [text]
+
+
 def test_fill_in_puts_back_what_the_xml_leaves_out():
     text = (
         "Each group comprised 50 participants. It rose to 90% [Equation 2]. "
