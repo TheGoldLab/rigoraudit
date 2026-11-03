@@ -15,7 +15,7 @@ from rigoraudit.paragraphs import (
 
 def write(tmp_path, entries):
     path = tmp_path / "paragraphs.json"
-    path.write_text(json.dumps(entries))
+    path.write_text(json.dumps(entries), encoding="utf-8")
     return path
 
 

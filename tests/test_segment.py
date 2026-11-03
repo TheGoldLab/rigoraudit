@@ -188,15 +188,17 @@ EXTRACT = [
 def workspace_with(tmp_path, extract=EXTRACT):
     path = tmp_path / "work" / "extract" / "paragraphs.json"
     path.parent.mkdir(parents=True)
-    path.write_text(json.dumps(extract))
+    path.write_text(json.dumps(extract), encoding="utf-8")
     (tmp_path / "audit.yaml").write_text(
-        "materials:\n  manuscript:\n    path: manuscript.pdf\n"
+        "materials:\n  manuscript:\n    path: manuscript.pdf\n", encoding="utf-8"
     )
     return tmp_path
 
 
 def accept(ws, handoff, claims, left_out=()):
-    h = Handoff.model_validate_json((ws / HANDOFFS / f"{handoff}.json").read_text())
+    h = Handoff.model_validate_json(
+        (ws / HANDOFFS / f"{handoff}.json").read_text(encoding="utf-8")
+    )
     a = Accepted(
         handoff=h.name,
         paragraphs=tuple(h.paragraphs),
@@ -205,14 +207,14 @@ def accept(ws, handoff, claims, left_out=()):
         answer=answer(claims, left_out),
     )
     (ws / ANSWERS).mkdir(parents=True, exist_ok=True)
-    (ws / ANSWERS / f"{h.name}.json").write_text(a.model_dump_json())
+    (ws / ANSWERS / f"{h.name}.json").write_text(a.model_dump_json(), encoding="utf-8")
 
 
 def test_results_are_handed_off_first_without_methods(tmp_path):
     ws = workspace_with(tmp_path)
     [md] = write_handoffs(ws)
     assert md.name == "segment-R1.1.md"
-    text = md.read_text()
+    text = md.read_text(encoding="utf-8")
     assert text.startswith("# Split the text into claims")
     assert "### Paragraph `R1.2` (Results › Speed ¶2)" in text
     assert "Rats pressed a lever." not in text
@@ -226,7 +228,7 @@ def test_legends_follow_with_the_results_claims(tmp_path):
     accept(ws, "segment-R1.1", GOOD[:1], left)
     [md] = write_handoffs(ws)
     assert md.name == "segment-F1.1.md"
-    text = md.read_text()
+    text = md.read_text(encoding="utf-8")
     assert f"- R1.1.a: {GOOD[0]['quote']}" in text
     # the answered handoff is kept; nothing else is left over
     assert sorted(p.name for p in (ws / HANDOFFS).iterdir()) == [
@@ -265,7 +267,7 @@ def test_import_saves_a_good_reply_and_moves_on_to_legends(tmp_path):
     left = [{"paragraph": "R1.2", "quote": "40 trials", "reason": "design"}]
     path, problems = import_answer(ws, reply(GOOD[:1], left), "Model X 1.0", today=DAY)
     assert problems == []
-    saved = Accepted.model_validate_json(path.read_text())
+    saved = Accepted.model_validate_json(path.read_text(encoding="utf-8"))
     assert (saved.handoff, saved.drafted_by, saved.imported) == (
         "segment-R1.1",
         "Model X 1.0",
@@ -323,12 +325,12 @@ def test_cli_import_prints_problems_to_paste_back(tmp_path, capsys):
     cli.main(["handoff", "segment", str(ws)])
     assert "segment-R1.1.md" in capsys.readouterr().out
     bad = tmp_path / "reply.txt"
-    bad.write_text(reply(GOOD[:1]))
+    bad.write_text(reply(GOOD[:1]), encoding="utf-8")
     with pytest.raises(SystemExit):
         cli.main(["import", "segment", str(bad), str(ws), "--by", "M"])
     out = capsys.readouterr().out
     assert "Please correct these problems" in out and "- In paragraph R1.2" in out
-    bad.write_text(reply(GOOD))
+    bad.write_text(reply(GOOD), encoding="utf-8")
     cli.main(["import", "segment", str(bad), str(ws), "--by", "M"])
     out = capsys.readouterr().out
     assert out.startswith("Accepted segment-R1.1: 2 claims and 0 left-out pieces")
@@ -378,16 +380,22 @@ EXAMPLE = Path(__file__).parent.parent / "examples" / "example-audit"
 
 
 def test_record_claims_match_the_example_audits_hand_built_claims(tmp_path):
-    extract = json.loads((EXAMPLE / "work/extract/paragraphs.json").read_text())
+    extract = json.loads(
+        (EXAMPLE / "work/extract/paragraphs.json").read_text(encoding="utf-8")
+    )
     ws = workspace_with(tmp_path, extract)
-    gold = AuditRecord.model_validate_json((EXAMPLE / "record/record.json").read_text())
+    gold = AuditRecord.model_validate_json(
+        (EXAMPLE / "record/record.json").read_text(encoding="utf-8")
+    )
     write_handoffs(ws)
     claims = [
         {"id": c.id, "paragraph": c.id.rsplit(".", 1)[0], "quote": c.anchor.quote,
          "type": c.type.value, "citations": list(c.citations), "depends_on": list(c.depends_on)}
         for c in gold.claims
     ]  # fmt: skip
-    left = json.loads((EXAMPLE / "record/coverage_exclusions.json").read_text())
+    left = json.loads(
+        (EXAMPLE / "record/coverage_exclusions.json").read_text(encoding="utf-8")
+    )
     left_out = left["exclusions"]
     assert import_answer(ws, reply(claims, left_out), "test")[1] == []
     built = record_claims(ws, "manuscript.txt")

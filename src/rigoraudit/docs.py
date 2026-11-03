@@ -211,7 +211,11 @@ def list_documentation(
         if code is not None and rel.startswith(code.path + "/"):
             lines = codeindex.code_lines(code_root, rel[len(code.path) + 1 :], commit)
         elif (materials / rel).is_file():
-            lines = (materials / rel).read_text(errors="replace").split("\n")
+            lines = (
+                (materials / rel)
+                .read_text(errors="replace", encoding="utf-8")
+                .split("\n")
+            )
         if lines is None:
             raise FileNotFoundError(f"script to run not found in materials/: {script}")
         header = opening_comment(lines, PurePosixPath(rel).suffix.lower())

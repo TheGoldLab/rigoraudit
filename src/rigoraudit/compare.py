@@ -655,7 +655,7 @@ def draft_record(workspace: Path, settings: Settings) -> AuditRecord | None:
         path = workspace / RECORD
         if not path.is_file():
             return None
-        return AuditRecord.model_validate_json(path.read_text())
+        return AuditRecord.model_validate_json(path.read_text(encoding="utf-8"))
     return build_record(workspace, settings)
 
 

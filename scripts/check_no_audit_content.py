@@ -90,7 +90,7 @@ def read_terms(roots: list[Path], spaces: list[Path]) -> list[str]:
     for folder in [*roots, *spaces]:
         f = folder / "release_terms.txt"
         if f.is_file():
-            lines = (ln.strip() for ln in f.read_text().splitlines())
+            lines = (ln.strip() for ln in f.read_text(encoding="utf-8").splitlines())
             terms += [ln for ln in lines if ln and not ln.startswith("#")]
     return sorted(set(terms))
 
@@ -147,7 +147,7 @@ def private_runs(spaces: list[Path]) -> set[tuple[str, ...]]:
     seen: set[tuple[str, ...]] = set()
     for space in spaces:
         for f in source_files(space):
-            text = f.read_text(errors="ignore")
+            text = f.read_text(errors="ignore", encoding="utf-8")
             if f.suffix == ".json":
                 try:
                     doc = json.loads(text)
@@ -166,7 +166,7 @@ def private_runs(spaces: list[Path]) -> set[tuple[str, ...]]:
 
 def git(*args: str) -> str:
     return subprocess.run(
-        ["git", *args], cwd=REPO, check=True, capture_output=True, text=True
+        ["git", *args], cwd=REPO, check=True, capture_output=True, encoding="utf-8"
     ).stdout
 
 
@@ -236,7 +236,7 @@ def main(argv: list[str] | None = None) -> int:
 
     problems: list[str] = []
     if args.message:
-        text = args.message.read_text()
+        text = args.message.read_text(encoding="utf-8")
         text = "\n".join(ln for ln in text.splitlines() if not ln.startswith("#"))
         problems = text_problems("commit message", text, terms, seen)
     else:

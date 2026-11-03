@@ -84,7 +84,7 @@ def test_large_files_are_left_out_and_everything_is_listed(tmp_path):
     assert (tmp_path / "code" / "fit.py").read_bytes() == CONTENT["code/fit.py"]
     assert not (tmp_path / "data").exists()
     assert [f.path for f in result.left_out] == ["data/trials.csv"]
-    listing = json.loads((tmp_path / osf.LISTING).read_text())
+    listing = json.loads((tmp_path / osf.LISTING).read_text(encoding="utf-8"))
     assert listing["source"] == "https://osf.io/ab3cd/"
     assert [(f["path"], f["fetched"]) for f in listing["files"]] == [
         ("README.md", True),
@@ -101,7 +101,7 @@ def test_large_files_are_left_out_and_everything_is_listed(tmp_path):
 def test_a_rerun_fetches_only_what_is_missing(tmp_path):
     fake = FakeOsf()
     osf.fetch("ab3cd", tmp_path, 1000, None, fake.get_json, fake.get_file)
-    (tmp_path / "README.md").write_text("changed")
+    (tmp_path / "README.md").write_text("changed", encoding="utf-8")
     fake.downloads.clear()
     result = osf.fetch("ab3cd", tmp_path, None, None, fake.get_json, fake.get_file)
     assert sorted(fake.downloads) == ["README.md", "data/trials.csv"]

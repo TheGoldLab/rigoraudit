@@ -48,9 +48,9 @@ def test_r_functions_and_assignments():
 
 def test_other_files_are_counted_by_folder(tmp_path):
     (tmp_path / "data").mkdir()
-    (tmp_path / "data" / "trials.json").write_text("[]")
-    (tmp_path / "README.txt").write_text("x")
-    (tmp_path / "run.py").write_text("n = 1\n")
+    (tmp_path / "data" / "trials.json").write_text("[]", encoding="utf-8")
+    (tmp_path / "README.txt").write_text("x", encoding="utf-8")
+    (tmp_path / "run.py").write_text("n = 1\n", encoding="utf-8")
     index = codeindex.build_index(tmp_path, None)
     assert [f.file for f in index.files] == ["run.py"]
     assert index.other == {".": 1, "data": 1}
@@ -79,7 +79,7 @@ def test_a_notebook_is_read_as_its_code_cells(tmp_path):
             ("code", "def fit(x):\n    return x"),
         ]
     )
-    (tmp_path / "fits.ipynb").write_text(book)
+    (tmp_path / "fits.ipynb").write_text(book, encoding="utf-8")
     lines = codeindex.code_lines(tmp_path, "fits.ipynb", None)
     assert lines == [
         "# Code cells of a Jupyter notebook in python",
@@ -114,7 +114,7 @@ def test_a_notebooks_text_is_kept_apart_from_its_code(tmp_path):
         "Text cell 3, before line 4:\nSlow.\n\n"
         "Text cell 4, after the last code cell:\n# Versions"
     )
-    (tmp_path / "fits.ipynb").write_text(book)
+    (tmp_path / "fits.ipynb").write_text(book, encoding="utf-8")
     [f] = codeindex.build_index(tmp_path, None).files
     assert f.sections == (("Fits", 2), ("Plots", 4))
     text = "\n".join(codeindex.render_index(codeindex.build_index(tmp_path, None)))
@@ -122,8 +122,10 @@ def test_a_notebooks_text_is_kept_apart_from_its_code(tmp_path):
 
 
 def test_a_notebook_in_an_unknown_language_is_counted_not_indexed(tmp_path):
-    (tmp_path / "a.ipynb").write_text(_notebook([("code", "x = 1")], "scala"))
-    (tmp_path / "b.ipynb").write_text("not a notebook")
+    (tmp_path / "a.ipynb").write_text(
+        _notebook([("code", "x = 1")], "scala"), encoding="utf-8"
+    )
+    (tmp_path / "b.ipynb").write_text("not a notebook", encoding="utf-8")
     index = codeindex.build_index(tmp_path, None)
     assert index.files == ()
     assert index.other == {".": 2}

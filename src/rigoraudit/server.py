@@ -621,7 +621,7 @@ def save_entry(
     saved only if it applies cleanly there. ``cross`` gives a record's
     cross-claim findings.
     """
-    draft = AuditRecord.model_validate_json(record_path.read_text())
+    draft = AuditRecord.model_validate_json(record_path.read_text(encoding="utf-8"))
     applied = review.apply(draft, review.load(log_path))
     current = applied.record
     reviewer, reason = _text(payload, "reviewer"), _text(payload, "reason")
@@ -755,7 +755,7 @@ def make_handler(
             if urlsplit(self.path).path not in ("/", "/index.html"):
                 self._send(HTTPStatus.NOT_FOUND, b"Not found", "text/plain")
                 return
-            page = report_path.read_text()
+            page = report_path.read_text(encoding="utf-8")
             if "</body>" in page:
                 page = page.replace("</body>", script + "</body>", 1)
             else:

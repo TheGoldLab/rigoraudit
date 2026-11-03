@@ -230,7 +230,7 @@ def load(path: Path) -> tuple[Entry, ...]:
     """Read the log; a missing file means no entries."""
     if not path.is_file():
         return ()
-    return ReviewLog.model_validate_json(path.read_text()).entries
+    return ReviewLog.model_validate_json(path.read_text(encoding="utf-8")).entries
 
 
 def _write(path: Path, entries: tuple[Entry, ...]) -> None:

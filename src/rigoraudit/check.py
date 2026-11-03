@@ -93,7 +93,7 @@ def read_exclusions(workspace: Path) -> tuple[Exclusion, ...] | None:
     in :data:`~rigoraudit.coverage.EXCLUSIONS`; ``None`` if there are neither."""
     path = workspace / EXCLUSIONS
     own = (
-        Exclusions.model_validate_json(path.read_text()).exclusions
+        Exclusions.model_validate_json(path.read_text(encoding="utf-8")).exclusions
         if path.is_file()
         else None
     )
@@ -109,7 +109,7 @@ def run(workspace: Path) -> Result:
     if not path.is_file():
         raise FileNotFoundError(f"no record in {workspace}: {RECORD} is missing")
     record = review.reviewed(
-        AuditRecord.model_validate_json(path.read_text()), workspace
+        AuditRecord.model_validate_json(path.read_text(encoding="utf-8")), workspace
     )
     s = settings.load(workspace)
     paragraphs = read_paragraphs(workspace / PARAGRAPHS)

@@ -24,7 +24,7 @@ def entry(text, n, section="Results", **extra):
 def workspace(tmp_path, entries):
     path = tmp_path / PARAGRAPHS
     path.parent.mkdir(parents=True)
-    path.write_text(json.dumps(entries))
+    path.write_text(json.dumps(entries), encoding="utf-8")
     return tmp_path
 
 
@@ -72,12 +72,14 @@ def test_rough_note_when_many_breaks_are_in_doubt(tmp_path):
 def test_import_splits_and_joins(tmp_path):
     ws = workspace(tmp_path, ENTRIES)
     (md,) = breaks.write_handoffs(ws)
-    assert f"### B1 (Results ¶1)\n\n> …{TOOK} ‖ {NEXT}…" in md.read_text()
+    assert f"### B1 (Results ¶1)\n\n> …{TOOK} ‖ {NEXT}…" in md.read_text(
+        encoding="utf-8"
+    )
     saved, problems = breaks.import_answer(ws, reply(B1=True, B2=False), "someone")
     assert problems == []
-    accepted = breaks.Accepted.model_validate_json(saved.read_text())
+    accepted = breaks.Accepted.model_validate_json(saved.read_text(encoding="utf-8"))
     assert (accepted.split, accepted.joined) == (1, 1)
-    got = json.loads((ws / PARAGRAPHS).read_text())
+    got = json.loads((ws / PARAGRAPHS).read_text(encoding="utf-8"))
     assert [(e["paragraph"], e["text"]) for e in got] == [
         (1, TOOK),
         (2, NEXT),
@@ -95,7 +97,7 @@ def test_import_keeps_what_was_right(tmp_path):
     breaks.write_handoffs(ws)
     _, problems = breaks.import_answer(ws, reply(B1=False, B2=True), "someone")
     assert problems == []
-    got = json.loads((ws / PARAGRAPHS).read_text())
+    got = json.loads((ws / PARAGRAPHS).read_text(encoding="utf-8"))
     assert [e["text"] for e in got] == [e["text"] for e in ENTRIES]
 
 
@@ -121,13 +123,13 @@ def test_import_problems(tmp_path):
         "repeated-spot",
         "missing-spot",
     ]
-    assert json.loads((ws / PARAGRAPHS).read_text()) == ENTRIES
+    assert json.loads((ws / PARAGRAPHS).read_text(encoding="utf-8")) == ENTRIES
 
 
 def test_import_refuses_changed_paragraphs(tmp_path):
     ws = workspace(tmp_path, ENTRIES)
     breaks.write_handoffs(ws)
-    (ws / PARAGRAPHS).write_text(json.dumps(ENTRIES[:3]))
+    (ws / PARAGRAPHS).write_text(json.dumps(ENTRIES[:3]), encoding="utf-8")
     _, problems = breaks.import_answer(ws, reply(B1=True, B2=False), "someone")
     assert [handoffs.kind(p) for p in problems] == ["paragraphs-changed"]
 
@@ -149,7 +151,7 @@ def test_command_says_what_changed_and_what_comes_next(tmp_path, capsys):
     ws = workspace(tmp_path, ENTRIES)
     breaks.write_handoffs(ws)
     answer = tmp_path / "reply.txt"
-    answer.write_text(reply(B1=True, B2=False))
+    answer.write_text(reply(B1=True, B2=False), encoding="utf-8")
     cli.main(["import", "breaks", str(answer), str(ws), "--by", "someone"])
     out = capsys.readouterr().out
     assert out.startswith(

@@ -128,7 +128,7 @@ class Place:
 
 def load_outline(path: Path) -> tuple[Heading, ...]:
     """Read headings written as ``{"headings": [{title, level, page}, ...]}``."""
-    data = json.loads(path.read_text())
+    data = json.loads(path.read_text(encoding="utf-8"))
     return tuple(Heading(**h) for h in data["headings"])
 
 

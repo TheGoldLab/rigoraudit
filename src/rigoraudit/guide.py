@@ -359,7 +359,7 @@ class Guide:
     def who(self, s: settings.Settings) -> str:
         """Who writes the answers, and how they come back; asked once per audit."""
         path = self.workspace / CHOICES
-        choices = json.loads(path.read_text()) if path.is_file() else {}
+        choices = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
         if not choices.get("by"):
             self.say(
                 "\nThe next steps need judgment, so an assistant does them (a chat "
@@ -400,7 +400,7 @@ class Guide:
                 )
             choices["by"] = by
             path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(json.dumps(choices, indent=1) + "\n")
+            path.write_text(json.dumps(choices, indent=1) + "\n", encoding="utf-8")
         return choices["by"]
 
     def ask_programs(self, s: settings.Settings) -> settings.Settings:
@@ -456,14 +456,18 @@ class Guide:
 
     def choice(self, key: str) -> str | None:
         path = self.workspace / CHOICES
-        return json.loads(path.read_text()).get(key) if path.is_file() else None
+        return (
+            json.loads(path.read_text(encoding="utf-8")).get(key)
+            if path.is_file()
+            else None
+        )
 
     def choose(self, key: str, value: str) -> None:
         path = self.workspace / CHOICES
-        choices = json.loads(path.read_text()) if path.is_file() else {}
+        choices = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
         choices[key] = value
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(choices, indent=1) + "\n")
+        path.write_text(json.dumps(choices, indent=1) + "\n", encoding="utf-8")
 
     def check_breaks(self) -> None:
         """Offer the optional breaks step; skipping it is remembered."""

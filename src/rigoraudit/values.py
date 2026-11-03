@@ -128,12 +128,14 @@ def write_values(
         "values": flatten(values),
     }
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(doc, indent=1, ensure_ascii=False) + "\n")
+    path.write_text(
+        json.dumps(doc, indent=1, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
 
 
 def read_values(path: Path) -> dict[str, Any]:
     """Read a derivation output written by :func:`write_values`."""
-    doc = json.loads(path.read_text())
+    doc = json.loads(path.read_text(encoding="utf-8"))
     if not {"script", "script_sha256", "inputs", "values"} <= doc.keys():
         raise ValueError(
             f"{path} is not a derivation output (script, script_sha256, inputs, values)"

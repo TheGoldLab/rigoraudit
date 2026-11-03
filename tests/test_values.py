@@ -63,9 +63,9 @@ def test_flatten_rejects_bad_key_parts(name):
 def test_write_values_records_script_and_input_checksums(tmp_path):
     inputs = tmp_path / "derivations" / "output" / "t.csv"
     inputs.parent.mkdir(parents=True)
-    inputs.write_text("a\n1\n")
+    inputs.write_text("a\n1\n", encoding="utf-8")
     script = tmp_path / "derivations" / "behavior.py"
-    script.write_text("")
+    script.write_text("", encoding="utf-8")
     out = tmp_path / "derivations" / "output" / "values" / "behavior.json"
 
     write_values(out, {"n": 1}, script=script, inputs=[inputs], workspace=tmp_path)
@@ -80,7 +80,7 @@ def test_write_values_records_script_and_input_checksums(tmp_path):
 
 def test_read_values_rejects_other_json(tmp_path):
     path = tmp_path / "x.json"
-    path.write_text(json.dumps({"values": {}}))
+    path.write_text(json.dumps({"values": {}}), encoding="utf-8")
     with pytest.raises(ValueError):
         read_values(path)
 
@@ -88,13 +88,13 @@ def test_read_values_rejects_other_json(tmp_path):
 def test_an_input_in_a_linked_folder_keeps_its_path_in_the_workspace(tmp_path):
     elsewhere = tmp_path / "elsewhere"
     elsewhere.mkdir()
-    (elsewhere / "t.csv").write_text("a\n1\n")
+    (elsewhere / "t.csv").write_text("a\n1\n", encoding="utf-8")
     ws = tmp_path / "audit"
     (ws / "materials").mkdir(parents=True)
     (ws / "materials" / "data").symlink_to(elsewhere)
     script = ws / "derivations" / "behavior.py"
     script.parent.mkdir()
-    script.write_text("")
+    script.write_text("", encoding="utf-8")
     out = ws / "derivations" / "output" / "values" / "behavior.json"
     data = ws / "materials" / "data" / "t.csv"
 

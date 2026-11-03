@@ -54,7 +54,10 @@ STEPS = {
 def _default_reviewer() -> str:
     try:
         name = subprocess.run(
-            ["git", "config", "user.name"], capture_output=True, text=True, check=False
+            ["git", "config", "user.name"],
+            capture_output=True,
+            encoding="utf-8",
+            check=False,
         ).stdout.strip()
     except OSError:
         name = ""

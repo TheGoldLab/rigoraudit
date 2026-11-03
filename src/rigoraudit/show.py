@@ -39,7 +39,7 @@ def _record(workspace: Path, s: Settings) -> tuple[AuditRecord, str | None]:
     if (
         not own
         and path.is_file()
-        and AuditRecord.model_validate_json(path.read_text()) != built
+        and AuditRecord.model_validate_json(path.read_text(encoding="utf-8")) != built
     ):
         note = (
             f"{RECORD} is older than the accepted answers shown here; the report "

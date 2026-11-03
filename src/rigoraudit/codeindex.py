@@ -86,7 +86,7 @@ class CodeIndex:
 
 def _git(cwd: Path, *args: str) -> str:
     return subprocess.run(
-        ["git", *args], cwd=cwd, check=True, capture_output=True, text=True
+        ["git", *args], cwd=cwd, check=True, capture_output=True, encoding="utf-8"
     ).stdout
 
 

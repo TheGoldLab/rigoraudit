@@ -39,10 +39,10 @@ def git(cwd, *args):
 def ws(tmp_path):
     code = tmp_path / "materials" / "code"
     (code / "lib").mkdir(parents=True)
-    (code / "README.md").write_text(README)
-    (code / "main.py").write_text(MAIN)
-    (code / "lib" / "smooth_rates.m").write_text(MATLAB)
-    (code / "requirements.txt").write_text("numpy==2.1\n")
+    (code / "README.md").write_text(README, encoding="utf-8")
+    (code / "main.py").write_text(MAIN, encoding="utf-8")
+    (code / "lib" / "smooth_rates.m").write_text(MATLAB, encoding="utf-8")
+    (code / "requirements.txt").write_text("numpy==2.1\n", encoding="utf-8")
     (code / "fig_rates.pdf").write_bytes(b"%PDF figure output")
     git(code, "init", "-q")
     git(code, "add", ".")
@@ -50,16 +50,19 @@ def ws(tmp_path):
     commit = git(code, "rev-parse", "HEAD")
     data = tmp_path / "materials" / "data"
     data.mkdir()
-    (data / "codebook.md").write_text("Column dwell is in ms.\n")
-    (data / "trials.txt").write_text("1 2 3\n")
+    (data / "codebook.md").write_text("Column dwell is in ms.\n", encoding="utf-8")
+    (data / "trials.txt").write_text("1 2 3\n", encoding="utf-8")
     paper = tmp_path / "materials" / "manuscript"
     paper.mkdir()
     (paper / "paper.pdf").write_bytes(b"%PDF")
-    (paper / "notes.md").write_text("Reviewer notes, not code documentation.\n")
+    (paper / "notes.md").write_text(
+        "Reviewer notes, not code documentation.\n", encoding="utf-8"
+    )
     (tmp_path / "audit.yaml").write_text(
         "materials:\n  manuscript:\n    path: manuscript/paper.pdf\n"
         f"  code:\n    path: code\n    commit: {commit}\n"
-        "settings:\n  run:\n    scripts: [code/main.py]\n"
+        "settings:\n  run:\n    scripts: [code/main.py]\n",
+        encoding="utf-8",
     )
     return tmp_path
 
@@ -87,13 +90,16 @@ def test_a_notebooks_text_cells_are_documentation(ws):
     (code / "figures.ipynb").write_text(json.dumps({"cells": [
         {"cell_type": "markdown", "source": ["# Figures\n", "Unpack data/ first."]},
         {"cell_type": "code", "source": ["x = 1"]},
-    ]}))  # fmt: skip
+    ]}), encoding="utf-8")  # fmt: skip
     old = git(code, "rev-parse", "HEAD")
     git(code, "add", ".")
     git(code, "commit", "-q", "-m", "notebook")
     manifest = ws / "audit.yaml"
     manifest.write_text(
-        manifest.read_text().replace(old, git(code, "rev-parse", "HEAD"))
+        manifest.read_text(encoding="utf-8").replace(
+            old, git(code, "rev-parse", "HEAD")
+        ),
+        encoding="utf-8",
     )
     found = docs.list_documentation(ws, settings.load(ws))
     [book] = [d for d in found if d.kind is docs.Kind.NOTEBOOK]
@@ -102,7 +108,9 @@ def test_a_notebooks_text_cells_are_documentation(ws):
 
 
 def test_the_code_is_read_at_the_commit(ws):
-    (ws / "materials" / "code" / "README.md").write_text("Changed later.\n")
+    (ws / "materials" / "code" / "README.md").write_text(
+        "Changed later.\n", encoding="utf-8"
+    )
     [readme] = [
         d
         for d in docs.list_documentation(ws, settings.load(ws))
@@ -145,17 +153,19 @@ def test_every_file_must_be_read_before_a_run(ws, capsys):
     assert len(docs.unread(ws, s)) == 4
     cli.main(["handoff", "docs", str(ws)])
     [md] = (ws / "work" / "docs" / "handoffs").glob("*.md")
-    text = md.read_text()
+    text = md.read_text(encoding="utf-8")
     assert "### `code/README.md` (documentation)" in text and "numpy==2.1" in text
 
     reply = ws / "reply.txt"
-    reply.write_text(json.dumps(good_answer()))
+    reply.write_text(json.dumps(good_answer()), encoding="utf-8")
     cli.main(["import", "docs", str(reply), str(ws), "--by", "t"])
     assert "Accepted docs-1-" in capsys.readouterr().out
     assert docs.unread(ws, s) == []
 
     # a file that changes, or a new one, has to be read again
-    (ws / "materials" / "data" / "codebook.md").write_text("Column dwell is in s.\n")
+    (ws / "materials" / "data" / "codebook.md").write_text(
+        "Column dwell is in s.\n", encoding="utf-8"
+    )
     assert [d.file for d in docs.unread(ws, s)] == ["data/codebook.md"]
 
 
@@ -190,12 +200,12 @@ def test_a_documentation_pdf_is_listed_but_not_checked(ws, capsys):
     s = settings.load(ws)
     docs.write_handoffs(ws, s)
     [md] = (ws / "work" / "docs" / "handoffs").glob("*.md")
-    assert "This is a PDF: attach the file" in md.read_text()
+    assert "This is a PDF: attach the file" in md.read_text(encoding="utf-8")
     answer = good_answer()
     answer["files"].append(notes("data/User_Guide.pdf", ("data", "anything"),
                                  nothing=[h for h in ALL if h != "data"]))  # fmt: skip
     reply = ws / "reply.txt"
-    reply.write_text(json.dumps(answer))
+    reply.write_text(json.dumps(answer), encoding="utf-8")
     cli.main(["import", "docs", str(reply), str(ws), "--by", "t"])
     assert "(1 PDF not checked)" in capsys.readouterr().out
 

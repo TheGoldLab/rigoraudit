@@ -934,7 +934,7 @@ def render(workspace: Path) -> tuple[str, str]:
     path = workspace / RECORD
     if not path.is_file():
         raise FileNotFoundError(f"no record in {workspace}: {RECORD} is missing")
-    draft = AuditRecord.model_validate_json(path.read_text())
+    draft = AuditRecord.model_validate_json(path.read_text(encoding="utf-8"))
     entries = review.load(workspace / review.LOG)
     sections = Sections(load_outline(workspace / OUTLINE), read_pages(workspace / TEXT))
     paragraphs = read_paragraphs(workspace / PARAGRAPHS)
@@ -1013,5 +1013,8 @@ def write(workspace: Path) -> Path:
     out.write_text(html, encoding="utf-8")
     readme = workspace / "README.md"
     if readme.is_file():
-        readme.write_text(status.update_block(readme.read_text(), standing))
+        readme.write_text(
+            status.update_block(readme.read_text(encoding="utf-8"), standing),
+            encoding="utf-8",
+        )
     return out

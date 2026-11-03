@@ -19,7 +19,10 @@ def test_gaps_must_name_claims_in_the_record(tmp_path):
     assert "Cross-claim checks: 0 values" in check.describe(result)
     manifest = ws / "audit.yaml"
     manifest.write_text(
-        manifest.read_text().replace("claims: []", "claims: [R1.2.a, R9.9.z]")
+        manifest.read_text(encoding="utf-8").replace(
+            "claims: []", "claims: [R1.2.a, R9.9.z]"
+        ),
+        encoding="utf-8",
     )
     result = check.run(ws)
     assert result.gap_claims == ("R9.9.z",) and not result.passed
@@ -29,7 +32,10 @@ def test_gaps_must_name_claims_in_the_record(tmp_path):
 def test_segment_left_out_items_are_exclusions(tmp_path):
     paragraphs = tmp_path / "work" / "extract" / "paragraphs.json"
     paragraphs.parent.mkdir(parents=True)
-    paragraphs.write_text((EXAMPLE / "work/extract/paragraphs.json").read_text())
+    paragraphs.write_text(
+        (EXAMPLE / "work/extract/paragraphs.json").read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
     assert check.read_exclusions(tmp_path) is None
     segment.write_handoffs(tmp_path)
     answer = {
@@ -47,7 +53,8 @@ def test_segment_left_out_items_are_exclusions(tmp_path):
     (tmp_path / EXCLUSIONS).write_text(
         json.dumps(
             {"exclusions": [{"paragraph": "R1.2", "quote": "10", "reason": "x"}]}
-        )
+        ),
+        encoding="utf-8",
     )
     assert [(e.quote, e.reason) for e in check.read_exclusions(tmp_path)] == [
         ("(4 and 8 kHz)", "task"),

@@ -267,7 +267,9 @@ def materials(tmp_path):
     repo = tmp_path / "code"
     repo.mkdir()
     git(repo, "init", "-q")
-    (repo / "fit.m").write_text("x = 1;\ndata = data(data.rt < 2, :);\ny = 3;\n")
+    (repo / "fit.m").write_text(
+        "x = 1;\ndata = data(data.rt < 2, :);\ny = 3;\n", encoding="utf-8"
+    )
     git(repo, "add", "fit.m")
     git(repo, "commit", "-qm", "init")
     return tmp_path
@@ -290,7 +292,9 @@ def test_code_matches_commit(materials):
 
 def test_code_checked_at_commit_not_working_tree(materials):
     anchor = code(materials, "data = data(data.rt < 2, :);")
-    (materials / "code" / "fit.m").write_text("x = 1;\ndata = data(data.rt < 3, :);\n")
+    (materials / "code" / "fit.m").write_text(
+        "x = 1;\ndata = data(data.rt < 3, :);\n", encoding="utf-8"
+    )
     outcome, detail = check_code_anchor(anchor, materials)
     assert outcome is Outcome.VERIFIED
     assert "working tree differs" in detail
@@ -386,9 +390,9 @@ def workspace(tmp_path):
     (tmp_path / "materials" / "data" / "t.mat").write_bytes(b"raw")
     exported = tmp_path / "derivations" / "output" / "t.csv"
     exported.parent.mkdir(parents=True)
-    exported.write_text("x\n1\n")
+    exported.write_text("x\n1\n", encoding="utf-8")
     script = tmp_path / "derivations" / "behavior.py"
-    script.write_text("")
+    script.write_text("", encoding="utf-8")
     write_values(
         tmp_path / "derivations" / "output" / "behavior.json",
         {"durations": {"A": {"n": 18236, "mean": 412.63}}},
@@ -446,7 +450,7 @@ def test_value_mismatch_or_missing_key(workspace, values, message):
 def test_true_false_values_not_confused_with_one_and_zero(tmp_path):
     script = tmp_path / "derivations" / "check.py"
     script.parent.mkdir(parents=True)
-    script.write_text("")
+    script.write_text("", encoding="utf-8")
     write_values(
         tmp_path / "derivations" / "output" / "behavior.json",
         {"kept": True},
@@ -473,7 +477,9 @@ def test_value_must_be_shown_in_quote(workspace):
 
 
 def test_changed_input_makes_output_stale(workspace):
-    (workspace / "derivations" / "output" / "t.csv").write_text("x\n2\n")
+    (workspace / "derivations" / "output" / "t.csv").write_text(
+        "x\n2\n", encoding="utf-8"
+    )
     outcome, detail = check(workspace)
     assert outcome is Outcome.STALE
     assert "derivations/output/t.csv" in detail
@@ -493,14 +499,16 @@ def test_statement_numbers_must_be_shown(statement, missing):
 
 
 def test_changed_script_makes_output_stale(workspace):
-    (workspace / "derivations" / "behavior.py").write_text("# edited\n")
+    (workspace / "derivations" / "behavior.py").write_text(
+        "# edited\n", encoding="utf-8"
+    )
     outcome, detail = check(workspace)
     assert outcome is Outcome.STALE
     assert "derivations/behavior.py" in detail
 
 
 def test_output_must_come_from_the_named_script(workspace):
-    (workspace / "derivations" / "other.py").write_text("")
+    (workspace / "derivations" / "other.py").write_text("", encoding="utf-8")
     outcome, detail = check(workspace, anchor=derived(script="derivations/other.py"))
     assert outcome is Outcome.MISMATCH
     assert "was written by derivations/behavior.py" in detail

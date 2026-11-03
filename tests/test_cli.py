@@ -38,7 +38,9 @@ def test_check_passes_on_the_example_and_fails_on_a_changed_quote(tmp_path, caps
     assert "Anchors: 10 checked; 10 verified." in out and "All checks pass." in out
     assert status.load_checks(ws).uncovered == 0
     code = ws / "materials" / "code" / "analysis.py"
-    code.write_text(code.read_text().replace("2.5", "3.0"))
+    code.write_text(
+        code.read_text(encoding="utf-8").replace("2.5", "3.0"), encoding="utf-8"
+    )
     with pytest.raises(SystemExit) as stop:
         cli.main(["check", str(ws)])
     assert stop.value.code == 1
@@ -57,7 +59,7 @@ def test_extract_without_a_manifest_is_a_short_message(tmp_path):
 
 def test_extract_names_a_paper_that_is_not_there(tmp_path):
     (tmp_path / "audit.yaml").write_text(
-        "materials:\n  manuscript:\n    path: manuscript/paper.pdf\n"
+        "materials:\n  manuscript:\n    path: manuscript/paper.pdf\n", encoding="utf-8"
     )
     with pytest.raises(SystemExit, match="but there is no file there"):
         cli.main(["extract", str(tmp_path)])

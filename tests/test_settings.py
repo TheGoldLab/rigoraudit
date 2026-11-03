@@ -27,7 +27,7 @@ materials:
 
 
 def load(tmp_path, text):
-    (tmp_path / settings.MANIFEST).write_text(text)
+    (tmp_path / settings.MANIFEST).write_text(text, encoding="utf-8")
     return settings.load(tmp_path)
 
 
@@ -104,7 +104,9 @@ def test_the_answer_on_programs_is_written_into_the_manifest(tmp_path, tail):
     load(tmp_path, MANIFEST + tail)
     settings.set_programs(tmp_path, [])
     assert settings.load(tmp_path).derive_programs == ()
-    assert MANIFEST in (tmp_path / settings.MANIFEST).read_text()  # the rest kept
+    assert MANIFEST in (tmp_path / settings.MANIFEST).read_text(
+        encoding="utf-8"
+    )  # the rest kept
 
 
 def test_a_manifest_that_cannot_be_read_says_where(tmp_path):

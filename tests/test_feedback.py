@@ -15,12 +15,14 @@ SECRET = "bright arena"
 @pytest.fixture
 def ws(tmp_path):
     (tmp_path / "audit.yaml").write_text(
-        "materials:\n  manuscript:\n    path: materials/secret_title.pdf\n"
+        "materials:\n  manuscript:\n    path: materials/secret_title.pdf\n",
+        encoding="utf-8",
     )
     extract = tmp_path / "work" / "extract" / "paragraphs.json"
     extract.parent.mkdir(parents=True)
     extract.write_text(
-        json.dumps([{"section": "Results", "paragraph": 1, "text": RESULTS}])
+        json.dumps([{"section": "Results", "paragraph": 1, "text": RESULTS}]),
+        encoding="utf-8",
     )
     return tmp_path
 
@@ -36,7 +38,9 @@ def run(ws, *args):
 def answer(ws, quote):
     claim = {"id": "R1.1.a", "paragraph": "R1.1", "type": "new_result", "quote": quote}
     path = ws / "reply.txt"
-    path.write_text(json.dumps({"instructions": "segment v2", "claims": [claim]}))
+    path.write_text(
+        json.dumps({"instructions": "segment v2", "claims": [claim]}), encoding="utf-8"
+    )
     return path
 
 
@@ -50,7 +54,7 @@ def test_runs_are_reported_by_kind_without_the_materials(ws, capsys):
     with pytest.raises(SystemExit, match="no code"):
         cli.main(["handoff", "trace", str(ws)])
 
-    text = (ws / feedback.REPORT).read_text()
+    text = (ws / feedback.REPORT).read_text(encoding="utf-8")
     assert "| handoff | segment | segment v2 | wrote 1 |" in text
     assert "| sent back |" in text and "quote-not-found ×1" in text
     assert "| accepted |" in text
@@ -71,12 +75,15 @@ def test_your_words_and_added_material_are_kept(ws, capsys):
     run(ws, "handoff", "segment", str(ws))
     report = ws / feedback.REPORT
     report.write_text(
-        report.read_text().replace(feedback._PROMPT, "The second import was confusing.")
+        report.read_text(encoding="utf-8").replace(
+            feedback._PROMPT, "The second import was confusing."
+        ),
+        encoding="utf-8",
     )
     reply = answer(ws, "not there")
     run(ws, "feedback", str(ws), "--include", str(reply))
     run(ws, "import", "segment", str(reply), str(ws), "--by", "t")
-    text = report.read_text()
+    text = report.read_text(encoding="utf-8")
     assert "The second import was confusing." in text
     assert f"## {feedback.MATERIAL}" in text and '"quote": "not there"' in text
     assert "| sent back |" in text
@@ -96,7 +103,7 @@ def test_one_report_covers_the_whole_audit(ws):
     feedback.record(ws, "audit", outcome="finished", now=later)
     [report] = (ws / "work" / "feedback").glob("*.md")
     assert report == ws / feedback.REPORT
-    text = report.read_text()
+    text = report.read_text(encoding="utf-8")
     assert "from 1 January 2026 at 09:00 to 2 January 2026 at 14:30" in text
     assert "the guide ran 2 times" in text
     assert "| 2026-01-02 14:30:00 | check |" in text
@@ -105,7 +112,8 @@ def test_one_report_covers_the_whole_audit(ws):
 def test_nothing_is_recorded_outside_a_workspace(tmp_path, capsys):
     (tmp_path / "work" / "extract").mkdir(parents=True)
     (tmp_path / "work" / "extract" / "paragraphs.json").write_text(
-        json.dumps([{"section": "Results", "paragraph": 1, "text": RESULTS}])
+        json.dumps([{"section": "Results", "paragraph": 1, "text": RESULTS}]),
+        encoding="utf-8",
     )
     cli.main(["handoff", "decompose", str(tmp_path)])
     assert "Nothing to hand off" in capsys.readouterr().out

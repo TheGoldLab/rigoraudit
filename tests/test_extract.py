@@ -1108,9 +1108,9 @@ def workspace(tmp_path, xml=True):
     folder.mkdir(parents=True)
     (folder / "paper.pdf").write_bytes(make_pdf(PAGES))
     if xml:
-        (folder / "paper.xml").write_text(JATS)
+        (folder / "paper.xml").write_text(JATS, encoding="utf-8")
     (tmp_path / "audit.yaml").write_text(
-        "materials:\n  manuscript:\n    path: manuscript/paper.pdf\n"
+        "materials:\n  manuscript:\n    path: manuscript/paper.pdf\n", encoding="utf-8"
     )
     return tmp_path
 
@@ -1120,15 +1120,16 @@ def test_extract_prefers_the_publishers_xml(tmp_path):
     result = extract.extract(ws, "manuscript/paper.pdf")
     assert (result.route, result.xml, result.paragraphs) == ("xml", "paper.xml", 14)
     assert extract.read_pages(ws / extract.TEXT)[1].startswith(HEADER.format(2))
-    outline = json.loads((ws / extract.OUTLINE).read_text())
+    outline = json.loads((ws / extract.OUTLINE).read_text(encoding="utf-8"))
     assert outline == {"source": "paper.pdf", "headings": []}
     paras = read_paragraphs(ws / PARAGRAPHS)
     assert [p.label for p in paras][:3] == ["A1.1", "P1.1", "I1.1"]
     assert result.not_found == sum(
-        len(p["not_in_pdf"]) for p in json.loads((ws / PARAGRAPHS).read_text())
+        len(p["not_in_pdf"])
+        for p in json.loads((ws / PARAGRAPHS).read_text(encoding="utf-8"))
     )
     # the XML's equations; this PDF has none, so they have no pictures
-    listed = json.loads((ws / extract.EQUATIONS_FILE).read_text())
+    listed = json.loads((ws / extract.EQUATIONS_FILE).read_text(encoding="utf-8"))
     assert [(e["number"], e["page"], e["picture"]) for e in listed] == [
         ("1", None, None), ("2", None, None),
     ]  # fmt: skip
@@ -1153,7 +1154,9 @@ def test_extract_adds_a_supplements_pages(tmp_path):
         ws, "manuscript/paper.pdf", supplement="manuscript/figures.pdf"
     )
     assert "in figure legends" not in extract.describe(result)
-    assert "\n=== PAGE 4 (figures.pdf) ===\n" in (ws / extract.TEXT).read_text()
+    assert "\n=== PAGE 4 (figures.pdf) ===\n" in (ws / extract.TEXT).read_text(
+        encoding="utf-8"
+    )
     assert len(extract.read_pages(ws / extract.TEXT)) == 3  # the article's only
     legend = next(
         p for p in read_paragraphs(ws / PARAGRAPHS) if p.section == "Figure 1 legend"
@@ -1213,7 +1216,7 @@ def test_extract_from_the_pdf_alone(tmp_path):
     assert [p.label for p in read_paragraphs(ws / PARAGRAPHS)] == [
         "F1.1", "I1.1", "I1.2", "R1.1", "F2.1",
     ]  # fmt: skip
-    assert json.loads((ws / extract.EQUATIONS_FILE).read_text()) == []
+    assert json.loads((ws / extract.EQUATIONS_FILE).read_text(encoding="utf-8")) == []
     assert "equations" not in extract.describe(result)
 
 
@@ -1221,7 +1224,7 @@ def test_extract_lists_display_equations(tmp_path):
     ws = workspace(tmp_path, xml=False)
     (ws / "materials" / "manuscript" / "paper.pdf").write_bytes(make_pdf(EQUATIONS))
     result = extract.extract(ws, "manuscript/paper.pdf")
-    listed = json.loads((ws / extract.EQUATIONS_FILE).read_text())
+    listed = json.loads((ws / extract.EQUATIONS_FILE).read_text(encoding="utf-8"))
     assert [e["number"] for e in listed] == ["1", "2", "3", None, "4"]
     # one without a number is known by its page and how far down it is
     assert [e["key"] for e in listed] == ["1", "2", "3", "p1@274", "4"]
@@ -1263,7 +1266,7 @@ def test_extract_with_grobid(tmp_path, monkeypatch):
     assert (result.route, result.paragraphs, result.not_found) == ("grobid", 4, 1)
     assert "read from the PDF by GROBID" in extract.describe(result)
     assert "could not place 1 paragraphs" in extract.describe(result)
-    paras = json.loads((ws / PARAGRAPHS).read_text())
+    paras = json.loads((ws / PARAGRAPHS).read_text(encoding="utf-8"))
     assert [(p["section"], p["pages"]) for p in paras] == [
         ("Introduction", [1]), ("Introduction", []), ("Results", [2]),
         ("Unplaced text", [2]),
@@ -1286,7 +1289,7 @@ def test_extract_without_an_answer_from_grobid(tmp_path, monkeypatch):
 
 def test_command_takes_grobid_from_the_manifest(tmp_path, monkeypatch):
     ws = workspace(tmp_path, xml=False)
-    with (ws / "audit.yaml").open("a") as f:
+    with (ws / "audit.yaml").open("a", encoding="utf-8") as f:
         f.write("settings:\n  extract:\n    grobid: http://localhost:8070\n")
     asked = []
     monkeypatch.setattr(
@@ -1303,9 +1306,9 @@ def test_command_keeps_corrected_paragraphs(tmp_path, capsys):
     ws = workspace(tmp_path, xml=False)
     path = ws / PARAGRAPHS
     path.parent.mkdir(parents=True)
-    path.write_text("[]")
+    path.write_text("[]", encoding="utf-8")
     cli.main(["extract", str(ws)])
-    assert path.read_text() == "[]"
+    assert path.read_text(encoding="utf-8") == "[]"
     assert "--replace" in capsys.readouterr().out
     cli.main(["extract", str(ws), "--replace"])
-    assert len(json.loads(path.read_text())) == 5
+    assert len(json.loads(path.read_text(encoding="utf-8"))) == 5

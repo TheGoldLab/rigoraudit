@@ -119,10 +119,15 @@ def test_the_record_holds_the_tools_findings(tmp_path):
     text = "Rats pressed faster, t(22) = 2.10, p = 0.047."
     ws = tmp_path / "audit"
     ws.mkdir()
-    (ws / "audit.yaml").write_text("materials:\n  manuscript:\n    path: paper.pdf\n")
+    (ws / "audit.yaml").write_text(
+        "materials:\n  manuscript:\n    path: paper.pdf\n", encoding="utf-8"
+    )
     para = ws / "work" / "extract" / "paragraphs.json"
     para.parent.mkdir(parents=True)
-    para.write_text(json.dumps([{"section": "Results", "paragraph": 1, "text": text}]))
+    para.write_text(
+        json.dumps([{"section": "Results", "paragraph": 1, "text": text}]),
+        encoding="utf-8",
+    )
     segment.write_handoffs(ws, ("Results",))
     _, problems = segment.import_answer(ws, json.dumps({
         "instructions": "segment v2", "claims": [{"id": "R1.1.a", "paragraph": "R1.1",

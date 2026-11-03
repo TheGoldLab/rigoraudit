@@ -40,25 +40,26 @@ def git(cwd, *args):
 def ws(tmp_path):
     code = tmp_path / "materials" / "code"
     code.mkdir(parents=True)
-    (code / "analysis.py").write_text(CODE)
-    (code / "stats.py").write_text(STATS)
+    (code / "analysis.py").write_text(CODE, encoding="utf-8")
+    (code / "stats.py").write_text(STATS, encoding="utf-8")
     git(code, "init", "-q")
     git(code, "add", ".")
     git(code, "commit", "-q", "-m", "c")
     commit = git(code, "rev-parse", "HEAD")
     # the working tree changes after the commit; checks must use the commit
-    (code / "analysis.py").write_text(CODE.replace("2.0", "3.0"))
+    (code / "analysis.py").write_text(CODE.replace("2.0", "3.0"), encoding="utf-8")
     (tmp_path / "audit.yaml").write_text(
         "materials:\n  manuscript:\n    path: materials/paper.pdf\n"
         f"  code:\n    path: materials/code\n    repository: https://github.com/example/repo\n"
-        f"    commit: {commit} (the version the paper cites)\n"
+        f"    commit: {commit} (the version the paper cites)\n",
+        encoding="utf-8",
     )
     extract = tmp_path / "work" / "extract" / "paragraphs.json"
     extract.parent.mkdir(parents=True)
     extract.write_text(json.dumps([
         {"section": "Methods › Analysis", "paragraph": 1, "text": METHODS},
         {"section": "Results › Accuracy", "paragraph": 1, "text": RESULTS},
-    ]))  # fmt: skip
+    ]), encoding="utf-8")  # fmt: skip
     segment.write_handoffs(tmp_path)
     claim = {"id": "R1.1.a", "paragraph": "R1.1", "type": "new_result",
              "quote": "Accuracy was 80% in block A (Figure 1), above chance (t(9) = 3.10, p = 0.013)"}  # fmt: skip
@@ -102,7 +103,7 @@ def test_settings_read_the_link_at_the_commit(ws):
 
 def test_handoff_gives_the_link_methods_and_facets(ws):
     [md] = trace.write_handoffs(ws, settings.load(ws))
-    text = md.read_text()
+    text = md.read_text(encoding="utf-8")
     assert "/tree/" in text and METHODS in text
     assert "- `R1.1.a`: Accuracy was 80% in block A" in text
     assert "  - analysis: The measure is accuracy." in text
@@ -111,16 +112,16 @@ def test_handoff_gives_the_link_methods_and_facets(ws):
 
 def test_a_coding_assistant_gets_the_methods_once(ws):
     [md] = trace.write_handoffs(ws, settings.load(ws), shared_methods=True)
-    text = md.read_text()
+    text = md.read_text(encoding="utf-8")
     assert METHODS not in text and "`work/trace/methods.md`" in text
-    assert METHODS in (ws / trace.METHODS).read_text()
+    assert METHODS in (ws / trace.METHODS).read_text(encoding="utf-8")
 
 
 def test_good_reply_is_saved_with_the_lines_at_the_commit(ws, capsys):
     s = settings.load(ws)
     trace.write_handoffs(ws, s)
     path = ws / "reply.txt"
-    path.write_text(reply(GOOD_CODE))
+    path.write_text(reply(GOOD_CODE), encoding="utf-8")
     cli.main(["import", "trace", str(path), str(ws), "--by", "t"])
     out = capsys.readouterr().out
     assert out.startswith(
@@ -190,7 +191,7 @@ def test_no_access_brings_the_index_and_then_the_lines_asked_for(ws, capsys):
 
     [md] = trace.write_handoffs(ws, s)
     assert md.stem == "trace-R1.1.a-round2"
-    text = md.read_text()
+    text = md.read_text(encoding="utf-8")
     assert "/tree/" not in text and "## Index of the code" in text
     assert "### `analysis.py` (5 lines)" in text
     assert "- functions: accuracy (3)" in text and "kept (4)" in text
@@ -207,12 +208,12 @@ def test_no_access_brings_the_index_and_then_the_lines_asked_for(ws, capsys):
     assert problems == []
     [md] = trace.write_handoffs(ws, s)
     assert md.stem == "trace-R1.1.a-round3"
-    text = md.read_text()
+    text = md.read_text(encoding="utf-8")
     assert "### `analysis.py`, lines 3–5" in text
     assert '4      kept = [t for t in trials if t["rt"] <= 2.0]' in text
 
     path = ws / "reply.txt"
-    path.write_text(reply(GOOD_CODE))
+    path.write_text(reply(GOOD_CODE), encoding="utf-8")
     cli.main(["import", "trace", str(path), str(ws), "--by", "t"])
     assert "Accepted trace-R1.1.a-round3" in capsys.readouterr().out
     obs = trace.trace_observations(ws, s)["R1.1.a"][Facet.ANALYSIS]
@@ -245,7 +246,7 @@ def test_requests_stop_after_the_last_round(ws):
         trace.write_handoffs(ws, s)
         assert ask(ws, s, requests=[{"file": "analysis.py"}])[1] == []
     [md] = trace.write_handoffs(ws, s)
-    assert "This is the last round" in md.read_text()
+    assert "This is the last round" in md.read_text(encoding="utf-8")
     [problem] = ask(ws, s, requests=[{"file": "analysis.py"}])[1]
     assert problem.startswith("No more code can be sent for these claims.")
 
@@ -260,7 +261,9 @@ def test_a_link_task_takes_no_requests(ws):
 def test_repository_only_setting_reports_no_access_plainly(ws):
     manifest = ws / "audit.yaml"
     manifest.write_text(
-        manifest.read_text() + "settings:\n  trace:\n    code_access: repository\n"
+        manifest.read_text(encoding="utf-8")
+        + "settings:\n  trace:\n    code_access: repository\n",
+        encoding="utf-8",
     )
     s = settings.load(ws)
     trace.write_handoffs(ws, s)
@@ -273,28 +276,38 @@ def test_repository_only_setting_reports_no_access_plainly(ws):
 def test_a_notebook_in_the_code_gives_the_index_unless_repository_is_asked(ws):
     code = ws / "materials" / "code"
     (code / "figures.ipynb").write_text(json.dumps({"cells": [
-        {"cell_type": "code", "source": "print(1)"}]}))  # fmt: skip
+        {"cell_type": "code", "source": "print(1)"}]}), encoding="utf-8")  # fmt: skip
     git(code, "add", "figures.ipynb")
     git(code, "commit", "-q", "-m", "nb")
     old = settings.load(ws).code.commit
     manifest = ws / "audit.yaml"
-    text = manifest.read_text().replace(old, git(code, "rev-parse", "HEAD"))
-    manifest.write_text(text)
+    text = manifest.read_text(encoding="utf-8").replace(
+        old, git(code, "rev-parse", "HEAD")
+    )
+    manifest.write_text(text, encoding="utf-8")
     [md] = trace.write_handoffs(ws, settings.load(ws))
-    assert "## Index of the code" in md.read_text() and "/tree/" not in md.read_text()
+    assert "## Index of the code" in md.read_text(
+        encoding="utf-8"
+    ) and "/tree/" not in md.read_text(encoding="utf-8")
 
     md.unlink()
-    manifest.write_text(text + "settings:\n  trace:\n    code_access: repository\n")
+    manifest.write_text(
+        text + "settings:\n  trace:\n    code_access: repository\n", encoding="utf-8"
+    )
     [md] = trace.write_handoffs(ws, settings.load(ws))
-    assert "/tree/" in md.read_text()
+    assert "/tree/" in md.read_text(encoding="utf-8")
 
 
 def test_index_setting_or_no_repository_gives_the_index_first(ws):
     manifest = ws / "audit.yaml"
-    text = manifest.read_text()
-    manifest.write_text(text + "settings:\n  trace:\n    code_access: index\n")
+    text = manifest.read_text(encoding="utf-8")
+    manifest.write_text(
+        text + "settings:\n  trace:\n    code_access: index\n", encoding="utf-8"
+    )
     [md] = trace.write_handoffs(ws, settings.load(ws))
-    assert md.stem == "trace-R1.1.a" and "## Index of the code" in md.read_text()
+    assert md.stem == "trace-R1.1.a" and "## Index of the code" in md.read_text(
+        encoding="utf-8"
+    )
 
     md.unlink()
     no_repo = "\n".join(
@@ -302,19 +315,22 @@ def test_index_setting_or_no_repository_gives_the_index_first(ws):
         for ln in text.splitlines()
         if "repository:" not in ln and "commit:" not in ln
     )
-    manifest.write_text(no_repo + "\n")
+    manifest.write_text(no_repo + "\n", encoding="utf-8")
     [md] = trace.write_handoffs(ws, settings.load(ws))
     # without a commit the working tree is indexed
-    assert "## Index of the code" in md.read_text()
+    assert "## Index of the code" in md.read_text(encoding="utf-8")
     manifest.write_text(
-        no_repo + "\nsettings:\n  trace:\n    code_access: repository\n"
+        no_repo + "\nsettings:\n  trace:\n    code_access: repository\n",
+        encoding="utf-8",
     )
     with pytest.raises(ValueError, match="no code repository and commit"):
         trace.write_handoffs(ws, settings.load(ws))
 
 
 def test_no_code_in_the_manifest(ws):
-    (ws / "audit.yaml").write_text("materials:\n  manuscript:\n    path: paper.pdf\n")
+    (ws / "audit.yaml").write_text(
+        "materials:\n  manuscript:\n    path: paper.pdf\n", encoding="utf-8"
+    )
     with pytest.raises(ValueError, match="no code"):
         trace.write_handoffs(ws, settings.load(ws))
 
@@ -322,7 +338,8 @@ def test_no_code_in_the_manifest(ws):
 def test_a_commit_of_only_digits_is_read_as_written(tmp_path):
     (tmp_path / "audit.yaml").write_text(
         "materials:\n  manuscript:\n    path: paper.pdf\n"
-        f"  code:\n    path: code\n    commit: {'1' * 40}\n"
+        f"  code:\n    path: code\n    commit: {'1' * 40}\n",
+        encoding="utf-8",
     )
     assert settings.load(tmp_path).code.commit == "1" * 40
 
@@ -357,7 +374,7 @@ def with_tests(tests):
 def test_each_test_is_listed_and_its_settings_checked(tested):
     s = settings.load(tested)
     [md] = trace.write_handoffs(tested, s)
-    assert "  - test 1: t(9) = 3.10, p = 0.013" in md.read_text()
+    assert "  - test 1: t(9) = 3.10, p = 0.013" in md.read_text(encoding="utf-8")
     assert trace.import_answer(tested, s, reply(GOOD_CODE), "t")[1] == [
         (
             "Claim R1.1.a has no entry for test 1; give one, with empty lists if the "
@@ -398,7 +415,7 @@ def test_the_tool_compares_the_settings_and_assumption_checks(tested):
 
     # compare shows what the tool checked, so the assistant does not redo it
     [md] = compare.write_handoffs(tested, s)
-    text = md.read_text()
+    text = md.read_text(encoding="utf-8")
     assert "#### Already checked by the tool; do not repeat" in text
     assert "- quantity, p from the statistic: consistent." in text
     assert "- analysis, tails: differs." in text

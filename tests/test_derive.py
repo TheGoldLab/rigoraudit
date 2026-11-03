@@ -35,12 +35,17 @@ def ws(tmp_path):
     """A workspace whose one claim is split into facets, with its data."""
     ws = tmp_path / "audit"
     (ws / "materials" / "data").mkdir(parents=True)
-    (ws / "materials" / "data" / "trials.json").write_text("[1, 1, 1, 0]")
-    (ws / "audit.yaml").write_text("materials:\n  manuscript:\n    path: paper.pdf\n")
+    (ws / "materials" / "data" / "trials.json").write_text(
+        "[1, 1, 1, 0]", encoding="utf-8"
+    )
+    (ws / "audit.yaml").write_text(
+        "materials:\n  manuscript:\n    path: paper.pdf\n", encoding="utf-8"
+    )
     para = ws / "work" / "extract" / "paragraphs.json"
     para.parent.mkdir(parents=True)
     para.write_text(
-        json.dumps([{"section": "Results", "paragraph": 1, "text": RESULTS}])
+        json.dumps([{"section": "Results", "paragraph": 1, "text": RESULTS}]),
+        encoding="utf-8",
     )
     segment.write_handoffs(ws, ("Results",))
     _, problems = segment.import_answer(ws, json.dumps({
@@ -70,7 +75,7 @@ GOOD = [{"for": "V1", "key": "accuracy/A", "how": "recomputed",
 
 def test_the_handoff_lists_each_printed_number_and_the_materials(ws):
     [path] = derive.write_handoffs(ws, settings.load(ws))
-    text = path.read_text()
+    text = path.read_text(encoding="utf-8")
     assert "- `V1` (quantity): accuracy = 75%, for block A" in text
     assert (
         "data/trials.json" in text and "derivations/output/values/R1.1.a.json" in text
@@ -81,13 +86,13 @@ def test_the_handoff_lists_each_printed_number_and_the_materials(ws):
 def test_linked_folders_are_listed_and_the_code_documentation_left_out(ws, tmp_path):
     elsewhere = tmp_path / "elsewhere"
     (elsewhere / "sessions").mkdir(parents=True)
-    (elsewhere / "sessions" / "s1.csv").write_text("a\n1\n")
+    (elsewhere / "sessions" / "s1.csv").write_text("a\n1\n", encoding="utf-8")
     (elsewhere / "sessions" / "loop").symlink_to(elsewhere)  # a link back
     (ws / "materials" / "linked").symlink_to(elsewhere)
     code = ws / "materials" / "code" / "lab"
     code.mkdir(parents=True)
-    (code / "README.md").write_text("Run it.")
-    (code / "fit.py").write_text("")
+    (code / "README.md").write_text("Run it.", encoding="utf-8")
+    (code / "fit.py").write_text("", encoding="utf-8")
     s = dataclasses.replace(settings.load(ws), code=settings.Code(path="code/lab"))
     listed = [line.split(" (")[0] for line in derive._materials(ws, s)]
     assert listed == [
@@ -177,7 +182,9 @@ def test_a_printed_number_saved_as_true_or_false_is_sent_back(ws):
 def test_a_number_the_code_sets_is_quoted_from_the_code(ws):
     code = ws / "materials" / "code"
     code.mkdir()
-    (code / "fit.py").write_text("import math\nLEVEL = 75  # percent\n")
+    (code / "fit.py").write_text(
+        "import math\nLEVEL = 75  # percent\n", encoding="utf-8"
+    )
     s = dataclasses.replace(settings.load(ws), code=settings.Code(path="code"))
     derive.write_handoffs(ws, s)
 
@@ -255,7 +262,9 @@ def test_import_on_the_command_line_asks_before_a_flagged_script(
     ws, monkeypatch, capsys
 ):
     cli.main(["handoff", "derive", str(ws)])
-    (ws / "reply.txt").write_text(reply(GOOD, script="import os\n" + SCRIPT))
+    (ws / "reply.txt").write_text(
+        reply(GOOD, script="import os\n" + SCRIPT), encoding="utf-8"
+    )
     questions = []
     monkeypatch.setattr("builtins.input", lambda q: questions.append(q) or "n")
     cli.main(["import", "derive", str(ws / "reply.txt"), "--by", "T", str(ws)])
@@ -268,7 +277,7 @@ def test_import_on_the_command_line_asks_before_a_flagged_script(
 
 def test_a_script_the_checks_pass_runs_without_asking(ws, monkeypatch, capsys):
     cli.main(["handoff", "derive", str(ws)])
-    (ws / "reply.txt").write_text(reply(GOOD))
+    (ws / "reply.txt").write_text(reply(GOOD), encoding="utf-8")
     monkeypatch.setattr("builtins.input", lambda q: pytest.fail("asked"))
     cli.main(["import", "derive", str(ws / "reply.txt"), "--by", "T", str(ws)])
     out = capsys.readouterr().out
@@ -376,11 +385,18 @@ def ws_two(tmp_path):
     """A workspace with two claims in one paragraph, each split into facets."""
     ws = tmp_path / "audit"
     (ws / "materials" / "data").mkdir(parents=True)
-    (ws / "materials" / "data" / "trials.json").write_text("[1, 1, 1, 0]")
-    (ws / "audit.yaml").write_text("materials:\n  manuscript:\n    path: paper.pdf\n")
+    (ws / "materials" / "data" / "trials.json").write_text(
+        "[1, 1, 1, 0]", encoding="utf-8"
+    )
+    (ws / "audit.yaml").write_text(
+        "materials:\n  manuscript:\n    path: paper.pdf\n", encoding="utf-8"
+    )
     para = ws / "work" / "extract" / "paragraphs.json"
     para.parent.mkdir(parents=True)
-    para.write_text(json.dumps([{"section": "Results", "paragraph": 1, "text": TWO}]))
+    para.write_text(
+        json.dumps([{"section": "Results", "paragraph": 1, "text": TWO}]),
+        encoding="utf-8",
+    )
     segment.write_handoffs(ws, ("Results",))
     _, problems = segment.import_answer(ws, json.dumps({
         "instructions": "segment v2", "claims": [
@@ -415,7 +431,7 @@ def test_claims_share_a_task_and_one_script(ws_two):
     s = settings.load(ws_two)
     assert len(derive.plan_handoffs(ws_two, s, max_claims=1)) == 2
     [path] = derive.write_handoffs(ws_two, s)
-    text = path.read_text()
+    text = path.read_text(encoding="utf-8")
     assert text.count("## Paragraph R1.1") == 1 and "the 2 claims below" in text
     assert "`V1` (quantity)" in text and "`V2` (population)" in text
     _, problems = derive.import_answer(
@@ -461,12 +477,15 @@ def ws_test(tmp_path):
     """A workspace whose one claim reports a t test, with its data."""
     ws = tmp_path / "audit"
     (ws / "materials" / "data").mkdir(parents=True)
-    (ws / "materials" / "data" / "trials.json").write_text("[]")
-    (ws / "audit.yaml").write_text("materials:\n  manuscript:\n    path: paper.pdf\n")
+    (ws / "materials" / "data" / "trials.json").write_text("[]", encoding="utf-8")
+    (ws / "audit.yaml").write_text(
+        "materials:\n  manuscript:\n    path: paper.pdf\n", encoding="utf-8"
+    )
     para = ws / "work" / "extract" / "paragraphs.json"
     para.parent.mkdir(parents=True)
     para.write_text(
-        json.dumps([{"section": "Results", "paragraph": 1, "text": TESTED}])
+        json.dumps([{"section": "Results", "paragraph": 1, "text": TESTED}]),
+        encoding="utf-8",
     )
     segment.write_handoffs(ws, ("Results",))
     _, problems = segment.import_answer(ws, json.dumps({

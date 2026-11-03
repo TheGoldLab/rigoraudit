@@ -125,7 +125,7 @@ def test_flat_outline_uses_its_top_level(tmp_path):
     path.write_text(json.dumps({"headings": [
         {"title": "Abstract", "level": 0, "page": 1},
         {"title": "Methods", "level": 0, "page": 1},
-    ]}))  # fmt: skip
+    ]}), encoding="utf-8")  # fmt: skip
     s = Sections(load_outline(path), ("Abstract\nText.\nMethods\nMore.\n",))
     assert s.majors == ["Abstract", "Methods"]
     assert s.at(1, 3) == Place(1, 0)

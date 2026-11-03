@@ -37,7 +37,7 @@ SILENT = {"facet": "condition", "observations": ["O3"], "status": "not_verifiabl
 
 def test_the_handoff_labels_every_observation_and_value(derived):
     [path] = sorted((derived / "work" / "compare" / "handoffs").glob("*.md"))
-    text = path.read_text()
+    text = path.read_text(encoding="utf-8")
     assert "- `O1` (results, quoted; Results, paragraph 1)" in text
     assert "`O1.v1`: accuracy 75% (for block A, 0 decimals shown)" in text
     assert (
@@ -57,7 +57,7 @@ def test_the_handoff_gives_why_a_worded_claim_cannot_be_checked(ws):  # noqa: F8
     [path] = compare.write_handoffs(ws, settings.load(ws))
     assert (
         "- condition, as stated in words: the data do not record the block"
-        in path.read_text()
+        in path.read_text(encoding="utf-8")
     )
 
 
@@ -65,7 +65,7 @@ def test_the_status_is_computed_and_the_record_built(derived):
     saved, problems = compare.import_answer(derived, answer(PRECISION, SILENT), "T")
     assert problems == [] and saved is not None
     path = compare.write_record(derived, settings.load(derived))
-    record = AuditRecord.model_validate_json(path.read_text())
+    record = AuditRecord.model_validate_json(path.read_text(encoding="utf-8"))
     [claim] = record.claims
     assert claim.trace is Trace.TRACED
     assert [f.status for f in record.findings] == [
@@ -116,7 +116,7 @@ def test_a_direction_stated_in_words_is_compared_by_sign(derived):
 
 def test_an_audit_with_its_own_record_script_keeps_it(derived, capsys):
     (derived / "record").mkdir(exist_ok=True)
-    (derived / "record" / "record.py").write_text("")
+    (derived / "record" / "record.py").write_text("", encoding="utf-8")
     with pytest.raises(SystemExit, match="its own record/record.py"):
         cli.main(["record", str(derived)])
     assert not (derived / RECORD).exists()
@@ -130,7 +130,7 @@ def test_claims_share_a_task_and_every_one_needs_findings(ws_two):  # noqa: F811
     )
     assert not problems
     [path] = compare.write_handoffs(ws_two, s)
-    text = path.read_text()
+    text = path.read_text(encoding="utf-8")
     assert "### Claim `R1.1.a`" in text and "### Claim `R1.1.b`" in text
     [h] = compare.pending_handoffs(ws_two)
     labels = [label for c in h.claims for label in c.observations]

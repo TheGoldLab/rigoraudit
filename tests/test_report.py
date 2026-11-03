@@ -38,7 +38,7 @@ def ws(tmp_path):
 
 
 def draft(ws):
-    return AuditRecord.model_validate_json((ws / RECORD).read_text())
+    return AuditRecord.model_validate_json((ws / RECORD).read_text(encoding="utf-8"))
 
 
 def test_each_claim_and_finding_is_marked_for_the_review_page(ws):
@@ -74,7 +74,12 @@ def scope(ws, *patterns):
     manifest = ws / "audit.yaml"
     listed = ", ".join(map(repr, patterns))
     manifest.write_text(
-        re.sub(r"scope: \[.*?\]", f"scope: [{listed}]", manifest.read_text())
+        re.sub(
+            r"scope: \[.*?\]",
+            f"scope: [{listed}]",
+            manifest.read_text(encoding="utf-8"),
+        ),
+        encoding="utf-8",
     )
 
 
@@ -104,15 +109,18 @@ def test_without_a_header_one_is_made_and_the_page_is_written(ws):
     (ws / report.HEADER).unlink()
     out = report.write(ws)
     assert out == ws / report.PAGE
-    html = out.read_text()
+    html = out.read_text(encoding="utf-8")
     assert "<h1>example-audit</h1>" in html and str(report.HEADER) in html
-    assert report.status.BEGIN in (ws / "README.md").read_text()
+    assert report.status.BEGIN in (ws / "README.md").read_text(encoding="utf-8")
 
 
 def test_a_claim_in_a_paragraph_not_extracted_is_an_error(ws):
     path = ws / "work/extract/paragraphs.json"
     path.write_text(
-        path.read_text().replace("Results › Learning", "Results › Training")
+        path.read_text(encoding="utf-8").replace(
+            "Results › Learning", "Results › Training"
+        ),
+        encoding="utf-8",
     )
     with pytest.raises(ValueError, match="quote paragraphs not in"):
         report.render(ws)
@@ -132,8 +140,12 @@ def gaps(ws, text):
     manifest = ws / "audit.yaml"
     manifest.write_text(
         re.sub(
-            r"gaps:.*?\n\n", f"gaps:\n{text}\n", manifest.read_text(), flags=re.DOTALL
-        )
+            r"gaps:.*?\n\n",
+            f"gaps:\n{text}\n",
+            manifest.read_text(encoding="utf-8"),
+            flags=re.DOTALL,
+        ),
+        encoding="utf-8",
     )
 
 
@@ -217,7 +229,7 @@ def test_an_equation_mark_is_followed_by_its_picture(ws):
     from rigoraudit.extract import EQUATIONS_FILE, FOLDER
 
     path = ws / "work/extract/paragraphs.json"
-    paragraphs = json.loads(path.read_text())
+    paragraphs = json.loads(path.read_text(encoding="utf-8"))
     claim = draft(ws).claims[0].anchor
     p = next(
         p
@@ -226,12 +238,13 @@ def test_an_equation_mark_is_followed_by_its_picture(ws):
     )
     at = len(p["text"]) + 1
     p["text"] += " [Equation 2]"
-    path.write_text(json.dumps(paragraphs))
+    path.write_text(json.dumps(paragraphs), encoding="utf-8")
     (ws / FOLDER / "equations").mkdir()
     (ws / FOLDER / "equations/001.png").write_bytes(b"made-up picture")
     record = {"number": "2", "section": p["section"], "paragraph": p["paragraph"]}
     (ws / EQUATIONS_FILE).write_text(
-        json.dumps([{**record, "at": at, "picture": "equations/001.png"}])
+        json.dumps([{**record, "at": at, "picture": "equations/001.png"}]),
+        encoding="utf-8",
     )
     html, _ = report.render(ws)
     assert '[Equation 2]<img class="eqpic" data-eq="0"' in html
@@ -239,7 +252,8 @@ def test_an_equation_mark_is_followed_by_its_picture(ws):
 
     # a mark whose place is not known is matched by its number
     (ws / EQUATIONS_FILE).write_text(
-        json.dumps([{**record, "at": None, "picture": "equations/001.png"}])
+        json.dumps([{**record, "at": None, "picture": "equations/001.png"}]),
+        encoding="utf-8",
     )
     html, _ = report.render(ws)
     assert '[Equation 2]<img class="eqpic" data-eq="0"' in html
@@ -250,7 +264,7 @@ def test_a_claim_with_no_stated_support_is_not_waiting_to_be_traced(ws):
     first = rec.claims[0]
     alone = Claim(id="Z1", type=ClaimType.NO_STATED_SUPPORT, anchor=first.anchor)
     rec = rec.model_copy(update={"claims": (*rec.claims, alone)})
-    (ws / RECORD).write_text(rec.model_dump_json(indent=1))
+    (ws / RECORD).write_text(rec.model_dump_json(indent=1), encoding="utf-8")
     html, _ = report.render(ws)
     card = re.search(
         r'<details class="card[^>]*data-claim-id="Z1".*?</details>', html, re.DOTALL
@@ -277,7 +291,8 @@ def test_a_claim_with_several_tests_lists_them_by_number(ws):
         ),
     )  # fmt: skip
     (ws / RECORD).write_text(
-        rec.model_copy(update={"context": context}).model_dump_json(indent=1)
+        rec.model_copy(update={"context": context}).model_dump_json(indent=1),
+        encoding="utf-8",
     )
     html, _ = report.render(ws)
     card = re.search(

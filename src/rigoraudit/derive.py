@@ -37,6 +37,7 @@ from __future__ import annotations
 
 import ast
 import datetime
+import os
 import re
 import subprocess
 import sys
@@ -900,7 +901,9 @@ def run_script(
             check=False,
             cwd=script.parent,
             capture_output=True,
-            text=True,
+            encoding="utf-8",
+            errors="replace",
+            env=os.environ | {"PYTHONUTF8": "1"},  # files read as UTF-8 on Windows too
             timeout=TIMEOUT,
         )
     except subprocess.TimeoutExpired:

@@ -120,7 +120,10 @@ def test_log_appends_and_round_trips(tmp_path):
     review.add(path, override(rec, Status.DIFFERS, day=2))
     log = review.load(path)
     assert [o.status for o in log] == [Status.CONSISTENT, Status.DIFFERS]
-    assert json.loads(path.read_text())["entries"][0]["reviewer"] == "A. Reviewer"
+    assert (
+        json.loads(path.read_text(encoding="utf-8"))["entries"][0]["reviewer"]
+        == "A. Reviewer"
+    )
 
 
 # --- Server -------------------------------------------------------------------
@@ -128,12 +131,13 @@ def test_log_appends_and_round_trips(tmp_path):
 
 @pytest.fixture
 def served(tmp_path):
-    (tmp_path / "record.json").write_text(record().model_dump_json())
+    (tmp_path / "record.json").write_text(record().model_dump_json(), encoding="utf-8")
     (tmp_path / "paragraphs.json").write_text(json.dumps([{
         "section": "Figure 3 legend", "paragraph": 3, "page": 2, "text": PARAGRAPH,
-    }]))  # fmt: skip
+    }]), encoding="utf-8")  # fmt: skip
     (tmp_path / "report.html").write_text(
-        '<html><body><li data-finding-id="F3.B.a/population/sessions"></li></body></html>'
+        '<html><body><li data-finding-id="F3.B.a/population/sessions"></li></body></html>',
+        encoding="utf-8",
     )
     renders = []
     handler = make_handler(
@@ -143,7 +147,9 @@ def served(tmp_path):
     )  # fmt: skip
     code = tmp_path / "materials" / "code"
     code.mkdir(parents=True)
-    (code / "fit.py").write_text("sessions = load()\nn = len(sessions)\n")
+    (code / "fit.py").write_text(
+        "sessions = load()\nn = len(sessions)\n", encoding="utf-8"
+    )
     httpd = ThreadingHTTPServer(("127.0.0.1", 0), handler)
     thread = threading.Thread(target=httpd.serve_forever, daemon=True)
     thread.start()
@@ -498,7 +504,7 @@ def cross(other: int = 50) -> CrossFinding:
 
 def test_a_cross_claim_finding_is_confirmed_or_overridden(tmp_path):
     path, log = tmp_path / "record.json", tmp_path / review.LOG
-    path.write_text(record().model_dump_json())
+    path.write_text(record().model_dump_json(), encoding="utf-8")
     ask = {"target_kind": "cross", "target": cross().id, "reason": "Same mice.",
            "reviewer": "A. Reviewer"}  # fmt: skip
     found = lambda rec: (cross(),)

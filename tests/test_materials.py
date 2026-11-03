@@ -14,7 +14,7 @@ def workspace(tmp_path, files):
     for rel, text in files.items():
         p = tmp_path / "materials" / rel
         p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_text(text)
+        p.write_text(text, encoding="utf-8")
     return tmp_path
 
 
@@ -24,7 +24,9 @@ def test_data_saved_in_the_code_folder_is_listed_with_what_it_holds(tmp_path):
     saved.parent.mkdir(parents=True)
     scipy.io.savemat(saved, {"chosen": {"left": np.arange(3), "right": np.arange(2)}})
     (tmp_path / "materials/data").mkdir()
-    (tmp_path / "materials/data/trials.csv").write_text("session,rt\n1,0.5\n")
+    (tmp_path / "materials/data/trials.csv").write_text(
+        "session,rt\n1,0.5\n", encoding="utf-8"
+    )
     by_path = {f.path: f for f in materials.list_files(ws, S)}
     assert by_path["paper/paper.pdf"].kind == "paper"
     assert by_path["code/run.m"].kind == "code"
@@ -97,9 +99,9 @@ def test_the_list_is_written_only_when_it_changes(tmp_path):
     ws = workspace(tmp_path, {"paper/paper.pdf": ""})
     assert materials.write_list(ws, S)
     assert not materials.write_list(ws, S)
-    (tmp_path / "materials/new.csv").write_text("x\n")
+    (tmp_path / "materials/new.csv").write_text("x\n", encoding="utf-8")
     assert materials.write_list(ws, S)
-    assert "`new.csv` (data" in (ws / materials.LIST).read_text()
+    assert "`new.csv` (data" in (ws / materials.LIST).read_text(encoding="utf-8")
 
 
 def test_an_archive_is_listed_with_the_files_inside_it(tmp_path):
@@ -111,7 +113,7 @@ def test_an_archive_is_listed_with_the_files_inside_it(tmp_path):
         z.writestr("raw/session_1.mat", "")
         z.writestr("raw/session_2.mat", "")
     inner = tmp_path / "fits.csv"
-    inner.write_text("a\n")
+    inner.write_text("a\n", encoding="utf-8")
     with tarfile.open(tmp_path / "materials/data/fits.tar.gz", "w:gz") as tar:
         tar.add(inner, arcname="fits/fits.csv")
     by_path = {f.path: f for f in materials.list_files(ws, S)}

@@ -58,10 +58,11 @@ def test_a_reply_that_cannot_be_used_says_why(stop, why):
 def test_the_manifest_names_the_model(tmp_path):
     (tmp_path / "audit.yaml").write_text(
         "materials:\n  manuscript:\n    path: paper.pdf\n"
-        "settings:\n  assistant:\n    model: claude-sonnet-5-5\n"
+        "settings:\n  assistant:\n    model: claude-sonnet-5-5\n",
+        encoding="utf-8",
     )
     assert settings.load(tmp_path).model == "claude-sonnet-5-5"
     (tmp_path / "audit.yaml").write_text(
-        "materials:\n  manuscript:\n    path: paper.pdf\n"
+        "materials:\n  manuscript:\n    path: paper.pdf\n", encoding="utf-8"
     )
     assert settings.load(tmp_path).model == settings.MODEL

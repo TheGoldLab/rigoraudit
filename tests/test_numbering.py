@@ -108,7 +108,7 @@ def test_corrections_by_where_they_are():
 def test_read_corrections(tmp_path):
     path = tmp_path / "numbers.yaml"
     assert read_corrections(path) == {}
-    path.write_text("p26@412: A14\np26@530: null\np21@233: 4\n")
+    path.write_text("p26@412: A14\np26@530: null\np21@233: 4\n", encoding="utf-8")
     assert read_corrections(path) == {"p26@412": "A14", "p26@530": None, "p21@233": "4"}
     for text, message in [
         ("p26@40: 2.10\n", "p26@40: put quotes"),
@@ -117,7 +117,7 @@ def test_read_corrections(tmp_path):
         ("- 26\n", "points down"),
         ("eq 3: '3'\n", "'eq 3'"),
     ]:
-        path.write_text(text)
+        path.write_text(text, encoding="utf-8")
         with pytest.raises(ValueError, match=message):
             read_corrections(path)
 
@@ -152,16 +152,16 @@ def test_equations_page_applies_corrections(tmp_path):
          "picture": None},
     ]  # fmt: skip
     (tmp_path / EQUATIONS_FILE).parent.mkdir(parents=True)
-    (tmp_path / EQUATIONS_FILE).write_text(json.dumps(listed))
+    (tmp_path / EQUATIONS_FILE).write_text(json.dumps(listed), encoding="utf-8")
     out = equations.write_page(tmp_path)
     assert "2 not found (between 1 and 3)" in out
     (tmp_path / numbering.CORRECTIONS).parent.mkdir()
-    (tmp_path / numbering.CORRECTIONS).write_text("p2@400: '2'\n")
+    (tmp_path / numbering.CORRECTIONS).write_text("p2@400: '2'\n", encoding="utf-8")
     out = equations.write_page(tmp_path)
     assert "not found" not in out
-    saved = json.loads((tmp_path / EQUATIONS_FILE).read_text())
+    saved = json.loads((tmp_path / EQUATIONS_FILE).read_text(encoding="utf-8"))
     assert [r["key"] for r in saved] == ["1", "2", "3"]
-    page = (tmp_path / equations.PAGE).read_text()
+    page = (tmp_path / equations.PAGE).read_text(encoding="utf-8")
     assert "Number from" in page
     assert "page 3 · place p3@80" in page
 
@@ -172,9 +172,9 @@ def test_equations_page_matches_a_typed_key_a_little_away(tmp_path):
          "picture": None},
     ]  # fmt: skip
     (tmp_path / EQUATIONS_FILE).parent.mkdir(parents=True)
-    (tmp_path / EQUATIONS_FILE).write_text(json.dumps(listed))
+    (tmp_path / EQUATIONS_FILE).write_text(json.dumps(listed), encoding="utf-8")
     (tmp_path / equations.TYPED).parent.mkdir()
-    (tmp_path / equations.TYPED).write_text("p2@296: 'y = a + b'\n")
+    (tmp_path / equations.TYPED).write_text("p2@296: 'y = a + b'\n", encoding="utf-8")
     text, count, done, unmatched = equations.page(tmp_path)
     assert (count, done, unmatched) == (1, 1, [])
     assert "Equation p2@300" in text and "typed in as p2@296" in text

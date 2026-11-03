@@ -255,7 +255,7 @@ def test_an_answer_is_used_only_for_the_values_it_was_given(tmp_path):
     assert not crosscheck.plan_handoffs(tmp_path, rec(21))
     found = crosscheck.write(tmp_path, rec(21))
     saved = crosscheck.CrossCheck.model_validate_json(
-        (tmp_path / crosscheck.FINDINGS).read_text()
+        (tmp_path / crosscheck.FINDINGS).read_text(encoding="utf-8")
     )
     assert saved.findings == found and found[0].status is Status.DIFFERS
     # the record changed: the answer is not used, and the step is handed off again

@@ -64,13 +64,13 @@ def upstream(tmp_path):
     """The authors' repository, with a later commit the paper did not use."""
     repo = tmp_path / "upstream"
     repo.mkdir()
-    (repo / "README.md").write_text(README)
-    (repo / "analysis.py").write_text(CODE)
+    (repo / "README.md").write_text(README, encoding="utf-8")
+    (repo / "analysis.py").write_text(CODE, encoding="utf-8")
     git(repo, "init", "-q")
     git(repo, "add", ".")
     git(repo, "commit", "-q", "-m", "paper version")
     commit = git(repo, "rev-parse", "HEAD")
-    (repo / "analysis.py").write_text(CODE.replace("2.0", "3.0"))
+    (repo / "analysis.py").write_text(CODE.replace("2.0", "3.0"), encoding="utf-8")
     git(repo, "commit", "-qam", "later")
     return repo, commit
 
@@ -106,7 +106,7 @@ def replies(ws):
 
     def save(name, answer):
         path = ws / f"{name}.txt"
-        path.write_text(json.dumps(answer))
+        path.write_text(json.dumps(answer), encoding="utf-8")
         out[name] = str(path)
 
     nothing = [h.value for h in docs.Heading if h.value not in ("run", "software")]
@@ -126,13 +126,15 @@ def replies(ws):
          "quote": '    kept = [t for t in trials if t["rt"] <= 2.0]'}]}]}]})  # fmt: skip
     data = ws / "materials" / "data" / "correct.json"
     data.parent.mkdir(parents=True, exist_ok=True)
-    data.write_text("[1, 1, 1, 1, 0]")
+    data.write_text("[1, 1, 1, 1, 0]", encoding="utf-8")
     answer = {"instructions": "derive v4", "claims": [{"claim": "R1.1.a", "values": [
         {"for": "V1", "key": "accuracy", "how": "recomputed",
          "source": "data/correct.json", "derivation": "percent correct"}]}]}  # fmt: skip
     script = DERIVE
     path = ws / "derive.txt"
-    path.write_text(f"{json.dumps(answer)}\n\n```python\n{script}```\n")
+    path.write_text(
+        f"{json.dumps(answer)}\n\n```python\n{script}```\n", encoding="utf-8"
+    )
     out["derive"] = str(path)
     save("compare", {"instructions": "compare v4", "claims": [{"claim": "R1.1.a",
         "findings": [{"facet": "quantity", "observations": ["O1", "O3"],
@@ -149,7 +151,8 @@ def fill_in(ws, repo, commit):
     (ws / "audit.yaml").write_text(
         guide.TEMPLATE.replace('repository: ""', f"repository: {repo}").replace(
             'commit: ""', f"commit: {commit}"
-        )
+        ),
+        encoding="utf-8",
     )
     (ws / "materials" / "manuscript").mkdir()
     (ws / "materials" / "manuscript" / "paper.pdf").write_bytes(b"%PDF")
@@ -161,7 +164,7 @@ def extract(ws):
     path.write_text(json.dumps([
         {"section": "Methods", "paragraph": 1, "text": METHODS},
         {"section": "Results", "paragraph": 1, "text": RESULTS},
-    ]))  # fmt: skip
+    ]), encoding="utf-8")  # fmt: skip
     pages = [f"{TITLE}\nMethods\n{METHODS}\nResults\n{RESULTS}\n"]
     outline = [Heading("Methods", 0, 1), Heading("Results", 0, 1)]
     write_text_layer(path.parent, pages, outline, "paper.pdf")
@@ -173,7 +176,7 @@ def test_a_whole_audit_from_an_empty_folder(tmp_path, upstream):
 
     outcome, script = run(ws)
     assert outcome == "made workspace"
-    assert (ws / "audit.yaml").read_text() == guide.TEMPLATE
+    assert (ws / "audit.yaml").read_text(encoding="utf-8") == guide.TEMPLATE
     assert settings.load(ws).manuscript == "manuscript/paper.pdf"
 
     fill_in(ws, repo, commit)
@@ -185,8 +188,10 @@ def test_a_whole_audit_from_an_empty_folder(tmp_path, upstream):
     )
     code = ws / "materials" / "code"
     assert git(code, "rev-parse", "HEAD") == commit
-    assert "<= 2.0" in (code / "analysis.py").read_text()  # the paper's version
-    assert "`analysis.py` (code" in (ws / materials.LIST).read_text()
+    assert "<= 2.0" in (code / "analysis.py").read_text(
+        encoding="utf-8"
+    )  # the paper's version
+    assert "`analysis.py` (code" in (ws / materials.LIST).read_text(encoding="utf-8")
     assert "Look there before recording anything as missing." in script.text
 
     extract(ws)
@@ -204,7 +209,9 @@ def test_a_whole_audit_from_an_empty_folder(tmp_path, upstream):
         r["header"],
     )
     assert outcome == "finished", script.text
-    assert "<h1>Test (2026)</h1>" in (ws / "report" / "audit.html").read_text()
+    assert "<h1>Test (2026)</h1>" in (ws / "report" / "audit.html").read_text(
+        encoding="utf-8"
+    )
     assert "Built the record from the accepted answers" in script.text
     assert (
         "  [x] compare\n  [x] crosscheck\n  [x] header" in script.text
@@ -222,7 +229,7 @@ def test_a_whole_audit_from_an_empty_folder(tmp_path, upstream):
     assert trace.trace_observations(ws, settings.load(ws))["R1.1.a"]
 
     # the run's own feedback report counts every step, and nothing was sent
-    report = (ws / feedback.REPORT).read_text()
+    report = (ws / feedback.REPORT).read_text(encoding="utf-8")
     assert "the guide ran" in report and "| audit |  |  | finished |" in report
     assert report.count("| accepted |") == 7
     assert "(it passed the script checks)" in script.text
@@ -234,9 +241,9 @@ def test_a_whole_audit_from_an_empty_folder(tmp_path, upstream):
 
     # an answer accepted before the instructions changed is kept, with a warning
     path = next((ws / "work" / "decompose" / "answers").glob("*.json"))
-    saved = json.loads(path.read_text())
+    saved = json.loads(path.read_text(encoding="utf-8"))
     saved["answer"]["instructions"] = "decompose v0"
-    path.write_text(json.dumps(saved))
+    path.write_text(json.dumps(saved), encoding="utf-8")
     assert handoffs.old_answers(ws, "decompose") == {path.stem: "decompose v0"}
     outcome, script = run(ws)
     assert outcome == "finished"
@@ -251,7 +258,9 @@ def test_problems_are_given_to_paste_back_and_the_guide_can_stop(tmp_path, upstr
     extract(ws)
     r = replies(ws)
     bad = ws / "bad.txt"
-    bad.write_text(json.dumps({"instructions": "docs v1", "files": []}))
+    bad.write_text(
+        json.dumps({"instructions": "docs v1", "files": []}), encoding="utf-8"
+    )
 
     outcome, script = run(ws, "1", "Test assistant", "missing.txt", str(bad), "")
     assert outcome == "stopped"
@@ -287,7 +296,9 @@ def test_the_guide_extracts_the_paragraphs_and_offers_to_stop(tmp_path, upstream
     assert outcome == "waiting for materials"
     assert "Wrote 2 paragraphs" in script.text and "best guess" in script.text
     assert "Go on to the next step now?" in script.text
-    paras = json.loads((ws / "work" / "extract" / "paragraphs.json").read_text())
+    paras = json.loads(
+        (ws / "work" / "extract" / "paragraphs.json").read_text(encoding="utf-8")
+    )
     assert [(p["section"], p["text"]) for p in paras] == [
         ("Methods", METHODS),
         ("Results", RESULTS),
@@ -323,20 +334,23 @@ def test_the_guide_offers_to_check_doubtful_breaks(tmp_path, upstream):
         {"section": "Methods", "paragraph": 1, "text": METHODS, "approximate": True},
         {"section": "Results", "paragraph": 1, "text": first, "approximate": True},
         {"section": "Results", "paragraph": 2, "text": second, "approximate": True},
-    ]))  # fmt: skip
+    ]), encoding="utf-8")  # fmt: skip
     answer = ws / "breaks.txt"
     answer.write_text(json.dumps({"instructions": "breaks v2",
-        "decisions": [{"spot": "B1", "new_paragraph": False}]}))  # fmt: skip
+        "decisions": [{"spot": "B1", "new_paragraph": False}]}), encoding="utf-8")  # fmt: skip
 
     outcome, script = run(ws, "1", "Test assistant", "y", str(answer), "")
     assert outcome == "stopped"
     assert "unsure about 1 paragraph break" in script.text
     assert "breaks: done." in script.text
-    paras = json.loads(path.read_text())
+    paras = json.loads(path.read_text(encoding="utf-8"))
     assert [p["text"] for p in paras] == [METHODS, f"{first} {second}"]
 
     # a skipped check is not offered again
-    path.write_text(json.dumps([*paras, {**paras[1], "paragraph": 2, "text": "and"}]))
+    path.write_text(
+        json.dumps([*paras, {**paras[1], "paragraph": 2, "text": "and"}]),
+        encoding="utf-8",
+    )
     (ws / "work" / "breaks" / "answers" / "breaks.json").unlink()
     outcome, script = run(ws, "n", "")
     assert "unsure about" in script.text
@@ -395,9 +409,9 @@ def test_the_guide_checks_the_record_and_writes_the_report(tmp_path):
     # a quote the paper does not have fails the check, and no report is written
     (ws / "report" / "audit.html").unlink()
     record = ws / "record" / "record.json"
-    data = json.loads(record.read_text())
+    data = json.loads(record.read_text(encoding="utf-8"))
     data["claims"][0]["anchor"]["quote"] += " and more"
-    record.write_text(json.dumps(data))
+    record.write_text(json.dumps(data), encoding="utf-8")
     assert g.check_and_report(settings.load(ws)) == "check failed"
     assert not (ws / "report" / "audit.html").exists()
 
@@ -422,11 +436,11 @@ class Model:
             raise api.Unavailable("The tool could not reach the API.")
         self.asked.append(text)
         if text.startswith("-" * 72):  # problems sent back
-            return Path(self.replies["docs"]).read_text()
+            return Path(self.replies["docs"]).read_text(encoding="utf-8")
         step = re.search(r"# Your task: ([a-z]+)", text)[1]
         if step == "docs" and len(self.asked) == 1:
             return json.dumps({"instructions": "docs v1", "files": []})
-        return Path(self.replies[step]).read_text()
+        return Path(self.replies[step]).read_text(encoding="utf-8")
 
 
 def test_in_api_mode_the_tool_asks_the_model_and_sends_problems_back(
@@ -449,7 +463,7 @@ def test_in_api_mode_the_tool_asks_the_model_and_sends_problems_back(
     assert any(
         "Code index" in t or "index of" in t for t in model.asked if "trace" in t
     )
-    record = json.loads((ws / "record" / "record.json").read_text())
+    record = json.loads((ws / "record" / "record.json").read_text(encoding="utf-8"))
     assert record["drafted_by"]["name"] == f"{settings.MODEL} (API)"
 
 
@@ -464,7 +478,7 @@ def test_api_mode_warns_of_the_cost_and_can_be_declined(tmp_path, upstream):
     assert script.text.count("Which kind of assistant") == 3  # asked again
     assert "substantial amount of money" in script.text
     assert "Turn on API mode, and pay for it?" in script.text
-    choices = json.loads((ws / guide.CHOICES).read_text())
+    choices = json.loads((ws / guide.CHOICES).read_text(encoding="utf-8"))
     assert choices == {"mode": "paste", "by": "Test assistant"}
 
 
@@ -512,8 +526,8 @@ def test_a_coding_assistant_works_through_the_inbox(tmp_path, upstream):
                 if not (ws / "work" / step / "answers" / f"{task.stem}.json").exists():
                     inbox = ws / "work" / step / guide.INBOX
                     assert inbox.is_dir()  # the guide makes it
-                    text = "{}" if bad else Path(r[step]).read_text()
-                    (inbox / f"{task.stem}.txt").write_text(text)
+                    text = "{}" if bad else Path(r[step]).read_text(encoding="utf-8")
+                    (inbox / f"{task.stem}.txt").write_text(text, encoding="utf-8")
 
     outcome, text = go("2", "Test assistant", person=True)
     assert outcome == "waiting" and "Tell it:" in text
@@ -526,7 +540,7 @@ def test_a_coding_assistant_works_through_the_inbox(tmp_path, upstream):
     answer_waiting(bad=True)
     go()
     [note] = (ws / "work" / "docs" / guide.INBOX).glob(f"*{guide.PROBLEMS}")
-    assert "Please correct these problems" in note.read_text()
+    assert "Please correct these problems" in note.read_text(encoding="utf-8")
     outcome, text = go()  # the next run says which reply to correct
     assert f"correct it as work/docs/inbox/{note.name} says" in text
     outcome, text = go(person=True)
@@ -542,7 +556,10 @@ def test_a_coding_assistant_works_through_the_inbox(tmp_path, upstream):
 
     answer_waiting()
     reply = ws / "work" / "derive" / guide.INBOX / "derive-R1.1.a.txt"
-    reply.write_text(reply.read_text().replace("import json", "import json, os"))
+    reply.write_text(
+        reply.read_text(encoding="utf-8").replace("import json", "import json, os"),
+        encoding="utf-8",
+    )
     outcome, text = go()  # the script checks flag it, so it waits
     assert "1 script passed the checks and waits for the user" in text
     assert "imports os, which can start programs" in text
@@ -570,10 +587,10 @@ def test_tasks_still_waiting_are_listed_beside_a_script_that_waits(tmp_path):
     ws = tmp_path / "audit"
     inbox = ws / "work" / "derive" / guide.INBOX
     inbox.mkdir(parents=True)
-    (inbox / "derive-1.txt").write_text("a script")
+    (inbox / "derive-1.txt").write_text("a script", encoding="utf-8")
     script = ws / "derivations" / "R1.py"
     script.parent.mkdir()
-    script.write_text("print(1)\n")
+    script.write_text("print(1)\n", encoding="utf-8")
     g = guide.Guide(ws, interactive=False, clip=None)
     g.choose("mode", "files")
 
@@ -598,7 +615,7 @@ def test_a_step_hands_off_its_next_round_once_a_round_is_answered(tmp_path):
     ws = tmp_path / "audit"
     inbox = ws / "work" / "segment" / guide.INBOX
     inbox.mkdir(parents=True)
-    (inbox / "segment-R1.txt").write_text("a reply")
+    (inbox / "segment-R1.txt").write_text("a reply", encoding="utf-8")
     g = guide.Guide(ws, interactive=False, clip=None)
     g.choose("mode", "files")
     rounds, written, answered = [["segment-R1"], ["segment-F1"]], [], set()
@@ -646,7 +663,7 @@ def test_tasks_and_replies_go_through_the_clipboard(tmp_path, upstream):
     run(ws)
     fill_in(ws, repo, commit)
     extract(ws)
-    good = Path(replies(ws)["docs"]).read_text()
+    good = Path(replies(ws)["docs"]).read_text(encoding="utf-8")
     bad = json.dumps({"instructions": "docs v1", "files": []})
     clip = Clip(None, bad, good)  # first Enter: the user forgot to copy
     script = Script("y", "1", "Test assistant", "", "", "", "q")
@@ -666,7 +683,7 @@ def test_the_guide_asks_once_whether_scripts_may_start_matlab(tmp_path, monkeypa
     fill_in(ws, "https://github.com/someone/analysis", "0" * 40)
     code = ws / "materials" / "code"
     code.mkdir()
-    (code / "analysis.py").write_text(CODE)
+    (code / "analysis.py").write_text(CODE, encoding="utf-8")
     monkeypatch.setattr("rigoraudit.matlab.find", lambda: Path("/opt/matlab"))
 
     def ask(*answers):
@@ -677,10 +694,12 @@ def test_the_guide_asks_once_whether_scripts_may_start_matlab(tmp_path, monkeypa
     s, text = ask()  # no MATLAB files, no question
     assert s.derive_programs is None and text == ""
 
-    (code / "fit.m").write_text("x = 1;\n")
+    (code / "fit.m").write_text("x = 1;\n", encoding="utf-8")
     s, text = ask("y")
     assert "includes MATLAB files" in text and "(found at /opt/matlab)" in text
     assert s.derive_programs == ("matlab",)
-    assert "    programs: [matlab]\n    run: auto" in (ws / "audit.yaml").read_text()
+    assert "    programs: [matlab]\n    run: auto" in (ws / "audit.yaml").read_text(
+        encoding="utf-8"
+    )
     s, text = ask()  # answered: not asked again
     assert text == ""

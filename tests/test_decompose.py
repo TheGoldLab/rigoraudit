@@ -202,7 +202,10 @@ EXAMPLE = Path(__file__).parent.parent / "examples" / "example-audit"
 def test_example_audit_from_segment_to_results_observations(tmp_path, capsys):
     extract = tmp_path / "work" / "extract" / "paragraphs.json"
     extract.parent.mkdir(parents=True)
-    extract.write_text((EXAMPLE / "work/extract/paragraphs.json").read_text())
+    extract.write_text(
+        (EXAMPLE / "work/extract/paragraphs.json").read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
     segment.write_handoffs(tmp_path)
     seg = {
         "instructions": "segment v2",
@@ -239,7 +242,7 @@ def test_example_audit_from_segment_to_results_observations(tmp_path, capsys):
             ]},
         ],
     }  # fmt: skip
-    reply.write_text(json.dumps(dec))
+    reply.write_text(json.dumps(dec), encoding="utf-8")
     cli.main(["import", "decompose", str(reply), str(tmp_path), "--by", "test"])
     assert capsys.readouterr().out.startswith(
         "Accepted decompose-R1.2.a: 4 facets of 2 claims"

@@ -78,7 +78,11 @@ def digest(record: AuditRecord) -> str:
 
 def load_checks(workspace: Path) -> Checks | None:
     path = workspace / CHECKS
-    return Checks.model_validate_json(path.read_text()) if path.is_file() else None
+    return (
+        Checks.model_validate_json(path.read_text(encoding="utf-8"))
+        if path.is_file()
+        else None
+    )
 
 
 def save_checks(
@@ -100,7 +104,9 @@ def save_checks(
         update["items"] = coverage.n_items
     path = workspace / CHECKS
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(old.model_copy(update=update).model_dump_json(indent=1) + "\n")
+    path.write_text(
+        old.model_copy(update=update).model_dump_json(indent=1) + "\n", encoding="utf-8"
+    )
 
 
 def _drafter(d: Drafter) -> str:
