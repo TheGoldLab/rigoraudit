@@ -1,0 +1,21 @@
+#!/bin/sh
+# Copyright (c) 2026, Joshua I. Gold
+# SPDX-License-Identifier: BSD-2-Clause
+# Install git hooks that run scripts/check_no_audit_content.py on every
+# commit, commit message, and push. Run once per clone, from anywhere in it.
+set -e
+hooks="$(git rev-parse --git-path hooks)"
+mkdir -p "$hooks"
+check='uv run --quiet python scripts/check_no_audit_content.py'
+
+for hook in pre-commit commit-msg pre-push; do
+    case $hook in
+        pre-commit) args='--staged' ;;
+        commit-msg) args='--message "$1"' ;;
+        pre-push) args='' ;;
+    esac
+    printf '#!/bin/sh\ncd "$(git rev-parse --show-toplevel)" && exec %s %s\n' "$check" "$args" \
+        > "$hooks/$hook"
+    chmod +x "$hooks/$hook"
+    echo "installed $hooks/$hook"
+done

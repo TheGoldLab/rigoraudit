@@ -1,0 +1,17 @@
+{
+ "script": "derivations/values_trials.py",
+ "script_sha256": "a93aff1b699cf4be912d0d8efade24720d71724281d8d062ceac3ab3f78f61cd",
+ "inputs": {
+  "materials/data/trials.json": "0683388ec4cfe53bb417b7ba2b971a103eb6435881bacd251109793ecab62210"
+ },
+ "values": {
+  "trials/all": 3540,
+  "trials/excluded_methods_cutoff": 80,
+  "mice": 12,
+  "sessions": 10,
+  "accuracy_pct/session_1": 60.115606936416185,
+  "accuracy_pct/session_10": 87.31988472622479,
+  "accuracy_pct_code_cutoff/session_1": 60.17191977077364,
+  "accuracy_pct_code_cutoff/session_10": 87.25212464589235
+ }
+}

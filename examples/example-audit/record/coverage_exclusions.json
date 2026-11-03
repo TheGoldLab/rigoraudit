@@ -1,0 +1,9 @@
+{
+ "exclusions": [
+  {
+   "paragraph": "R1.1",
+   "quote": "(4 and 8 kHz)",
+   "reason": "Describes the task, as the Methods do; it reports no result."
+  }
+ ]
+}

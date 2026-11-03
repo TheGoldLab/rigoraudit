@@ -1,0 +1,592 @@
+{
+ "schema_version": 4,
+ "drafted_by": {
+  "kind": "model",
+  "name": "Claude Opus 5.5",
+  "model_id": "claude-opus-5-5",
+  "stage": "Claude Code session",
+  "prompt_version": null,
+  "date": "2026-10-30"
+ },
+ "claims": [
+  {
+   "id": "R1.2.a",
+   "type": "new_result",
+   "anchor": {
+    "kind": "manuscript",
+    "file": "manuscript.txt",
+    "section": "Results › Learning",
+    "paragraph": 2,
+    "char_start": 0,
+    "char_end": 51,
+    "page": 2,
+    "line": null,
+    "quote": "Twelve mice completed 3,600 trials over 10 sessions"
+   },
+   "trace": "traced",
+   "depends_on": [],
+   "citations": [],
+   "restates": null,
+   "drafted_by": null
+  },
+  {
+   "id": "R1.2.b",
+   "type": "new_result",
+   "anchor": {
+    "kind": "manuscript",
+    "file": "manuscript.txt",
+    "section": "Results › Learning",
+    "paragraph": 2,
+    "char_start": 53,
+    "char_end": 109,
+    "page": 2,
+    "line": null,
+    "quote": "Accuracy rose from 60% in session 1 to 87% in session 10"
+   },
+   "trace": "traced",
+   "depends_on": [],
+   "citations": [],
+   "restates": null,
+   "drafted_by": null
+  }
+ ],
+ "findings": [
+  {
+   "id": "R1.2.a/population",
+   "claim_id": "R1.2.a",
+   "facet": "population",
+   "scope": null,
+   "status": "consistent",
+   "basis": "exact",
+   "comparisons": [
+    {
+     "kind": "exact",
+     "stated": [
+      {
+       "name": "mice",
+       "value": 12,
+       "unit": null,
+       "subject": null,
+       "relation": "=",
+       "decimals": null,
+       "key": null
+      }
+     ],
+     "observed": [
+      {
+       "name": "mice",
+       "value": 12,
+       "unit": null,
+       "subject": null,
+       "relation": "=",
+       "decimals": null,
+       "key": "mice"
+      }
+     ],
+     "predicted": null,
+     "amount": null,
+     "hedge": null,
+     "span": null
+    },
+    {
+     "kind": "exact",
+     "stated": [
+      {
+       "name": "sessions",
+       "value": 10,
+       "unit": null,
+       "subject": null,
+       "relation": "=",
+       "decimals": null,
+       "key": null
+      }
+     ],
+     "observed": [
+      {
+       "name": "sessions",
+       "value": 10,
+       "unit": null,
+       "subject": null,
+       "relation": "=",
+       "decimals": null,
+       "key": "sessions"
+      }
+     ],
+     "predicted": null,
+     "amount": null,
+     "hedge": null,
+     "span": null
+    }
+   ],
+   "tolerance": null,
+   "summary": "The Results state 12 mice and 10 sessions; the data contain 12 mice and 10 sessions.",
+   "observations": [
+    {
+     "source": "results",
+     "statement": "Twelve mice completed 3,600 trials over 10 sessions.",
+     "anchor": {
+      "kind": "manuscript",
+      "file": "manuscript.txt",
+      "section": "Results › Learning",
+      "paragraph": 2,
+      "char_start": 0,
+      "char_end": 51,
+      "page": 2,
+      "line": null,
+      "quote": "Twelve mice completed 3,600 trials over 10 sessions"
+     },
+     "obtained": "quoted",
+     "values": [
+      {
+       "name": "mice",
+       "value": 12,
+       "unit": null,
+       "subject": null,
+       "relation": "=",
+       "decimals": null,
+       "key": null
+      },
+      {
+       "name": "trials",
+       "value": 3600,
+       "unit": null,
+       "subject": null,
+       "relation": "=",
+       "decimals": null,
+       "key": null
+      },
+      {
+       "name": "sessions",
+       "value": 10,
+       "unit": null,
+       "subject": null,
+       "relation": "=",
+       "decimals": null,
+       "key": null
+      }
+     ],
+     "drafted_by": null
+    },
+    {
+     "source": "data",
+     "statement": "The data contain 12 mice and 10 sessions.",
+     "anchor": {
+      "kind": "data",
+      "file": "data/trials.json",
+      "field": null,
+      "selection": null,
+      "derivation": "count of distinct mouse and session IDs",
+      "produced_by": {
+       "script": "derivations/values_trials.py",
+       "output": "derivations/output/values/trials.json",
+       "drafted_by": null
+      },
+      "quote": "12 mice; 10 sessions"
+     },
+     "obtained": "recomputed",
+     "values": [
+      {
+       "name": "mice",
+       "value": 12,
+       "unit": null,
+       "subject": null,
+       "relation": "=",
+       "decimals": null,
+       "key": "mice"
+      },
+      {
+       "name": "sessions",
+       "value": 10,
+       "unit": null,
+       "subject": null,
+       "relation": "=",
+       "decimals": null,
+       "key": "sessions"
+      }
+     ],
+     "drafted_by": null
+    }
+   ],
+   "not_described_in": [],
+   "reason": null,
+   "effect": "none_observed",
+   "drafted_by": null
+  },
+  {
+   "id": "R1.2.a/quantity",
+   "claim_id": "R1.2.a",
+   "facet": "quantity",
+   "scope": null,
+   "status": "differs",
+   "basis": "exact",
+   "comparisons": [
+    {
+     "kind": "exact",
+     "stated": [
+      {
+       "name": "trials",
+       "value": 3600,
+       "unit": null,
+       "subject": null,
+       "relation": "=",
+       "decimals": null,
+       "key": null
+      }
+     ],
+     "observed": [
+      {
+       "name": "trials",
+       "value": 3540,
+       "unit": null,
+       "subject": null,
+       "relation": "=",
+       "decimals": null,
+       "key": "trials/all"
+      }
+     ],
+     "predicted": null,
+     "amount": null,
+     "hedge": null,
+     "span": null
+    }
+   ],
+   "tolerance": null,
+   "summary": "The Results state 3,600 trials; the data contain 3,540, which is 60 fewer than 12 mice × 10 sessions × 30 trials.",
+   "observations": [
+    {
+     "source": "results",
+     "statement": "Twelve mice completed 3,600 trials over 10 sessions.",
+     "anchor": {
+      "kind": "manuscript",
+      "file": "manuscript.txt",
+      "section": "Results › Learning",
+      "paragraph": 2,
+      "char_start": 0,
+      "char_end": 51,
+      "page": 2,
+      "line": null,
+      "quote": "Twelve mice completed 3,600 trials over 10 sessions"
+     },
+     "obtained": "quoted",
+     "values": [
+      {
+       "name": "mice",
+       "value": 12,
+       "unit": null,
+       "subject": null,
+       "relation": "=",
+       "decimals": null,
+       "key": null
+      },
+      {
+       "name": "trials",
+       "value": 3600,
+       "unit": null,
+       "subject": null,
+       "relation": "=",
+       "decimals": null,
+       "key": null
+      },
+      {
+       "name": "sessions",
+       "value": 10,
+       "unit": null,
+       "subject": null,
+       "relation": "=",
+       "decimals": null,
+       "key": null
+      }
+     ],
+     "drafted_by": null
+    },
+    {
+     "source": "data",
+     "statement": "The data contain 3,540 trials.",
+     "anchor": {
+      "kind": "data",
+      "file": "data/trials.json",
+      "field": null,
+      "selection": null,
+      "derivation": "count of all trials, none excluded",
+      "produced_by": {
+       "script": "derivations/values_trials.py",
+       "output": "derivations/output/values/trials.json",
+       "drafted_by": null
+      },
+      "quote": "3,540 trials"
+     },
+     "obtained": "recomputed",
+     "values": [
+      {
+       "name": "trials",
+       "value": 3540,
+       "unit": null,
+       "subject": null,
+       "relation": "=",
+       "decimals": null,
+       "key": "trials/all"
+      }
+     ],
+     "drafted_by": null
+    }
+   ],
+   "not_described_in": [],
+   "reason": null,
+   "effect": "indirect",
+   "drafted_by": null
+  },
+  {
+   "id": "R1.2.b/quantity",
+   "claim_id": "R1.2.b",
+   "facet": "quantity",
+   "scope": null,
+   "status": "consistent",
+   "basis": "reported_precision",
+   "comparisons": [
+    {
+     "kind": "precision",
+     "stated": [
+      {
+       "name": "accuracy",
+       "value": 60,
+       "unit": "%",
+       "subject": "session 1",
+       "relation": "=",
+       "decimals": 0,
+       "key": null
+      }
+     ],
+     "observed": [
+      {
+       "name": "accuracy",
+       "value": 60.115606936416185,
+       "unit": "%",
+       "subject": "session 1",
+       "relation": "=",
+       "decimals": null,
+       "key": "accuracy_pct/session_1"
+      }
+     ],
+     "predicted": null,
+     "amount": null,
+     "hedge": null,
+     "span": null
+    },
+    {
+     "kind": "precision",
+     "stated": [
+      {
+       "name": "accuracy",
+       "value": 87,
+       "unit": "%",
+       "subject": "session 10",
+       "relation": "=",
+       "decimals": 0,
+       "key": null
+      }
+     ],
+     "observed": [
+      {
+       "name": "accuracy",
+       "value": 87.31988472622479,
+       "unit": "%",
+       "subject": "session 10",
+       "relation": "=",
+       "decimals": null,
+       "key": "accuracy_pct/session_10"
+      }
+     ],
+     "predicted": null,
+     "amount": null,
+     "hedge": null,
+     "span": null
+    }
+   ],
+   "tolerance": null,
+   "summary": "The Results state 60% and 87% correct in sessions 1 and 10; recomputed from the data as the Methods describe, they are 60.1% and 87.3%.",
+   "observations": [
+    {
+     "source": "results",
+     "statement": "Accuracy was 60% in session 1 and 87% in session 10.",
+     "anchor": {
+      "kind": "manuscript",
+      "file": "manuscript.txt",
+      "section": "Results › Learning",
+      "paragraph": 2,
+      "char_start": 53,
+      "char_end": 109,
+      "page": 2,
+      "line": null,
+      "quote": "Accuracy rose from 60% in session 1 to 87% in session 10"
+     },
+     "obtained": "quoted",
+     "values": [
+      {
+       "name": "accuracy",
+       "value": 60,
+       "unit": "%",
+       "subject": "session 1",
+       "relation": "=",
+       "decimals": 0,
+       "key": null
+      },
+      {
+       "name": "accuracy",
+       "value": 87,
+       "unit": "%",
+       "subject": "session 10",
+       "relation": "=",
+       "decimals": 0,
+       "key": null
+      }
+     ],
+     "drafted_by": null
+    },
+    {
+     "source": "data",
+     "statement": "Recomputed accuracy is 60.1% in session 1 and 87.3% in session 10.",
+     "anchor": {
+      "kind": "data",
+      "file": "data/trials.json",
+      "field": null,
+      "selection": null,
+      "derivation": "percentage correct per session, excluding response times > 2 s",
+      "produced_by": {
+       "script": "derivations/values_trials.py",
+       "output": "derivations/output/values/trials.json",
+       "drafted_by": null
+      },
+      "quote": "session 1: 60.1%; session 10: 87.3%"
+     },
+     "obtained": "recomputed",
+     "values": [
+      {
+       "name": "accuracy",
+       "value": 60.115606936416185,
+       "unit": "%",
+       "subject": "session 1",
+       "relation": "=",
+       "decimals": null,
+       "key": "accuracy_pct/session_1"
+      },
+      {
+       "name": "accuracy",
+       "value": 87.31988472622479,
+       "unit": "%",
+       "subject": "session 10",
+       "relation": "=",
+       "decimals": null,
+       "key": "accuracy_pct/session_10"
+      }
+     ],
+     "drafted_by": null
+    }
+   ],
+   "not_described_in": [],
+   "reason": null,
+   "effect": "none_observed",
+   "drafted_by": null
+  },
+  {
+   "id": "R1.2.b/analysis",
+   "claim_id": "R1.2.b",
+   "facet": "analysis",
+   "scope": null,
+   "status": "differs",
+   "basis": "exact",
+   "comparisons": [
+    {
+     "kind": "exact",
+     "stated": [
+      {
+       "name": "response-time cutoff",
+       "value": 2,
+       "unit": "s",
+       "subject": null,
+       "relation": "=",
+       "decimals": null,
+       "key": null
+      }
+     ],
+     "observed": [
+      {
+       "name": "response-time cutoff",
+       "value": 2.5,
+       "unit": "s",
+       "subject": null,
+       "relation": "=",
+       "decimals": null,
+       "key": null
+      }
+     ],
+     "predicted": null,
+     "amount": null,
+     "hedge": null,
+     "span": null
+    }
+   ],
+   "tolerance": null,
+   "summary": "The Methods exclude trials with response times longer than 2 s; the code excludes those longer than 2.5 s. With the code's cutoff, accuracy is 60.2% and 87.3%, which also round to the stated 60% and 87%.",
+   "observations": [
+    {
+     "source": "methods",
+     "statement": "Trials with response times longer than 2 s are excluded.",
+     "anchor": {
+      "kind": "manuscript",
+      "file": "manuscript.txt",
+      "section": "Methods › Subjects and task",
+      "paragraph": 2,
+      "char_start": 0,
+      "char_end": 71,
+      "page": 1,
+      "line": null,
+      "quote": "Trials with response times longer than 2 s were excluded from analysis."
+     },
+     "obtained": "quoted",
+     "values": [
+      {
+       "name": "response-time cutoff",
+       "value": 2,
+       "unit": "s",
+       "subject": null,
+       "relation": "=",
+       "decimals": null,
+       "key": null
+      }
+     ],
+     "drafted_by": null
+    },
+    {
+     "source": "code",
+     "statement": "The code keeps trials with response times up to 2.5 s.",
+     "anchor": {
+      "kind": "code",
+      "file": "code/analysis.py",
+      "line_start": 8,
+      "line_end": 9,
+      "commit": null,
+      "quote": "# Exclude slow responses\ntrials = [t for t in trials if t[\"rt\"] <= 2.5]"
+     },
+     "obtained": "read",
+     "values": [
+      {
+       "name": "response-time cutoff",
+       "value": 2.5,
+       "unit": "s",
+       "subject": null,
+       "relation": "=",
+       "decimals": null,
+       "key": null
+      }
+     ],
+     "drafted_by": null
+    }
+   ],
+   "not_described_in": [],
+   "reason": null,
+   "effect": "none_observed",
+   "drafted_by": null
+  }
+ ],
+ "context": []
+}

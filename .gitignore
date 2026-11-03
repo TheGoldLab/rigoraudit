@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+
+# Manuscript materials and audit outputs never belong in the tool repo
+data/
+# except the example audit's made-up data
+!examples/example-audit/materials/data/
+audits/
+*.pdf
+
+# OS
+.DS_Store
+
+# Overrides saved while trying the example in the review page
+examples/example-audit/review/
+
+# Personal Claude Code settings (absolute paths)
+.claude/settings.local.json

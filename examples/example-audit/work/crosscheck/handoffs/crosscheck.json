@@ -1,0 +1,85 @@
+{
+ "name": "crosscheck",
+ "instructions": "crosscheck v1",
+ "claims": [
+  {
+   "id": "R1.2.a",
+   "section": "Results › Learning",
+   "quote": "Twelve mice completed 3,600 trials over 10 sessions"
+  },
+  {
+   "id": "R1.2.b",
+   "section": "Results › Learning",
+   "quote": "Accuracy rose from 60% in session 1 to 87% in session 10"
+  }
+ ],
+ "rows": [
+  {
+   "label": "V1",
+   "claim_id": "R1.2.a",
+   "facet": "population",
+   "name": "mice",
+   "subject": null,
+   "unit": null,
+   "value": "12",
+   "quote": "Twelve mice completed 3,600 trials over 10 sessions",
+   "same_text": null
+  },
+  {
+   "label": "V2",
+   "claim_id": "R1.2.a",
+   "facet": "population",
+   "name": "trials",
+   "subject": null,
+   "unit": null,
+   "value": "3600",
+   "quote": "Twelve mice completed 3,600 trials over 10 sessions",
+   "same_text": null
+  },
+  {
+   "label": "V3",
+   "claim_id": "R1.2.a",
+   "facet": "population",
+   "name": "sessions",
+   "subject": null,
+   "unit": null,
+   "value": "10",
+   "quote": "Twelve mice completed 3,600 trials over 10 sessions",
+   "same_text": null
+  },
+  {
+   "label": "V4",
+   "claim_id": "R1.2.b",
+   "facet": "analysis",
+   "name": "response-time cutoff",
+   "subject": null,
+   "unit": "s",
+   "value": "2 s",
+   "quote": "Trials with response times longer than 2 s were excluded from analysis.",
+   "same_text": null
+  },
+  {
+   "label": "V5",
+   "claim_id": "R1.2.b",
+   "facet": "quantity",
+   "name": "accuracy",
+   "subject": "session 1",
+   "unit": "%",
+   "value": "60%",
+   "quote": "Accuracy rose from 60% in session 1 to 87% in session 10",
+   "same_text": null
+  },
+  {
+   "label": "V6",
+   "claim_id": "R1.2.b",
+   "facet": "quantity",
+   "name": "accuracy",
+   "subject": "session 10",
+   "unit": "%",
+   "value": "87%",
+   "quote": "Accuracy rose from 60% in session 1 to 87% in session 10",
+   "same_text": null
+  }
+ ],
+ "candidates": []
+}

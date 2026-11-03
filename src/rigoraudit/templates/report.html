@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{{TITLE}}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+/* Layout: report header, overview, and potential issues; then one collapsible block per major manuscript section,
+   each with its text (left, sticky) beside its claim cards (right); stacks on narrow screens. */
+:root {
+  --bg: #f6f7f9; --panel: #ffffff; --ink: #1b2230; --muted: #5b6474; --rule: #dde1e8; --soft: #eef1f5;
+  --ok: #2c7a69; --ok-bg: #e3f1ed; --dif: #a65d12; --dif-bg: #fbeedd; --nd: #5650b0; --nd-bg: #ebeafa;
+  --nv: #646b78; --nv-bg: #eceef1; --ref: #6f7a8c; --link: #2b4f8f;
+  --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #11151b; --panel: #181d25; --ink: #e5e8ee; --muted: #9aa3b1; --rule: #2a313c; --soft: #1f252f;
+  --ok: #63c2ab; --ok-bg: #173229; --dif: #e7a660; --dif-bg: #3a2914; --nd: #a9a5f2; --nd-bg: #25234a;
+  --nv: #a3a9b4; --nv-bg: #262b33; --ref: #9aa4b5; --link: #8fb1ee; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #11151b; --panel: #181d25; --ink: #e5e8ee; --muted: #9aa3b1; --rule: #2a313c; --soft: #1f252f;
+  --ok: #63c2ab; --ok-bg: #173229; --dif: #e7a660; --dif-bg: #3a2914; --nd: #a9a5f2; --nd-bg: #25234a;
+  --nv: #a3a9b4; --nv-bg: #262b33; --ref: #9aa4b5; --link: #8fb1ee; color-scheme: dark }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.55 var(--sans); }
+.wrap { max-width: 1320px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; display: grid; gap: 28px; }
+a { color: var(--link); }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; border-radius: 3px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+
+header.top { display: grid; gap: 10px; max-width: 72ch; }
+.eyebrow { font: 500 12px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font: 600 30px/1.15 var(--serif); }
+.paper-title { font: italic 17px/1.45 var(--serif); color: var(--muted); margin: 0; }
+.scope { margin: 6px 0 0; }
+
+.meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.meta div { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 12px 14px; min-width: 0; }
+.meta dt { font: 600 12px/1.2 var(--sans); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.meta dd { margin: 0; font-size: 14px; overflow-wrap: anywhere; }
+.meta code { font: 13px var(--mono); }
+
+section.summary { display: grid; gap: 16px; }
+h2 { font: 600 20px/1.25 var(--serif); }
+.counts { display: flex; flex-wrap: wrap; gap: 8px 28px; align-items: baseline; }
+.counts .big { font: 600 15px var(--sans); }
+.counts .big b { font: 600 26px/1 var(--serif); font-variant-numeric: tabular-nums; margin-right: 4px; }
+ul.inline { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 16px; color: var(--muted); font-size: 14px; }
+ul.inline .n { font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 600; }
+
+.chip { display: inline-block; font: 500 12px/1 var(--sans); padding: 4px 8px; border-radius: 999px; white-space: nowrap; border: 1px solid transparent; }
+.chip.ok { color: var(--ok); background: var(--ok-bg); }
+.chip.dif { color: var(--dif); background: var(--dif-bg); }
+.chip.nd { color: var(--nd); background: var(--nd-bg); }
+.chip.nv { color: var(--nv); background: var(--nv-bg); }
+.chip.nt { color: var(--muted); border: 1px dashed var(--rule); }
+.chip.ref, .chip.int { color: var(--ref); background: var(--soft); }
+
+ol.attention { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; }
+ol.attention li { display: grid; grid-template-columns: auto auto auto 1fr; gap: 4px 10px; align-items: center; padding: 12px 14px; border-top: 1px solid var(--rule); }
+ol.attention li:first-child { border-top: 0; }
+ol.attention p { grid-column: 1 / -1; margin: 2px 0 0; max-width: 90ch; font-size: 14px; }
+.facet { font: 500 12px var(--mono); color: var(--muted); }
+.effect { font-size: 12px; color: var(--muted); }
+.idlink { font: 500 13px var(--mono); text-decoration: none; }
+.idlink:hover { text-decoration: underline; }
+
+details.major, details.issues { background: transparent; border-top: 1px solid var(--rule); padding-top: 14px; }
+details.major > summary, details.issues > summary { cursor: pointer; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; list-style: none; }
+details.major > summary::-webkit-details-marker, details.issues > summary::-webkit-details-marker { display: none; }
+details.major > summary::before, details.issues > summary::before { content: "▸"; color: var(--muted); font-size: 18px; width: 14px; transition: transform .15s; }
+details.major[open] > summary::before, details.issues[open] > summary::before { transform: rotate(90deg); }
+details.major > summary h2, details.issues > summary h2 { display: inline; }
+.sec-n { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+details.major > summary .chips { justify-content: flex-start; }
+details.major > .split, details.issues > ol { margin-top: 14px; }
+ol.excl { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 8px; font-size: 14px; max-width: 100ch; }
+ol.excl q { font: italic 14.5px/1.5 var(--serif); }
+ol.excl .why { color: var(--muted); }
+ul.cross { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 8px; font-size: 14px; max-width: 100ch; }
+ul.cross .why { color: var(--muted); }
+.uncovered { margin: 0; font-size: 14px; color: var(--muted); }
+[hidden] { display: none !important; }
+form.filters { position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--bg) 94%, transparent); backdrop-filter: blur(6px);
+  border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); padding: 10px 0; display: grid; gap: 6px; margin: 0; }
+.frow { display: grid; grid-template-columns: 9.5em minmax(0, 1fr) auto; gap: 4px 12px; align-items: baseline; }
+.ftitle { font: 600 12px/1.6 var(--sans); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.fsub { text-transform: none; letter-spacing: 0; font-weight: 400; }
+.fboxes { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.fbox { font-size: 13.5px; display: inline-flex; gap: 5px; align-items: baseline; cursor: pointer; white-space: nowrap; }
+.fbox input { margin: 0; accent-color: var(--link); align-self: center; }
+.fbox.zero { color: var(--muted); opacity: .6; cursor: default; }
+.fn { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.fall { font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+.fall button, .freset { font: inherit; color: var(--link); background: none; border: 0; padding: 0; cursor: pointer; }
+.fall button:hover, .freset:hover { text-decoration: underline; }
+.fstatus { display: flex; flex-wrap: wrap; gap: 4px 18px; align-items: baseline; font-size: 13px; color: var(--muted); padding-top: 2px; }
+#fcount { color: var(--ink); font-variant-numeric: tabular-nums; }
+.forder label { margin-left: 8px; display: inline-flex; gap: 4px; align-items: baseline; cursor: pointer; }
+.freset { font-size: 13px; margin-left: auto; }
+.fempty { margin: 0; padding: 24px 0; color: var(--muted); }
+button.folded-toggle { font: 13px var(--sans); color: var(--link); background: none; border: 0; padding: 0; cursor: pointer; text-align: left; width: max-content; }
+li.finding.folded { display: none; }
+a.mark.off { background: none !important; border-bottom-color: transparent !important; }
+a.mark.off sup { display: none; }
+@media (max-width: 720px) { form.filters { position: static; } .frow { grid-template-columns: minmax(0, 1fr) auto; } .ftitle { grid-column: 1 / -1; } }
+.key { margin-bottom: 14px; display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--muted); align-items: center; }
+.key span.sw { display: inline-block; width: 22px; height: 10px; vertical-align: middle; margin-right: 5px; border-bottom: 2px solid; }
+
+.split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 28px; align-items: start; }
+.ms { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 18px 22px 22px; min-width: 0; }
+@media (min-width: 1000px) { .ms { position: sticky; top: calc(var(--bar-h, 0px) + 12px); max-height: calc(100vh - var(--bar-h, 0px) - 24px); overflow-y: auto; } }
+.ms-h { font: 600 15px/1.3 var(--sans); margin: 18px 0 8px; color: var(--muted); }
+.ms-h:first-child { margin-top: 0; }
+.ms-h.ms-claim { font: 600 16px/1.4 var(--serif); color: var(--ink); }
+.ms-p { font: 16.5px/1.7 var(--serif); margin: 0 0 14px; max-width: 68ch; }
+.pnum { font: 500 11px var(--mono); color: var(--muted); margin-right: 8px; user-select: none; }
+a.mark { color: inherit; text-decoration: none; border-bottom: 2px solid; padding: 1px 0; border-radius: 2px; transition: background .2s; }
+a.mark sup { font: 500 10px var(--mono); margin-left: 2px; color: var(--muted); }
+.st-ok { border-color: var(--ok); } a.mark.st-ok { background: color-mix(in srgb, var(--ok-bg) 70%, transparent); }
+.st-dif { border-color: var(--dif); } a.mark.st-dif { background: var(--dif-bg); }
+.st-nd { border-color: var(--nd); } a.mark.st-nd { background: var(--nd-bg); }
+.st-nv { border-color: var(--nv); }
+a.mark.st-nt, a.mark.st-ref, a.mark.st-int { border-bottom-style: dashed; border-color: var(--ref); }
+a.mark.active, a.mark:hover { background: var(--soft); outline: 1px solid var(--rule); }
+a.mark.flash { outline: 2px solid var(--link); outline-offset: 2px; }
+button.to-text { font: inherit; color: var(--link); background: none; border: 0; padding: 0; cursor: pointer; }
+button.to-text:hover { text-decoration: underline; }
+.fgo { display: inline-flex; gap: 6px; align-items: baseline; }
+.fgo input { font: 13px var(--mono); width: 8em; padding: 2px 6px; border: 1px solid var(--rule); border-radius: 4px; background: var(--panel); color: var(--ink); }
+#fgo-msg { color: var(--dif); }
+.idlink.st-ok { color: var(--ok); } .idlink.st-dif { color: var(--dif); } .idlink.st-nd { color: var(--nd); }
+
+.cards { display: grid; gap: 10px; min-width: 0; }
+.cards h2 { margin-bottom: 4px; }
+details.card { background: var(--panel); border: 1px solid var(--rule); border-left: 4px solid var(--rule); border-radius: 6px; min-width: 0; scroll-margin-top: calc(var(--bar-h, 0px) + 16px); }
+details.card.st-ok { border-left-color: var(--ok); }
+details.card.st-dif { border-left-color: var(--dif); }
+details.card.st-nd { border-left-color: var(--nd); }
+details.card.flash { box-shadow: 0 0 0 3px color-mix(in srgb, var(--link) 35%, transparent); }
+details.card > summary { list-style: none; cursor: pointer; padding: 12px 14px; display: grid; grid-template-columns: auto auto 1fr; gap: 6px 10px; align-items: center; }
+details.card > summary::-webkit-details-marker { display: none; }
+.cid { font: 600 14px var(--mono); }
+.ctype { font-size: 12px; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; }
+.cquote { grid-column: 1 / -1; font: 15px/1.5 var(--serif); }
+details.card:not([open]) .cquote { color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.card-body { padding: 0 14px 14px; display: grid; gap: 12px; }
+.where-line { margin: 0; font-size: 12.5px; color: var(--muted); }
+.note { margin: 0; font-size: 14px; color: var(--muted); }
+ul.tests { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 6px; font-size: 14px; max-width: 100ch; }
+ul.tests .tnum { font-weight: 600; margin-right: 4px; }
+ul.tests .why { color: var(--muted); }
+
+.tbl-wrap { overflow-x: auto; }
+table.facets { border-collapse: collapse; font-size: 13px; width: 100%; min-width: 420px; }
+table.facets th, table.facets td { border-bottom: 1px solid var(--rule); padding: 6px 8px; text-align: left; white-space: nowrap; }
+table.facets thead th { font-weight: 600; color: var(--muted); font-size: 12px; letter-spacing: .04em; text-transform: uppercase; }
+table.facets tbody th { font: 500 12.5px var(--mono); }
+.cell { font-size: 12.5px; }
+.cell.ok { color: var(--ok); } .cell.dif { color: var(--dif); font-weight: 600; } .cell.nd { color: var(--nd); }
+.cell.nd-silent { color: var(--nd); font-style: italic; } .cell.nv { color: var(--nv); } .cell.none { color: var(--rule); }
+
+ol.findings { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+li.finding { border: 1px solid var(--rule); border-radius: 6px; padding: 10px 12px; display: grid; gap: 6px; }
+li.finding.dif { background: color-mix(in srgb, var(--dif-bg) 45%, var(--panel)); }
+li.finding.nd { background: color-mix(in srgb, var(--nd-bg) 40%, var(--panel)); }
+.f-head { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+.f-sum { margin: 0; font-size: 14px; max-width: 80ch; }
+.basis { margin: 0; font-size: 12.5px; color: var(--muted); }
+.off { margin: 0 0 4px; font-size: 13px; color: var(--dif); }
+.silent { margin: 0; font-size: 13px; color: var(--nd); }
+.rv { margin: 4px 0 0; padding: 6px 10px; border-left: 3px solid var(--link); background: var(--soft); font-size: 13px; border-radius: 0 4px 4px 0; }
+.rv.stale { border-left-color: var(--dif); }
+.rv .who { color: var(--muted); }
+details.ev-box > summary { cursor: pointer; font-size: 13px; color: var(--link); width: max-content; }
+ul.evs { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 10px; }
+li.ev { border-left: 2px solid var(--rule); padding-left: 10px; display: grid; gap: 4px; min-width: 0; }
+.ev-head { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+.src { font: 600 11.5px var(--sans); letter-spacing: .06em; text-transform: uppercase; }
+.src-methods { color: var(--nd); } .src-results { color: var(--ink); } .src-code { color: var(--dif); } .src-data, .src-output { color: var(--ok); }
+.where { font: 12px var(--mono); color: var(--muted); overflow-wrap: anywhere; }
+.stmt { margin: 0; font-size: 13.5px; }
+pre.code { margin: 0; background: var(--soft); border-radius: 4px; padding: 8px 10px; overflow-x: auto; font: 12.5px/1.5 var(--mono); }
+blockquote.msq { margin: 0; font: italic 14.5px/1.5 var(--serif); padding: 4px 0; }
+/* An equation's picture as printed, after its mark: small in the line; a click shows it full size. */
+img.eqpic { height: 2em; width: auto; max-width: 100%; vertical-align: middle; margin: 0 .25em; padding: 1px 3px; background: #fff; border: 1px solid var(--rule); border-radius: 3px; cursor: zoom-in; }
+img.eqpic.full { display: block; height: auto; margin: 6px 0; padding: 6px; cursor: zoom-out; }
+dl.dq { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 2px 10px; font-size: 13px; }
+dl.dq dt { color: var(--muted); }
+dl.dq dd { margin: 0; font-family: var(--mono); font-size: 12.5px; overflow-wrap: anywhere; }
+
+footer { color: var(--muted); font-size: 13px; max-width: 80ch; display: grid; gap: 6px; border-top: 1px solid var(--rule); padding-top: 16px; }
+footer p { margin: 0; }
+
+@media (max-width: 999px) { .split { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 560px) {
+  h1 { font-size: 25px; }
+  ol.attention li { grid-template-columns: auto auto 1fr; }
+  ol.attention li .effect { grid-column: 1 / -1; }
+  details.card > summary { grid-template-columns: auto 1fr; }
+  .chips { grid-column: 1 / -1; justify-content: flex-start; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  {{HEADER}}
+
+  <section class="summary" aria-labelledby="sum-h">
+    <h2 id="sum-h">Report</h2>
+    <div class="counts">
+      <span class="big"><b>{{N_CLAIMS}}</b>claims</span>
+      <span class="big"><b>{{N_TRACED}}</b>traced to Methods, code, or data</span>
+      <span class="big"><b>{{N_FINDINGS}}</b>findings</span>
+    </div>
+    <p class="uncovered">Sections of the manuscript with no claims audited: {{UNCOVERED}}.</p>
+    {{COVERAGE}}
+    {{REVIEW_LINE}}
+  </section>
+
+  {{GAPS}}
+
+  {{CROSS}}
+
+  <form class="filters" id="filters" aria-label="Choose what the report shows">
+    {{FILTERS}}
+    <div class="fstatus">
+      <span id="fcount" aria-live="polite"></span>
+      <span class="forder">Order cards by
+        <label><input type="radio" name="order" value="text" checked>manuscript</label>
+        <label><input type="radio" name="order" value="effect">potential effect</label></span>
+      <label class="fgo">Go to claim <input id="fgo" list="fgo-ids" autocomplete="off" spellcheck="false" title="Type a claim ID and press Enter (shortcut: /)"></label>
+      <datalist id="fgo-ids"></datalist>
+      <span id="fgo-msg" aria-live="polite"></span>
+      <button type="button" class="freset" id="freset">Reset</button>
+    </div>
+  </form>
+
+  <p class="fempty" id="fempty" hidden>No claims match these choices.</p>
+  {{SECTIONS}}
+
+{{EXCLUSIONS}}
+
+  <footer>
+    <p>Status labels describe agreement between sources: <em>consistent</em> (the sources compared agree), <em>differs</em> (two sources state different things), <em>not described</em> (one source does or states something another is silent on), <em>not verifiable</em> (could not be checked, with the reason given). Each comparison states how it was made: exact match, reported precision, stated design vs recorded trials, or direction, with the tolerance applied. Within a card, findings are ordered by their potential effect on the reported result; cards follow the manuscript unless ordered by potential effect.</p>
+    {{FOOTER}}
+  </footer>
+</div>
+
+<script type="application/json" id="eq-pictures">{{EQUATIONS}}</script>
+<script>
+(() => {
+  // --- Equations: each picture is stored once and drawn after each of its marks; a click enlarges it
+  const pics = JSON.parse(document.getElementById('eq-pictures').textContent);
+  document.querySelectorAll('img.eqpic').forEach(img => { img.src = pics[+img.dataset.eq]; });
+  document.addEventListener('click', e => {  // before the links and cards under it
+    const img = e.target.closest('img.eqpic');
+    if (!img) return;
+    e.preventDefault(); e.stopPropagation();
+    img.classList.toggle('full');
+    img.title = img.classList.contains('full') ? 'Click to make small' : 'Click to enlarge';
+  }, true);
+
+  // --- Filters: claim type and section select claims; outcome selects findings ---------------
+  const form = document.getElementById('filters');
+  const cards = [...document.querySelectorAll('details.card')];
+  const ROWS = ['types', 'outcomes', 'sections'];
+  const boxes = row => [...form.querySelectorAll(`input[name="${row}"]:not(:disabled)`)];
+  const checked = row => new Set(boxes(row).filter(b => b.checked).map(b => b.value));
+  const forced = new Set();  // cards opened by a link while filtered out
+  const totals = { claims: cards.length, findings: document.querySelectorAll('li.finding').length };
+
+  for (const card of cards) {  // a line to unfold the findings a filter hides
+    const ol = card.querySelector('ol.findings');
+    if (!ol) continue;
+    const t = document.createElement('button');
+    t.type = 'button'; t.className = 'folded-toggle'; t.hidden = true;
+    t.addEventListener('click', () => { card.dataset.unfold = card.dataset.unfold ? '' : '1'; apply(false); });
+    ol.after(t);
+  }
+  for (const sec of document.querySelectorAll('details.major')) {
+    const n = sec.querySelector('.sec-n'); n.dataset.full = n.textContent;
+  }
+
+  function apply(save = true) {
+    const T = checked('types'), O = checked('outcomes'), S = checked('sections');
+    const byEffect = form.order.value === 'effect';
+    let nc = 0, nf = 0;
+    for (const card of cards) {
+      const fs = [...card.querySelectorAll('li.finding')];
+      const match = fs.filter(f => O.has(f.dataset.status));
+      const untraced = 'untraced' in card.dataset;
+      const ok = T.has(card.dataset.type) && S.has(card.dataset.section) && (untraced ? O.has('untraced') : match.length > 0);
+      const show = ok || forced.has(card.id);
+      card.hidden = !show;
+      const rest = ok ? fs.filter(f => !match.includes(f)) : [];
+      const unfold = !!card.dataset.unfold;
+      fs.forEach(f => f.classList.toggle('folded', rest.includes(f) && !unfold));
+      const t = card.querySelector('button.folded-toggle');
+      if (t) {
+        t.hidden = rest.length === 0;
+        const kinds = [...new Set(rest.map(f => f.querySelector('.chip').textContent.toLowerCase()))].join(', ');
+        t.textContent = unfold ? `Hide ${rest.length} other finding${rest.length === 1 ? '' : 's'}`
+                               : `${rest.length} other finding${rest.length === 1 ? '' : 's'} (${kinds})`;
+      }
+      card.dataset.key = untraced ? 999 : Math.min(...(ok ? match : fs).map(f => +f.dataset.key));
+      if (ok) { nc++; nf += match.length; }
+    }
+    for (const list of document.querySelectorAll('section.cards')) {
+      const key = c => byEffect ? [+c.dataset.key, +c.dataset.order] : [+c.dataset.order, 0];
+      [...list.children].sort((a, b) => { const x = key(a), y = key(b); return x[0] - y[0] || x[1] - y[1]; })
+        .forEach(c => list.append(c));
+    }
+    const visible = new Set(cards.filter(c => !c.hidden).map(c => c.id.slice(5)));
+    // with nothing filtered out, every paragraph shows, those without claims too
+    const filtered = ROWS.some(row => checked(row).size !== boxes(row).length);
+    document.querySelectorAll('a.mark').forEach(m => m.classList.toggle('off', !visible.has(m.dataset.cid)));
+    for (const sec of document.querySelectorAll('details.major')) {
+      const paras = [...sec.querySelectorAll('p.ms-p')];
+      paras.forEach(p => { p.hidden = filtered && !p.dataset.cids.split(' ').some(id => visible.has(id)); });
+      for (const h of sec.querySelectorAll('h3.ms-h')) {  // hide a subheading with nothing shown under it
+        let el = h.nextElementSibling, any = false;
+        while (el && !el.matches('h3.ms-h')) { if (el.matches('p.ms-p') && !el.hidden) any = true; el = el.nextElementSibling; }
+        h.hidden = filtered && !any && !(h.dataset.cids || '').split(' ').some(id => visible.has(id));
+      }
+      const shown = sec.querySelectorAll('details.card:not([hidden])').length;
+      const all = sec.querySelectorAll('details.card').length;
+      sec.hidden = filtered && shown === 0;
+      const n = sec.querySelector('.sec-n');
+      n.textContent = shown === all ? n.dataset.full : `${shown} of ${all} claims shown`;
+      const chips = sec.querySelector(':scope > summary .chips');
+      if (chips) chips.hidden = shown !== all || nf !== totals.findings;
+    }
+    document.getElementById('fcount').textContent =
+      `Showing ${nc} of ${totals.claims} claims · ${nf} of ${totals.findings} findings`;
+    document.getElementById('fempty').hidden = nc > 0 || forced.size > 0;
+    if (save) saveView();
+  }
+
+  // The view lives in the URL, so it can be bookmarked or shared and survives a reload
+  function saveView() {
+    const q = new URLSearchParams();
+    for (const row of ROWS) {
+      const on = checked(row);
+      if (on.size !== boxes(row).length) q.set(row, [...on].join(',') || '-');
+    }
+    if (form.order.value === 'effect') q.set('order', 'effect');
+    const qs = q.toString();
+    try { history.replaceState(null, '', (qs ? '?' + qs : location.pathname) + location.hash); } catch {}
+  }
+  function loadView() {
+    const q = new URLSearchParams(location.search);
+    for (const row of ROWS) {
+      if (!q.has(row)) continue;
+      const on = new Set(q.get(row).split(','));
+      boxes(row).forEach(b => { b.checked = on.has(b.value); });
+    }
+    if (q.get('order') === 'effect') form.order.value = 'effect';
+  }
+
+  form.addEventListener('change', e => { if (e.target.id !== 'fgo') { forced.clear(); apply(); } });
+  form.addEventListener('submit', e => e.preventDefault());
+  form.addEventListener('click', e => {
+    const b = e.target.closest('button[data-all], button[data-none]');
+    if (b) {
+      const row = b.dataset.all || b.dataset.none;
+      boxes(row).forEach(x => { x.checked = !!b.dataset.all; });
+      forced.clear(); apply();
+    }
+  });
+  document.getElementById('freset').addEventListener('click', () => {
+    ROWS.forEach(row => boxes(row).forEach(x => { x.checked = true; }));
+    form.order.value = 'text';
+    cards.forEach(c => { delete c.dataset.unfold; });
+    forced.clear(); apply();
+  });
+
+  // Keep the sticky manuscript column and scroll targets below the pinned filters
+  const setBar = () => document.documentElement.style.setProperty('--bar-h',
+    getComputedStyle(form).position === 'sticky' ? form.offsetHeight + 'px' : '0px');
+  new ResizeObserver(setBar).observe(form);
+  addEventListener('resize', setBar);
+
+  loadView();
+  apply(false);
+
+  const smooth = () => matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+
+  // Bring a claim's wording into view in the manuscript column. Where the column scrolls on its own
+  // (wide screens), only the column moves; where it does not, the page scrolls to the wording.
+  const showInText = (id, flash, movePage = false) => {
+    const mark = document.querySelector(`a.mark[data-cid="${id}"]`);
+    if (!mark) return;
+    document.querySelectorAll('a.mark.active').forEach(m => m.classList.remove('active'));
+    mark.classList.add('active');
+    const ms = mark.closest('.ms');
+    if (ms && getComputedStyle(ms).position === 'sticky' && ms.scrollHeight > ms.clientHeight) {
+      const top = ms.scrollTop + mark.getBoundingClientRect().top - ms.getBoundingClientRect().top - ms.clientHeight / 3;
+      ms.scrollTo({ top, behavior: smooth() });
+    } else if (movePage) {
+      mark.scrollIntoView({ behavior: smooth(), block: 'center' });
+    }
+    if (flash) { mark.classList.add('flash'); setTimeout(() => mark.classList.remove('flash'), 1400); }
+  };
+
+  const open = (id, flash) => {
+    const card = document.getElementById('card-' + id);
+    if (!card) return false;
+    if (card.hidden) { forced.add(card.id); apply(false); }
+    const sec = card.closest('details.major');
+    if (sec) sec.open = true;
+    card.open = true;
+    card.scrollIntoView({ behavior: smooth(), block: 'start' });
+    if (flash) { card.classList.add('flash'); setTimeout(() => card.classList.remove('flash'), 1400); }
+    showInText(id, flash);
+    return true;
+  };
+
+  document.addEventListener('click', e => {
+    const b = e.target.closest('button.to-text');
+    if (b) showInText(b.dataset.cid, true, true);
+  });
+
+  // Go to a claim by ID; case, spaces, and dots are ignored, so "r2 4b" finds R2.4.b
+  const norm = s => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const ids = cards.map(c => c.id.slice(5));
+  const byNorm = new Map(ids.map(id => [norm(id), id]));
+  const go = document.getElementById('fgo'), goMsg = document.getElementById('fgo-msg');
+  document.getElementById('fgo-ids').innerHTML = ids.map(id => `<option value="${id}">`).join('');
+  go.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { go.value = ''; goMsg.textContent = ''; go.blur(); return; }
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const want = go.value.trim();
+    if (!want) return;
+    const id = byNorm.get(norm(want));
+    goMsg.textContent = id && open(id, true) ? '' : `No claim ${want}`;
+    if (id) go.select();
+  });
+  go.addEventListener('input', () => { goMsg.textContent = ''; });
+  document.addEventListener('keydown', e => {
+    if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.target.closest('input, textarea, select, [contenteditable]')) return;
+    e.preventDefault(); go.focus(); go.select();
+  });
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a[href^="#card-"]');
+    if (!a) return;
+    e.preventDefault();
+    open(a.getAttribute('href').slice(6), true);
+  });
+  document.querySelectorAll('details.card').forEach(card => {
+    card.addEventListener('toggle', () => { if (card.open) showInText(card.id.slice(5), false); });
+  });
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a[href="#exclusions"]');
+    if (a) document.getElementById('exclusions').open = true;
+  });
+  const h = location.hash.match(/^#card-([A-Za-z0-9._-]+)$/);
+  if (h) open(h[1], true);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+# Manifest for the example audit (step 1). Everything here is made up.
+audit:
+  title: Tone discrimination learning in mice (made-up example)
+  scope: >-
+    Results (one subsection). The Methods are read as the description the
+    results are checked against.
+
+materials:
+  manuscript:
+    path: manuscript.txt
+    description: >-
+      The paper's text, pages separated by form feeds. A real audit keeps
+      the published PDF here and extracts its text layer.
+    sha256: df393465df7abfcbc2f9307ce1890210eb799523d16bb425d699c41bc6a046f7
+  code:
+    path: code/
+    version: >-
+      Not under version control in this example, so code quotes are checked
+      against the working tree. A real audit records the commit (or archive
+      DOI) and cites it in every code anchor.
+    files:
+      - path: code/analysis.py
+        sha256: ce0c7ebe9135b809220df7b4cb80f55c7250715695f4985a939671708f2e89ea
+  data:
+    path: data/
+    files:
+      - path: data/trials.json
+        description: One record per trial (mouse, session, tone, correct, response time in s)
+        sha256: 0683388ec4cfe53bb417b7ba2b971a103eb6435881bacd251109793ecab62210
+
+gaps:   # what the audit could not run or check from the materials given
+  - missing: No code for Figure 1 is included.
+    instead: Figure 1 is not checked against code.
+    claims: []   # the claims it affects
+
+settings:
+  scope: [Results]   # the audited sections; the Methods are what results are checked against
