@@ -79,6 +79,12 @@ What it may open depends on the job it is doing:
   accepted answer and import the reply again; never edit the saved files
   by hand.
 
+To test a guided run against an audit of the same paper done by hand,
+`uv run python scripts/compare_claims.py REFERENCE GUIDED OUT.md` matches
+their claims by quoted words and lists those that are the same, split
+differently, missed, or extra, with differences in type and facets. It
+quotes the paper, so write `OUT.md` to the guided run's `notes/`.
+
 Nobody opens the paper's PDF; the tool's extracted text stands in for it.
 The project settings block reading PDFs; block reading `work/**/*.json` in
 your own `.claude/settings.local.json`.
