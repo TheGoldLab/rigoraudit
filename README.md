@@ -2,13 +2,13 @@
 
 Audits a scientific paper together with its code and data. The audit identifies every claim, along with its supporting evidence (Methods, code, and data), in the paper (**transparency**) and checks for agreement between each claim and its evidence (**consistency**).
 
-Several stages of the audit can be (tediously) done by hand but are typically done with an AI assistant. These stages include extracting claims from the paper; parsing them into testable components; aligning them with approrpiate sections of methods, code, and data; and running the relevant code. The remaining stages, involving cross-checking the claims and writing the report, are done by code included in this repository.
+Several stages of the audit can be (tediously) done by hand but are typically done with an AI assistant. These stages include extracting claims from the paper; parsing them into testable components; aligning them with appropriate sections of methods, code, and data; and running the relevant code. The remaining stages, involving cross-checking the claims and writing the report, are done by code included in this repository.
 
 The result is a report that displays the manuscript text beside a card for each claim the paper
 makes. Each card says what the Results, Methods, code, and data show for that
 claim, including quoting the exact text, code lines, or values behind each statement. The card also indicates whether or not the claim is consistent across all those conditions, and if not how they differ. A human reviewer can add to (but not edit or replace) the record, for example to add context that might help explain mismatched claims (e.g., "expected variability across samples").
 
-This tool has been designed and tested primary using neuroscience studies and thus is likely to have quirks (e.g., what counts as a "result") specific to that domain. It also provides a way to have AI guide a user through a full audit but is intended to be used in a way that is not fully automated. Instead, human review is expected at multiple stages to check on and, if necessary, adjust how the specific set of claims for the paper are extracted and parsed. Moreover, the final report is purely descriptive and leaves judgment to the reader/reviewer.
+This tool has been designed and tested primarily using neuroscience studies and thus is likely to have quirks (e.g., what counts as a "result") specific to that domain. It also provides a way to have AI guide a user through a full audit but is intended to be used in a way that is not fully automated. Instead, human review is expected at multiple stages to check on and, if necessary, adjust how the specific set of claims for the paper are extracted and parsed. Moreover, the final report is purely descriptive and leaves judgment to the reader/reviewer.
 
 
 ## How an audit works
