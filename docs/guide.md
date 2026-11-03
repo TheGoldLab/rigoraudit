@@ -358,7 +358,9 @@ its file in `work/<step>/answers/` and run `rigoraudit audit` again.
 - **decompose.** Each new-result claim is split into facets: quantity,
   population, analysis, condition, and display. The assistant copies each
   number as printed; the tool reads the value from it, including powers
-  of ten whose superscript the PDF's text flattens (`p<10−5`). It also
+  of ten whose superscript the PDF's text flattens (`p<10−5`). A number
+  printed without a unit takes the unit of the next one when the two are
+  joined by ±, a dash, or "to" (`168.25 ± 4.1 ms`, `5–10%`). It also
   copies each statistical test the claim reports, part by part: the
   statistic, its degrees of freedom, p, N, the tails and whether the test
   is paired (only if the text says), and the effect size. From these the

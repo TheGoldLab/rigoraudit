@@ -96,6 +96,26 @@ def test_values_are_read_from_printed_text(text, value, unit, relation, decimals
 
 
 @pytest.mark.parametrize(
+    ("quote", "printed", "units"),
+    [
+        ("latency 168.25 ± 4.1 ms", ("168.25", "4.1 ms"), ["ms", "ms"]),
+        ("5–10% of trials", ("5", "10%"), ["%", "%"]),
+        ("from 2 to 6 s", ("2", "6 s"), ["s", "s"]),
+        # not joined, or no unit to carry: left as printed
+        ("12 rats ran 40 trials", ("12", "40 trials"), [None, "trials"]),
+        ("3.1 ± 0.2 (SEM)", ("3.1", "0.2"), [None, None]),
+        # a number inside another one is not the value
+        ("15 ± 4 ms and 5 Hz", ("5 Hz", "4 ms"), ["Hz", "ms"]),
+    ],
+)
+def test_a_value_takes_the_unit_printed_after_it(quote, printed, units):
+    values = [
+        decompose.StatedValue(name=f"v{i}", printed=p) for i, p in enumerate(printed)
+    ]
+    assert [p.unit for p in decompose.read_stated(values, quote)] == units
+
+
+@pytest.mark.parametrize(
     # "10-5" may be a range; 10^-400 is too small to store
     "text",
     [

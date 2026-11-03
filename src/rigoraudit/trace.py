@@ -1090,7 +1090,12 @@ def procedure_observations(
                     page=p.page_at(start),
                     quote=quote,
                 ),
-                values=tuple(_value(v) for v in c.values),
+                values=tuple(
+                    _value(v, printed)
+                    for v, printed in zip(
+                        c.values, decompose.read_stated(c.values, quote)
+                    )
+                ),
             )
             out[c.id] = [
                 own,
@@ -1134,10 +1139,14 @@ def _converted(own: Observation, c: ClaimTrace) -> list[Observation]:
     return list({o.statement: o for o in out}.values())
 
 
-def _value(v: decompose.StatedValue, code: bool = False) -> Value:
-    """A value read from its printed text; one the code sets is plain (=, no
-    decimals), as an obtained value is."""
-    printed = decompose.read_printed(v.printed)
+def _value(
+    v: decompose.StatedValue,
+    printed: decompose.Printed | None = None,
+    code: bool = False,
+) -> Value:
+    """A value read from its printed text, unless ``printed`` gives it already
+    read; one the code sets is plain (=, no decimals), as an obtained value is."""
+    printed = printed or decompose.read_printed(v.printed)
     if printed is None:
         raise ValueError(f"{v.printed!r} is not a number")
     return Value(

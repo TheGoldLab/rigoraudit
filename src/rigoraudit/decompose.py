@@ -20,6 +20,7 @@ observations, one per facet, anchored to the manuscript.
 
 from __future__ import annotations
 
+import dataclasses
 import datetime
 import math
 import re
@@ -224,6 +225,42 @@ def read_printed(text: str) -> Printed | None:
     return Printed(
         value, unit or None, RELATIONS.get(m["rel"] or "=", Relation.EQ), decimals
     )
+
+
+JOINED = r"\s*(?:±|\+/[-−]|[–—-]|to)\s*"
+"""What joins a value to the one after it that carries the unit for both."""
+
+
+def read_stated(values: Sequence[StatedValue], quote: str) -> list[Printed | None]:
+    """Each value read from its printed text (:func:`read_printed`), in order.
+
+    A value printed without a unit takes the unit of the value printed just
+    after it in ``quote``, joined by ±, a dash, or "to": in
+    ``"168.25 ± 4.1 ms"`` the mean ``168.25`` is in ms, and in ``"5–10%"``
+    the low end ``5`` is a percentage.
+
+    >>> [p.unit for p in read_stated(
+    ...     [StatedValue(name="mean", printed="168.25"),
+    ...      StatedValue(name="SEM", printed="4.1 ms")], "168.25 ± 4.1 ms")]
+    ['ms', 'ms']
+    """
+    read = [read_printed(v.printed) for v in values]
+    out = list(read)
+    for i, (v, p) in enumerate(zip(values, read)):
+        if p is None or p.unit:
+            continue
+        for w, q in zip(values, read):
+            if (
+                q is not None
+                and q.unit
+                and re.search(
+                    rf"(?<![\d.,]){re.escape(v.printed)}{JOINED}{re.escape(w.printed)}",
+                    quote,
+                )
+            ):
+                out[i] = dataclasses.replace(p, unit=q.unit)
+                break
+    return out
 
 
 def _fraction(m: re.Match[str]) -> Printed | None:
@@ -591,8 +628,7 @@ def results_observations(
             for f in c.facets:
                 start, quote = p.locate(f.quote)
                 values = []
-                for v in f.values:
-                    printed = read_printed(v.printed)
+                for v, printed in zip(f.values, read_stated(f.values, f.quote)):
                     if printed is None:
                         raise ValueError(f"{a.handoff}: {v.printed!r} is not a number")
                     values.append(

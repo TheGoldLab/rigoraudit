@@ -43,7 +43,8 @@ facet once per claim; if a claim states two conditions, put them in one
   number exactly as printed, with its unit or sign if it has one ("120 ms",
   "87%", "3,600", "< 0.01", "∼100 ms", "twelve", "13/16", "<10−5" for a
   power of ten). For a range, give each end as its own value, named for which end
-  it is: "5–10%" is "5" (low) and "10%" (high). Add `subject` when the
+  it is: "5–10%" is "5" (low) and "10%" (high); the tool gives "5" the
+  unit printed after "10", as it does "168.25" in "168.25 ± 4.1 ms". Add `subject` when the
   value applies to one group or condition only ("block A"). Do not work out, round, or
   convert any number: the tool reads the value from what you copy.
 

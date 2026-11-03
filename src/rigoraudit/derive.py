@@ -49,7 +49,6 @@ from pydantic import ConfigDict, Field, PositiveInt
 
 from rigoraudit import decompose, docs, handoffs, instructions, materials, trace
 from rigoraudit.codeindex import code_lines
-from rigoraudit.decompose import read_printed
 from rigoraudit.handoffs import AnswerError, Problem, Problems
 from rigoraudit.paragraphs import PARAGRAPHS, Paragraph, read_paragraphs
 from rigoraudit.schema import (
@@ -202,6 +201,8 @@ class Stated(Frozen):
     facet: Facet
     name: NonEmptyStr
     printed: NonEmptyStr
+    unit: str | None = None
+    """The value's unit, which the tool reads (:func:`decompose.read_stated`)."""
     subject: str | None = None
 
 
@@ -329,7 +330,8 @@ def plan_handoffs(
         for c in todo[start : start + max_claims]:
             stated = []
             for f in c.facets:
-                for v in f.values:
+                read = decompose.read_stated(f.values, f.quote)
+                for v, printed in zip(f.values, read):
                     n += 1
                     stated.append(
                         Stated(
@@ -337,6 +339,7 @@ def plan_handoffs(
                             facet=f.facet,
                             name=v.name,
                             printed=v.printed,
+                            unit=printed.unit if printed else None,
                             subject=v.subject,
                         )
                     )
@@ -656,11 +659,10 @@ def _in_code_problems(
 
 
 def _setting_value(s: InCode, stated: Stated | None) -> Value:
-    printed = read_printed(stated.printed) if stated else None
     return Value(
         name=stated.name if stated else s.name or s.for_,
         value=s.value,
-        unit=s.unit or (printed.unit if printed else None),
+        unit=s.unit or (stated.unit if stated else None),
         subject=stated.subject if stated else None,
     )
 
@@ -1107,11 +1109,10 @@ def derived_observations(
         for v in c.values:
             s = stated.get(c.claim, {}).get(v.for_)
             facet = s.facet if s else Facet(v.for_)
-            printed = read_printed(s.printed) if s else None
             got = Value(
                 name=s.name if s else v.name or v.key,
                 value=values[v.key],
-                unit=printed.unit if printed else None,
+                unit=s.unit if s else None,
                 subject=s.subject if s else None,
                 key=v.key,
             )
