@@ -114,7 +114,7 @@ def replies(ws):
         "notes": [{"heading": "run", "quote": "Run analysis.py", "states": "s"},
                   {"heading": "software", "quote": "Python 3.11", "states": "s"}],
         "says_nothing": nothing}]})  # fmt: skip
-    save("segment", {"instructions": "segment v2", "claims": [
+    save("segment", {"instructions": "segment v3", "claims": [
         {"id": "R1.1.a", "paragraph": "R1.1", "type": "new_result",
          "quote": "Accuracy was 80% in block A"}]})  # fmt: skip
     save("decompose", {"instructions": "decompose v3", "claims": [{"id": "R1.1.a",
@@ -136,7 +136,7 @@ def replies(ws):
         f"{json.dumps(answer)}\n\n```python\n{script}```\n", encoding="utf-8"
     )
     out["derive"] = str(path)
-    save("compare", {"instructions": "compare v4", "claims": [{"claim": "R1.1.a",
+    save("compare", {"instructions": "compare v5", "claims": [{"claim": "R1.1.a",
         "findings": [{"facet": "quantity", "observations": ["O1", "O3"],
          "basis": "reported_precision",
          "comparisons": [{"kind": "precision", "stated": ["O1.v1"], "observed": ["O3.v1"]}],

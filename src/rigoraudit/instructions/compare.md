@@ -1,6 +1,6 @@
 ---
 step: compare
-version: 4
+version: 5
 ---
 
 # Compare what each source says about each claim
@@ -64,6 +64,15 @@ give that prediction as `predicted`. Never set a status by a p-value.
   Methods item with the words must be among the finding's observations.
   The observed value is the signed quantity, such as the difference in
   accuracy, A minus B.
+- For an `inequality` whose threshold the paper does not print, `stated` is
+  the threshold the words imply, such as `"< 0.05"`, and `hedge` gives
+  those words; as for `sign`, the item with the words must be among the
+  finding's observations. Read wording about a test at p = 0.05, unless the
+  paper states another level: "significant", "reliable", or "differs" as
+  `"< 0.05"`; "no reliable difference", "uncorrelated", or "neither
+  predominating" as `"≥ 0.05"`. Read "majority" as `"> 0.5"` of a share.
+  The observed value is the p value or share the code or data give. Wording
+  with no threshold ("comparable", "similar") is `not_verifiable`.
 
 ## Each finding
 
@@ -115,7 +124,7 @@ nothing else, in this form:
 
 ```json
 {
-  "instructions": "compare v4",
+  "instructions": "compare v5",
   "claims": [
     {"claim": "R1.2.a",
      "findings": [

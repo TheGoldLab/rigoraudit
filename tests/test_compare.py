@@ -23,7 +23,7 @@ def derived(ws):  # noqa: F811
 
 
 def answer(*findings):
-    return json.dumps({"instructions": "compare v4", "claims": [
+    return json.dumps({"instructions": "compare v5", "claims": [
         {"claim": "R1.1.a", "findings": list(findings)}]})  # fmt: skip
 
 
@@ -144,7 +144,7 @@ def test_claims_share_a_task_and_every_one_needs_findings(ws_two):  # noqa: F811
 
     a = {"claim": "R1.1.a", "findings": [finding("O1", "O2")]}
     b = {"claim": "R1.1.b", "findings": [finding("O3", "O4")]}
-    reply_ = {"instructions": "compare v4", "claims": [a]}
+    reply_ = {"instructions": "compare v5", "claims": [a]}
     _, problems = compare.import_answer(ws_two, json.dumps(reply_), "T")
     assert [p.kind for p in problems] == ["claim-missing"]
     reply_["claims"] = [a, b]
@@ -153,3 +153,20 @@ def test_claims_share_a_task_and_every_one_needs_findings(ws_two):  # noqa: F811
     record = compare.build_record(ws_two, s)
     assert {f.claim_id for f in record.findings} == {"R1.1.a", "R1.1.b"}
     assert all(f.status is Status.CONSISTENT for f in record.findings)
+
+
+def test_a_threshold_stated_in_words_is_compared_by_inequality(derived):
+    at = {"facet": "quantity", "observations": ["O1", "O2"], "basis": "direction",
+          "comparisons": [{"kind": "inequality", "stated": ["> 50"], "observed": ["O2.v1"],
+                           "hedge": "most"}],
+          "summary": "The Results state most. The data give 75."}  # fmt: skip
+    no_words = {**at, "comparisons": [{**at["comparisons"][0], "hedge": None}]}
+    _, problems = compare.import_answer(derived, answer(no_words, SILENT), "T")
+    assert "a threshold stated as > 50 needs the words" in problems[0]
+
+    saved, problems = compare.import_answer(derived, answer(at, SILENT), "T")
+    assert problems == [] and saved is not None
+    [found, _] = compare.read_accepted(derived)[0].findings
+    assert found.status is Status.CONSISTENT
+    assert found.observations[0].values[-1].value == 50  # added to the Results item
+    assert found.comparisons[0].describe() == "“most” read as accuracy > 50"

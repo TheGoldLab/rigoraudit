@@ -49,7 +49,7 @@ def ws(tmp_path):
     )
     segment.write_handoffs(ws, ("Results",))
     _, problems = segment.import_answer(ws, json.dumps({
-        "instructions": "segment v2", "claims": [{"id": "R1.1.a", "paragraph": "R1.1",
+        "instructions": "segment v3", "claims": [{"id": "R1.1.a", "paragraph": "R1.1",
         "type": "new_result", "quote": RESULTS.rstrip(".")}]}), "T")  # fmt: skip
     assert not problems
     decompose.write_handoffs(ws)
@@ -399,7 +399,7 @@ def ws_two(tmp_path):
     )
     segment.write_handoffs(ws, ("Results",))
     _, problems = segment.import_answer(ws, json.dumps({
-        "instructions": "segment v2", "claims": [
+        "instructions": "segment v3", "claims": [
         {"id": "R1.1.a", "paragraph": "R1.1", "type": "new_result",
          "quote": "Mice were correct on 75% of trials in block A"},
         {"id": "R1.1.b", "paragraph": "R1.1", "type": "new_result",
@@ -489,7 +489,7 @@ def ws_test(tmp_path):
     )
     segment.write_handoffs(ws, ("Results",))
     _, problems = segment.import_answer(ws, json.dumps({
-        "instructions": "segment v2", "claims": [{"id": "R1.1.a", "paragraph": "R1.1",
+        "instructions": "segment v3", "claims": [{"id": "R1.1.a", "paragraph": "R1.1",
         "type": "new_result", "quote": TESTED.rstrip(".")}]}), "T")  # fmt: skip
     assert not problems
     decompose.write_handoffs(ws)

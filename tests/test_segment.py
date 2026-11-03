@@ -34,7 +34,7 @@ HANDOFFS = Path("work/segment/handoffs")
 ANSWERS = Path("work/segment/answers")
 
 
-def answer(claims=(), left_out=(), version="segment v2"):
+def answer(claims=(), left_out=(), version="segment v3"):
     return parse_answer(
         json.dumps(
             {
@@ -54,7 +54,7 @@ GOOD = [
 
 def test_instructions_load_with_version():
     seg = instructions.load("segment")
-    assert seg.label == "segment v2"
+    assert seg.label == "segment v3"
     assert seg.text.startswith("# Split the text into claims")
 
 
@@ -78,7 +78,7 @@ def test_good_answer_has_no_problems():
 
 
 def test_reply_with_text_around_a_fenced_block_is_read():
-    reply = 'Here it is:\n```json\n{"instructions": "segment v2"}\n```\nDone.'
+    reply = 'Here it is:\n```json\n{"instructions": "segment v3"}\n```\nDone.'
     assert parse_answer(reply).claims == ()
 
 
@@ -87,7 +87,7 @@ def test_unreadable_answers_are_described_in_words():
         parse_answer("{claims: }")
     with pytest.raises(AnswerError) as e:
         parse_answer(
-            '{"instructions": "segment v2", "claims": [{"id": "R1.1.a", "paragraph": "R1.1"}]}'
+            '{"instructions": "segment v3", "claims": [{"id": "R1.1.a", "paragraph": "R1.1"}]}'
         )
     assert e.value.problems == [
         "In claim 1, quote: Field required.",
@@ -171,7 +171,7 @@ def test_left_out_quote_and_paragraph_are_checked():
 def test_outdated_instructions_are_flagged():
     problems = check_answer(answer(GOOD, version="segment v0"), PARAGRAPHS)
     assert problems == [
-        "The answer names instructions 'segment v0'; the current instructions are 'segment v2'."
+        "The answer names instructions 'segment v0'; the current instructions are 'segment v3'."
     ]
 
 
@@ -253,7 +253,7 @@ DAY = datetime.date(2026, 1, 2)
 def reply(claims=(), left_out=()):
     body = json.dumps(
         {
-            "instructions": "segment v2",
+            "instructions": "segment v3",
             "claims": list(claims),
             "left_out": list(left_out),
         }
@@ -369,7 +369,7 @@ def test_depends_on_and_no_stated_support():
     c = {**GOOD[1], "type": "no_stated_support", "depends_on": ["R1.1.a"]}
     [problem] = check_answer(answer([GOOD[0], c]), PARAGRAPHS)
     assert "cannot have citations or depends_on" in problem
-    bad_type = {"instructions": "segment v2", "claims": [{**GOOD[0], "type": "result"}]}
+    bad_type = {"instructions": "segment v3", "claims": [{**GOOD[0], "type": "result"}]}
     with pytest.raises(AnswerError, match="type"):
         parse_answer(json.dumps(bad_type))
 

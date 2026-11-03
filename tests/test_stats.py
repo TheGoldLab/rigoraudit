@@ -130,7 +130,7 @@ def test_the_record_holds_the_tools_findings(tmp_path):
     )
     segment.write_handoffs(ws, ("Results",))
     _, problems = segment.import_answer(ws, json.dumps({
-        "instructions": "segment v2", "claims": [{"id": "R1.1.a", "paragraph": "R1.1",
+        "instructions": "segment v3", "claims": [{"id": "R1.1.a", "paragraph": "R1.1",
         "type": "new_result", "quote": text.rstrip(".")}]}), "T")  # fmt: skip
     assert not problems
     decompose.write_handoffs(ws)

@@ -40,3 +40,11 @@ facet-level comparison is needed to find and explain them.
   is a coverage exclusion naming the claim it restates.
 - 2026-11-02: Procedures, in the Results or anywhere else, are traced and
   compared whole, with no facets ([0017](0017-procedures-traced-whole.md)).
+- 2026-11-03: A result or an interpretation (segment instructions v3). If a
+  number in the data could check the sentence (a difference, a correlation,
+  a direction, a count), it is a new result, however broadly worded; if it
+  says what results mean (a mechanism, a cause), it is an interpretation. A
+  figure title follows the same rule: one that sums up a result is a new
+  result restating it, one that names a mechanism is an interpretation.
+  Quotes take the shortest span, without lead-ins or figure references,
+  and the whole sentence only when a shorter span would be unclear.

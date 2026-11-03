@@ -1,6 +1,6 @@
 ---
 step: segment
-version: 2
+version: 3
 ---
 
 # Split the text into claims
@@ -29,6 +29,20 @@ a cited paper, or an argument from other claims.
   against the code: "Trials shorter than 200 ms were removed" is a claim.
 - **An interpretation counts,** when it says something could be wrong:
   "suggesting that the area integrates evidence" is a claim.
+
+## A result or an interpretation?
+
+If a number in the data could check the sentence (a difference, a
+correlation, a direction, a count), it is a `new_result`, however broadly
+it is worded: "responses depended on the cue" is a result. If it says what
+results *mean* (a mechanism, a cause, what the brain or the animal does
+with them), it is an `interpretation`: "the area integrates evidence" is
+one. A sentence with both is two claims.
+
+A figure's title follows the same rule. A title that sums up a result
+("Responses depend on the cue") is a `new_result` that restates the
+Results claim it sums up; a title that names a mechanism ("Two mechanisms
+shape the response") is an `interpretation`.
 
 ## Kinds of claim
 
@@ -62,8 +76,9 @@ reason. Leave text out only when it holds nothing that could be checked:
   Give that claim's ID as `restates`.
 
 Figure and table references ("Figure 2B") and citations ("Lee et al.,
-2019") are not checkable items. Leave them inside claims if they fall
-there; you never need to leave them out.
+2019") are not checkable items, so you never need to leave them out. Keep a
+citation inside the claim that cites it; keep a figure reference out of a
+claim's quote unless it falls in the middle of it.
 
 ## Text outside the Results
 
@@ -81,8 +96,10 @@ copied exactly from its paragraph.
 - Copy it character for character: same spelling, capitals, punctuation,
   dashes, and spaces. Do not fix typos or expand abbreviations.
 - Take the shortest span that contains the whole claim, including its
-  numbers and comparison words. You may leave out a leading "and", "but",
-  or "whereas".
+  numbers and comparison words. Leave out lead-ins ("Together,", "We found
+  that", "and", "but", "whereas") and figure references ("(Figure 2B)")
+  around it; later tasks can still quote those. Quote the whole sentence
+  only when a shorter span would leave unclear what the claim says.
 - The quote must appear only once in its paragraph. If it appears twice,
   make it longer.
 - Claims in one paragraph do not overlap.
@@ -104,7 +121,7 @@ Reply with a single JSON block and nothing else, in this form:
 
 ```json
 {
-  "instructions": "segment v2",
+  "instructions": "segment v3",
   "claims": [
     {"id": "R1.2.a", "paragraph": "R1.2", "quote": "exact text", "type": "new_result"},
     {"id": "R1.2.b", "paragraph": "R1.2", "quote": "exact text", "type": "comparison",
@@ -142,7 +159,7 @@ Answer:
 
 ```json
 {
-  "instructions": "segment v2",
+  "instructions": "segment v3",
   "claims": [
     {"id": "R2.1.a", "paragraph": "R2.1", "type": "new_result",
      "quote": "Mice licked more often after the reward tone than after the neutral tone"},

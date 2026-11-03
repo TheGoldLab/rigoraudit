@@ -76,11 +76,25 @@ SCRIPT = PurePosixPath("record") / "record.py"
 """A workspace's own script for its record, if it has one."""
 
 
+def threshold(stated: Sequence[str]) -> bool:
+    """Whether ``stated`` is one threshold the words imply, such as ``< 0.05``
+    for "significant" (decision 0008), rather than a label.
+
+    >>> threshold(["< 0.05"]), threshold(["≥ 0.05"]), threshold(["O1.v1"])
+    (True, True, False)
+    """
+    if len(stated) != 1 or stated[0].lstrip()[:1] not in "<>≤≥":
+        return False
+    t = decompose.read_printed(stated[0])
+    return t is not None and not t.unit
+
+
 class ComparisonAnswer(Frozen):
     kind: Kind
     stated: tuple[NonEmptyStr, ...]
     """Labels of stated values, e.g. ``O1.v1``; for ``sign``, ``+`` or ``-``
-    for the direction the words in ``hedge`` state."""
+    for the direction the words in ``hedge`` state; for ``inequality``, the
+    threshold those words imply, e.g. ``< 0.05`` (:func:`threshold`)."""
     observed: tuple[NonEmptyStr, ...]
     predicted: str | None = None
     amount: float | None = None
@@ -437,16 +451,24 @@ def _claim_findings(
             return o.values[int(i) - 1]
 
         def stated(c: ComparisonAnswer, where=where, items=items) -> tuple[Value, ...]:
-            if c.kind is not Kind.SIGN or c.stated not in (("+",), ("-",)):
+            if c.kind is Kind.SIGN and c.stated in (("+",), ("-",)):
+                what, example = "a direction", "higher in block A"
+                v = Value(name="direction", value=1 if c.stated == ("+",) else -1)
+            elif c.kind is Kind.INEQUALITY and threshold(c.stated):
+                what, example = "a threshold", "significant"
+                t = decompose.read_printed(c.stated[0])
+                assert t is not None
+                name = value(c.observed[0]).name if c.observed else "threshold"
+                v = Value(name=name, value=t.value, relation=t.relation)
+            else:
                 return tuple(value(r) for r in c.stated)
             words = [k for k, o in items.items() if o.source in STATING]
             if not c.hedge or not words:
                 raise LookupError(
-                    f"{where}: a direction stated as {c.stated[0]} needs the words "
-                    'that state it in hedge ("higher in block A"), and the Results '
+                    f"{where}: {what} stated as {c.stated[0]} needs the words "
+                    f'that state it in hedge ("{example}"), and the Results '
                     "or Methods item with those words among the observations."
                 )
-            v = Value(name="direction", value=1 if c.stated == ("+",) else -1)
             o = items[words[0]]
             if v not in o.values:
                 items[words[0]] = o.model_copy(update={"values": (*o.values, v)})

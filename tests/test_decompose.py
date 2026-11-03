@@ -208,7 +208,7 @@ def test_example_audit_from_segment_to_results_observations(tmp_path, capsys):
     )
     segment.write_handoffs(tmp_path)
     seg = {
-        "instructions": "segment v2",
+        "instructions": "segment v3",
         "claims": [
             {"id": "R1.2.a", "paragraph": "R1.2", "type": "new_result",
              "quote": "Twelve mice completed 3,600 trials over 10 sessions."},

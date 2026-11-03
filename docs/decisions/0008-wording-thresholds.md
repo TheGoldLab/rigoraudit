@@ -65,3 +65,9 @@ implies.
 - 2026-10-30: The examples above are synthetic. The originals, from an
   example audit, were moved to that audit's workspace so that this
   repository holds no audit content (see [release.md](../release.md)).
+- 2026-11-03: A guided audit applies these readings in the compare step.
+  Decompose copies only printed numbers, so a compare answer may state the
+  threshold itself (`"stated": ["< 0.05"]`) with the words it reads in
+  `hedge`, as it states a direction (`"+"`). The tool adds the threshold to
+  the Results item and names it after the value compared (compare
+  instructions v5).

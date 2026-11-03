@@ -39,7 +39,7 @@ def answer(ws, quote):
     claim = {"id": "R1.1.a", "paragraph": "R1.1", "type": "new_result", "quote": quote}
     path = ws / "reply.txt"
     path.write_text(
-        json.dumps({"instructions": "segment v2", "claims": [claim]}), encoding="utf-8"
+        json.dumps({"instructions": "segment v3", "claims": [claim]}), encoding="utf-8"
     )
     return path
 
@@ -55,7 +55,7 @@ def test_runs_are_reported_by_kind_without_the_materials(ws, capsys):
         cli.main(["handoff", "trace", str(ws)])
 
     text = (ws / feedback.REPORT).read_text(encoding="utf-8")
-    assert "| handoff | segment | segment v2 | wrote 1 |" in text
+    assert "| handoff | segment | segment v3 | wrote 1 |" in text
     assert "| sent back |" in text and "quote-not-found ×1" in text
     assert "| accepted |" in text
     assert "- segment: 2" in text  # tries for the one accepted answer

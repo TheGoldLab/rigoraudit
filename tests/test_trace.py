@@ -63,7 +63,7 @@ def ws(tmp_path):
     segment.write_handoffs(tmp_path)
     claim = {"id": "R1.1.a", "paragraph": "R1.1", "type": "new_result",
              "quote": "Accuracy was 80% in block A (Figure 1), above chance (t(9) = 3.10, p = 0.013)"}  # fmt: skip
-    seg = {"instructions": "segment v2", "claims": [claim]}
+    seg = {"instructions": "segment v3", "claims": [claim]}
     assert segment.import_answer(tmp_path, json.dumps(seg), "t")[1] == []
     decompose.write_handoffs(tmp_path)
     dec = {"instructions": "decompose v3", "claims": [{"id": "R1.1.a", "facets": [
@@ -433,7 +433,7 @@ def pws(ws):
     segment.write_handoffs(ws, ("Results", "Methods"))
     claim = {"id": "M1.1.a", "paragraph": "M1.1", "type": "procedure",
              "quote": PROCEDURE}  # fmt: skip
-    seg = {"instructions": "segment v2", "claims": [claim]}
+    seg = {"instructions": "segment v3", "claims": [claim]}
     assert segment.import_answer(ws, json.dumps(seg), "t")[1] == []
     return ws
 
@@ -542,7 +542,7 @@ WHOLE = {"observations": ["O1", "O2"], "basis": "exact",
 
 
 def whole_answer(*findings):
-    return json.dumps({"instructions": "compare v4", "claims": [
+    return json.dumps({"instructions": "compare v5", "claims": [
         {"claim": "M1.1.a", "findings": list(findings)}]})  # fmt: skip
 
 
