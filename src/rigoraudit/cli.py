@@ -214,7 +214,15 @@ def _parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> None:
-    args = _parser().parse_args(argv)
+    parser = _parser()
+    args, extra = parser.parse_known_args(argv)
+    # Python before 3.12.7, and 3.13.0, leave a folder named after an option
+    # (`import derive reply.txt --by T audit`) unread
+    lone = len(extra) == 1 and not extra[0].startswith("-")
+    if lone and getattr(args, "workspace", None) == Path("."):
+        args.workspace, extra = Path(extra[0]), []
+    if extra:
+        parser.error(f"unrecognized arguments: {' '.join(extra)}")
     if args.command == "osf":
         _osf(args.link, args.dest, args.list, None if args.all else args.max_mb)
         return
