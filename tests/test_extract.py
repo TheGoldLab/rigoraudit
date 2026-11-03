@@ -167,6 +167,8 @@ JATS = """<article xmlns:mml="http://www.w3.org/1998/Math/MathML">
 <back>
   <ack><title>Acknowledgements</title><p>We thank no one.</p></ack>
   <ref-list><ref>Doe J (2020)</ref></ref-list>
+  <sec sec-type="synthesis-author-response"><title>Synthesis</title>
+    <p>A reviewers' summary.</p></sec>
 </back>
 <sub-article><body><p>A reviewer's comment.</p></body></sub-article>
 </article>"""

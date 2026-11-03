@@ -256,6 +256,9 @@ REFERENCES = {"ref-list"}
 ATTACHED = {"sub-article", "response"}
 """Documents published with the article, such as peer reviews and the
 authors' replies; they are not part of the manuscript."""
+ATTACHED_SECTIONS = {"synthesis-author-response"}
+"""Section types that hold such a document inside the article (eNeuro's
+reviewers' "Synthesis" and the authors' reply)."""
 
 
 def _local(tag: object) -> str:
@@ -308,7 +311,7 @@ def _article(root: ET.Element):
     """Every element of the article itself, in document order."""
     yield root
     for c in root:
-        if _local(c.tag) not in ATTACHED:
+        if _local(c.tag) not in ATTACHED and c.get("sec-type") not in ATTACHED_SECTIONS:
             yield from _article(c)
 
 
@@ -365,6 +368,8 @@ class _Collector:
 
     def section(self, e: ET.Element, path: list[str]) -> None:
         """A section and its subsections; an untitled one stays in ``path``."""
+        if e.get("sec-type") in ATTACHED_SECTIONS:
+            return
         title = text_of(_child(e, "title"))
         here = [*path, title] if title else path
         for c in e:
