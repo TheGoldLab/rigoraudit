@@ -46,13 +46,14 @@ from __future__ import annotations
 import dataclasses
 import itertools
 import json
+import os
 import shutil
 import subprocess
 import sys
 import time
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from rigoraudit import (
     api,
@@ -82,7 +83,7 @@ from rigoraudit.schema import RECORD, AuditRecord
 from rigoraudit.words import plural
 
 FOLDERS = ("materials", "work", "derivations", "record", "review", "report", "notes")
-CHOICES = Path("work", "guide.json")
+CHOICES = PurePosixPath("work", "guide.json")
 """What the user chose once for this audit (who writes the answers, and
 whether the tool asks a model itself)."""
 TRIES = 3
@@ -167,7 +168,7 @@ class Guide:
         feedback.record(self.workspace, command, **event)
 
     def rel(self, path: Path) -> str:
-        return str(path.relative_to(self.workspace))
+        return path.relative_to(self.workspace).as_posix()
 
     # --- Workspace and materials ------------------------------------------
 
@@ -660,7 +661,7 @@ class Guide:
         """What to do next: for the user, a line to give the assistant; for
         the assistant, the tasks and where its replies go."""
         n = plural(len(waiting), "task")
-        work = Path("work") / step
+        work = PurePosixPath("work", step)
         notes = {
             h.name: work / INBOX / f"{h.name}{PROBLEMS}"
             for h in waiting
@@ -1137,5 +1138,7 @@ def download(repository: str, commit: str, dest: Path) -> None:
     try:
         git("checkout", "--quiet", "--detach", commit, cwd=dest)
     except subprocess.CalledProcessError:
-        shutil.rmtree(dest)  # the clone this call made, so a rerun starts clean
+        # the clone this call made, so a rerun starts clean; on Windows git's
+        # files are read-only, so make each writable to remove it
+        shutil.rmtree(dest, onexc=lambda rm, path, _: (os.chmod(path, 0o700), rm(path)))
         raise

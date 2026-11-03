@@ -40,7 +40,7 @@ from rigoraudit.osf import human_size
 from rigoraudit.settings import Gap, Settings
 from rigoraudit.words import plural
 
-LIST = Path("work", "materials", "files.md")
+LIST = PurePosixPath("work", "materials", "files.md")
 """The list of the materials, written at every run of the guide."""
 DATA_SUFFIXES = {
     ".mat", ".csv", ".tsv", ".npy", ".npz", ".h5", ".hdf5", ".nc", ".nwb",

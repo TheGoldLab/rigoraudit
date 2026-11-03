@@ -36,7 +36,7 @@ import re
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from itertools import pairwise
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import yaml
 
@@ -44,7 +44,7 @@ NUMBER = r"(?:[A-Z]\.?)?\d{1,3}(?:\.\d{1,3})?[a-z]?"
 """A printed equation number, without brackets: ``"3"``, ``"3a"``, ``"A12"``,
 ``"A.12"``, ``"2.1"``, ``"S3"``."""
 _PARTS = re.compile(r"([A-Z]?)\.?(\d+)(?:\.(\d+))?([a-z]?)")
-CORRECTIONS = Path("derivations/equation_numbers.yaml")
+CORRECTIONS = PurePosixPath("derivations/equation_numbers.yaml")
 PLACE = re.compile(r"p(\d+)@(\d+)")
 """A key from an equation's page and place on it: ``"p22@233"``."""
 Corrections = Mapping[str, str | None]

@@ -26,13 +26,13 @@ import datetime
 import math
 import operator
 from enum import StrEnum
-from pathlib import Path, PurePosixPath
+from pathlib import PurePosixPath
 from typing import Annotated, Any, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 SCHEMA_VERSION = 4
-RECORD = Path("record/record.json")
+RECORD = PurePosixPath("record/record.json")
 """Where a workspace keeps its record."""
 
 NonEmptyStr = Annotated[str, Field(pattern=r"\S")]

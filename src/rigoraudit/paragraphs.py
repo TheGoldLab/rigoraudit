@@ -34,11 +34,11 @@ import json
 import re
 from collections.abc import Sequence
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from rigoraudit.numbering import NUMBER
 
-PARAGRAPHS = Path("work/extract/paragraphs.json")
+PARAGRAPHS = PurePosixPath("work/extract/paragraphs.json")
 SEPARATOR = " › "
 LABEL = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 EQUATION_MARK = re.compile(rf"\[Equation(?: ({NUMBER}))?\]")

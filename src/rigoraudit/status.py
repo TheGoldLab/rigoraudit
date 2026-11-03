@@ -24,7 +24,7 @@ import hashlib
 import re
 from collections import Counter
 from collections.abc import Iterable, Sequence
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from pydantic import BaseModel, ConfigDict
 
@@ -34,7 +34,7 @@ from rigoraudit.schema import AuditRecord, Drafter, DrafterKind
 from rigoraudit.verify import AnchorCheck, Outcome
 from rigoraudit.words import plural
 
-CHECKS = Path("work") / "checks.json"
+CHECKS = PurePosixPath("work") / "checks.json"
 """Where a workspace keeps the results of its latest checks."""
 BEGIN = "<!-- rigoraudit status: generated, do not edit -->"
 END = "<!-- /rigoraudit status -->"

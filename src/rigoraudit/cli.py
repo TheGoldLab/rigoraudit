@@ -262,7 +262,7 @@ def main(argv: list[str] | None = None) -> None:
             print(f"Wrote {materials.LIST}.")
         elif args.command == "record":
             path = compare.write_record(workspace, settings.load(workspace))
-            print(f"Wrote {path.relative_to(workspace)}.")
+            print(f"Wrote {path.relative_to(workspace).as_posix()}.")
         elif args.command == "check":
             result = check.run(workspace)
             print(check.describe(result))
@@ -284,7 +284,9 @@ def main(argv: list[str] | None = None) -> None:
         elif args.command == "feedback":
             if args.include:
                 path = feedback.include(workspace, args.include)
-                print(f"Added {args.include.name} to {path.relative_to(workspace)}.\n")
+                print(
+                    f"Added {args.include.name} to {path.relative_to(workspace).as_posix()}.\n"
+                )
             print(feedback.explain(workspace))
     except (FileNotFoundError, ValueError) as e:
         raise SystemExit(str(e)) from e
@@ -408,7 +410,7 @@ def _handoff(step: str, workspace: Path, max_chars: int, scripts: list[str] = ()
         f"Wrote {plural(len(written), 'file')} to give your assistant, one at a time:"
     )
     for path in written:
-        print(f"  {path.relative_to(workspace)}")
+        print(f"  {path.relative_to(workspace).as_posix()}")
     print(
         "\nFor each one: paste the whole file into the chat (or attach it), save the"
         "\nreply as a text file, and give it to the tool to check:"
@@ -465,13 +467,13 @@ def _import(step: str, workspace: Path, reply: Path, by: str, handoff: str | Non
             f"Accepted the paragraph breaks: {plural(accepted.split, 'paragraph')} "
             f"split in two and {plural(accepted.joined, 'pair')} joined into one, "
             f"in {PARAGRAPHS}. The answer is saved in "
-            f"{saved.relative_to(workspace)}.\nNext: rigoraudit handoff segment"
+            f"{saved.relative_to(workspace).as_posix()}.\nNext: rigoraudit handoff segment"
         )
         return "accepted", [], accepted.handoff
     if step == "header":
         print(
             f"Accepted the header and wrote it to {report.HEADER}; edit that file "
-            f"to change it. The answer is saved in {saved.relative_to(workspace)}."
+            f"to change it. The answer is saved in {saved.relative_to(workspace).as_posix()}."
         )
         return "accepted", [], accepted.handoff
     if step == "docs":
@@ -518,7 +520,7 @@ def _import(step: str, workspace: Path, reply: Path, by: str, handoff: str | Non
             f"of {plural(len(accepted.answer.claims), 'claim')}"
         )
     print(
-        f"Accepted {accepted.handoff}: {what}, saved to {saved.relative_to(workspace)}."
+        f"Accepted {accepted.handoff}: {what}, saved to {saved.relative_to(workspace).as_posix()}."
     )
     waiting = module.pending_handoffs(workspace)
     if waiting:

@@ -26,11 +26,11 @@ import traceback
 from collections import Counter
 from collections.abc import Iterable
 from importlib import metadata
-from pathlib import Path, PurePath
+from pathlib import Path, PurePath, PurePosixPath
 
 from rigoraudit import handoffs, instructions
 
-FOLDER = Path("work", "feedback")
+FOLDER = PurePosixPath("work", "feedback")
 LOG = FOLDER / "log.jsonl"
 REPORT = FOLDER / "report.md"
 ISSUES = "https://github.com/TheGoldLab/rigoraudit/issues/new"

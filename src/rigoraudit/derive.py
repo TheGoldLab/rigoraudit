@@ -97,7 +97,7 @@ def concerns_text(concerns: Sequence[str]) -> str:
     )
 
 
-SCRIPTS = Path("derivations")
+SCRIPTS = PurePosixPath("derivations")
 OUTPUTS = SCRIPTS / "output" / "values"
 TIMEOUT = 60 * 60
 """Seconds a script may run before it is stopped."""

@@ -59,7 +59,7 @@ from collections import Counter
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field, replace
 from itertools import pairwise
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from pypdf import PdfReader
 from pypdf.errors import PyPdfError
@@ -85,7 +85,7 @@ from rigoraudit.sections import (
 from rigoraudit.verify import ManuscriptText
 from rigoraudit.words import plural
 
-FOLDER = Path("work/extract")
+FOLDER = PurePosixPath("work/extract")
 TEXT = FOLDER / "published.txt"
 OUTLINE = FOLDER / "outline.json"
 EQUATIONS_FILE = FOLDER / "equations.json"

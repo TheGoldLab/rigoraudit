@@ -48,7 +48,7 @@ import re
 from collections import Counter
 from collections.abc import Sequence
 from html import escape
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from rigoraudit import check, crosscheck, materials, review, settings, status
 from rigoraudit.coverage import Exclusion
@@ -86,9 +86,9 @@ from rigoraudit.verify import ManuscriptText
 from rigoraudit.words import plural
 
 TEMPLATE = Path(__file__).parent / "templates" / "report.html"
-PAGE = Path("report") / "audit.html"
+PAGE = PurePosixPath("report") / "audit.html"
 """The report page, in the workspace."""
-HEADER = Path("report") / "header.html"
+HEADER = PurePosixPath("report") / "header.html"
 """The audit's own header, e.g.::
 
     <header class="top">
@@ -103,7 +103,7 @@ HEADER = Path("report") / "header.html"
     </dl>
 
 The text of its first ``<h1>`` is the page's title."""
-FOOTER = Path("report") / "footer.html"
+FOOTER = PurePosixPath("report") / "footer.html"
 
 RANK = {
     Status.DIFFERS: 0,

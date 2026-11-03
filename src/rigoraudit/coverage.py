@@ -27,7 +27,7 @@ from __future__ import annotations
 import re
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import PurePosixPath
 
 from pydantic import BaseModel, ConfigDict
 
@@ -69,7 +69,7 @@ not after "et al", "vs", "cf", or a dotted lowercase abbreviation ("i.e.",
 only widens the sentence a gap is reported in."""
 
 
-EXCLUSIONS = Path("record/coverage_exclusions.json")
+EXCLUSIONS = PurePosixPath("record/coverage_exclusions.json")
 """Where a workspace keeps its exclusions."""
 
 

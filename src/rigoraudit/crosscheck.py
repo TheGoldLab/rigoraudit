@@ -47,7 +47,7 @@ import datetime
 import re
 from collections import defaultdict
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from pydantic import Field
 
@@ -80,7 +80,7 @@ from rigoraudit.words import plural
 STEP = "crosscheck"
 NAME = "crosscheck"
 NOUNS = {"groups": "group", "set_aside": "set-aside candidate"}
-FINDINGS = Path("work") / "crosscheck" / "findings.json"
+FINDINGS = PurePosixPath("work") / "crosscheck" / "findings.json"
 """Where the cross-claim findings are written."""
 MAX_QUOTE = 200
 """Characters of a value's quote given in the handoff."""

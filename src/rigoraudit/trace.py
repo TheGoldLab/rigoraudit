@@ -81,7 +81,7 @@ SCALES = {
 }  # fmt: skip
 """Units a procedure's value is converted between, when the code works in
 another unit than the claim: each unit's kind and its size in that kind."""
-METHODS = Path("work") / STEP / "methods.md"
+METHODS = PurePosixPath("work") / STEP / "methods.md"
 """The Methods, written once for a coding assistant instead of in every task."""
 MAX_LINES = 60
 """Longest code passage one citation may cover."""
@@ -89,7 +89,7 @@ MAX_REQUEST_LINES = 2000
 """Most new lines of code one request may ask for."""
 MAX_ROUNDS = 4
 """Handoffs in one chain of requests, counting the first."""
-ASKED = Path("work", STEP, "asked")
+ASKED = PurePosixPath("work", STEP, "asked")
 NOUNS = {
     "claims": "claim",
     "facets": "facet",

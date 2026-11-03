@@ -32,7 +32,7 @@ import datetime
 import re
 from collections import Counter
 from collections.abc import Sequence
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from pydantic import ValidationError
 
@@ -72,7 +72,7 @@ WHOLE = "whole"
 """The part of a finding's ID that stands for the whole claim."""
 STATING = (Source.RESULTS, Source.METHODS)
 """Sources whose values are stated, not obtained."""
-SCRIPT = Path("record") / "record.py"
+SCRIPT = PurePosixPath("record") / "record.py"
 """A workspace's own script for its record, if it has one."""
 
 

@@ -696,7 +696,9 @@ def test_the_guide_asks_once_whether_scripts_may_start_matlab(tmp_path, monkeypa
 
     (code / "fit.m").write_text("x = 1;\n", encoding="utf-8")
     s, text = ask("y")
-    assert "includes MATLAB files" in text and "(found at /opt/matlab)" in text
+    assert (
+        "includes MATLAB files" in text and f"(found at {Path('/opt/matlab')})" in text
+    )
     assert s.derive_programs == ("matlab",)
     assert "    programs: [matlab]\n    run: auto" in (ws / "audit.yaml").read_text(
         encoding="utf-8"

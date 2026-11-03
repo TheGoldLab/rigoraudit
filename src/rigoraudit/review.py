@@ -25,7 +25,7 @@ import os
 import tempfile
 from dataclasses import dataclass
 from enum import StrEnum
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Literal, Self
 
 from pydantic import BaseModel, ConfigDict, ValidationError, model_validator
@@ -44,7 +44,7 @@ from rigoraudit.schema import (
     Trace,
 )
 
-LOG = Path("review") / "log.json"
+LOG = PurePosixPath("review") / "log.json"
 """The log's place in a workspace."""
 
 

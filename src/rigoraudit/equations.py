@@ -35,7 +35,7 @@ import json
 import re
 import struct
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import yaml
 
@@ -50,8 +50,8 @@ from rigoraudit.extract import (
     numbering_note as numbering_check,
 )
 
-TYPED = Path("derivations/equations.yaml")
-PAGE = Path("work/equations.html")
+TYPED = PurePosixPath("derivations/equations.yaml")
+PAGE = PurePosixPath("work/equations.html")
 KATEX = Path(__file__).parent / "katex"
 ZOOM = 2.5
 """Screen pixels per printed point, for the picture and the typed version
