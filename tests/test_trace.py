@@ -6,8 +6,8 @@ import subprocess
 
 import pytest
 
-from rigoraudit import cli, compare, decompose, segment, settings, stats, trace
-from rigoraudit.schema import DrafterKind, Facet, Source, Status, Trace
+from miragold import cli, compare, decompose, segment, settings, stats, trace
+from miragold.schema import DrafterKind, Facet, Source, Status, Trace
 
 CODE = """import json
 

@@ -34,9 +34,9 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from rigoraudit import decompose, segment
-from rigoraudit.schema import RECORD, AuditRecord, ClaimType, Source
-from rigoraudit.settings import load
+from miragold import decompose, segment
+from miragold.schema import RECORD, AuditRecord, ClaimType, Source
+from miragold.settings import load
 
 MIN_WORDS = 4
 """Fewest shared words in a row that link two claims."""

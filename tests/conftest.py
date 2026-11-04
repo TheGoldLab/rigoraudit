@@ -6,8 +6,8 @@ import re
 
 import pytest
 
-from rigoraudit import clipboard, compare, decompose, derive, handoffs, segment, trace
-from rigoraudit.schema import Drafter, DrafterKind
+from miragold import clipboard, compare, decompose, derive, handoffs, segment, trace
+from miragold.schema import Drafter, DrafterKind
 
 DRAFTER = Drafter(
     kind=DrafterKind.PERSON, name="A. Reviewer", date=datetime.date(2026, 1, 1)

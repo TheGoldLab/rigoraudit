@@ -1,10 +1,10 @@
 [project]
-name = "rigoraudit"
+name = "miragold"
 version = "0.1.0"
 description = "Audit scientific manuscripts against their code and data for transparency and consistency."
 readme = "README.md"
 license = "BSD-2-Clause AND MIT"
-license-files = ["LICENSE", "src/rigoraudit/katex/LICENSE"]
+license-files = ["LICENSE", "src/miragold/katex/LICENSE"]
 authors = [
     { name = "Joshua I. Gold", email = "jigold@pennmedicine.upenn.edu" }
 ]
@@ -21,7 +21,7 @@ dependencies = [
 ]
 
 [project.scripts]
-rigoraudit = "rigoraudit.cli:main"
+miragold = "miragold.cli:main"
 
 [project.optional-dependencies]
 api = [

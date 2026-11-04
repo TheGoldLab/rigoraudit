@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from rigoraudit import cli, status
+from miragold import cli, status
 
 EXAMPLE = Path(__file__).resolve().parents[1] / "examples" / "example-audit"
 

@@ -3,7 +3,7 @@
 
 import xml.etree.ElementTree as ET
 
-from rigoraudit import grobid
+from miragold import grobid
 
 TEI = """<TEI xmlns="http://www.tei-c.org/ns/1.0"><text>
 <front/>

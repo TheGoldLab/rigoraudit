@@ -15,7 +15,7 @@ can see, which stay outside the repository:
   ``1 1 2 2`` or ``x = a + b``, are common to any two documents);
 - material files: PDFs, data and archive formats, and files over ``MAX_BYTES``.
 
-Workspaces roots are read from ``RIGORAUDIT_PRIVATE_ROOTS`` (separated by
+Workspaces roots are read from ``MIRAGOLD_PRIVATE_ROOTS`` (separated by
 ``os.pathsep``), or default to ``../audit_examples`` beside the repository. A
 workspace is any subfolder holding an ``audit.yaml``. With no root found, only
 the file checks run, with a warning.
@@ -74,7 +74,7 @@ def runs(tokens: list[str]) -> Iterator[tuple[int, tuple[str, ...]]]:
 
 
 def private_roots() -> list[Path]:
-    env = os.environ.get("RIGORAUDIT_PRIVATE_ROOTS")
+    env = os.environ.get("MIRAGOLD_PRIVATE_ROOTS")
     candidates = env.split(os.pathsep) if env else [str(REPO.parent / "audit_examples")]
     return [
         Path(c).expanduser().resolve() for c in candidates if c and Path(c).is_dir()
@@ -230,7 +230,7 @@ def main(argv: list[str] | None = None) -> int:
     spaces = workspaces(roots)
     if not spaces:
         print("check_no_audit_content: no audit workspaces found; checking file types only. "
-              "Set RIGORAUDIT_PRIVATE_ROOTS to check content.", file=sys.stderr)  # fmt: skip
+              "Set MIRAGOLD_PRIVATE_ROOTS to check content.", file=sys.stderr)  # fmt: skip
     terms = read_terms(roots, spaces)
     seen = private_runs(spaces)
 

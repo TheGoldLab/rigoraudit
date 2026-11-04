@@ -4,10 +4,10 @@ import json
 
 import pytest
 
-from rigoraudit import equations, numbering
-from rigoraudit.extract import EQUATION_NUMBER, EQUATIONS_FILE
-from rigoraudit.numbering import Item, gaps, read_corrections, settle, unused
-from rigoraudit.paragraphs import EQUATION_MARK
+from miragold import equations, numbering
+from miragold.extract import EQUATION_NUMBER, EQUATIONS_FILE
+from miragold.numbering import Item, gaps, read_corrections, settle, unused
+from miragold.paragraphs import EQUATION_MARK
 
 
 def read(*numbers, page=1, trusted=False):

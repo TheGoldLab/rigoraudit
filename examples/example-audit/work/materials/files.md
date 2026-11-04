@@ -1,6 +1,6 @@
 # The materials
 
-Written by rigoraudit at every run of `rigoraudit audit`; do not edit. Every file in `materials/` (paths relative to it), and what the code reads. Look here before recording anything as missing.
+Written by miragold at every run of `miragold audit`; do not edit. Every file in `materials/` (paths relative to it), and what the code reads. Look here before recording anything as missing.
 
 1 code file, 1 data file, 1 paper file.
 
@@ -30,4 +30,4 @@ Written by rigoraudit at every run of `rigoraudit audit`; do not edit. Every fil
 
 ### The top folder
 
-- `manuscript.txt` (paper, 674 bytes)
+- `manuscript.txt` (paper, 672 bytes)

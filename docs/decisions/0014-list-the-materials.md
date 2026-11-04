@@ -35,7 +35,7 @@ manifest, and nothing tested it.
 
 3. **The check points out gaps to look at again.** When a gap's text names
    a data file, a name saved in one, a function defined inside another code
-   file, or a package folder that is in the materials, `rigoraudit check`
+   file, or a package folder that is in the materials, `miragold check`
    says so. It does not fail, because gaps often name files that are there
    to say what is not.
 

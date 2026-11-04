@@ -1,6 +1,6 @@
 # User guide
 
-How to audit a paper with rigoraudit, step by step. The [README](../README.md)
+How to audit a paper with miragold, step by step. The [README](../README.md)
 says how to install the tool and try the example audit first.
 
 Contents: [What you need](#what-you-need) ·
@@ -37,7 +37,7 @@ Contents: [What you need](#what-you-need) ·
 ## The guided audit
 
 ```
-rigoraudit audit my-audit
+miragold audit my-audit
 ```
 
 takes you through the audit in order, and picks up where you left off each
@@ -91,7 +91,7 @@ tasks without any copying. Once you have answered the guide's first
 questions, tell the assistant:
 
 ```
-Run rigoraudit audit my-audit and do the tasks it gives you.
+Run miragold audit my-audit and do the tasks it gives you.
 ```
 
 When the assistant runs it, the guide lists the tasks waiting and where
@@ -104,7 +104,7 @@ to the next step when one is done.
 A script the assistant writes runs as soon as its reply passes the checks,
 unless the script checks flag it ([step 4](#4-re-derive-claims)); starting
 MATLAB is not flagged if you allowed it when the guide asked. A
-flagged script waits for you: run `rigoraudit audit my-audit` yourself in
+flagged script waits for you: run `miragold audit my-audit` yourself in
 a terminal; it lists the scripts waiting and what was found in each, for
 you to read, and asks once whether to run them.
 
@@ -168,7 +168,7 @@ settings:
 ```
 
 Paths are relative to `materials/`. Any entry with both a `path` and a
-`sha256` gives that file's checksum, which `rigoraudit check` compares the
+`sha256` gives that file's checksum, which `miragold check` compares the
 file against. `settings: scope` lists the audited sections: each is matched
 against the start of a paragraph's section, so `Results` takes every Results
 subsection. Patterns can be more exact: `'Figure \d+ legend$'` takes the
@@ -176,7 +176,7 @@ legends of the main figures only. The default is the Results, figure
 legends, and tables. The extract step ends by naming the paper's
 sections, to copy from.
 
-The guide (or `rigoraudit materials`) lists every file in `materials/` in
+The guide (or `miragold materials`) lists every file in `materials/` in
 `work/materials/files.md`, wherever it is: data saved inside the code
 repository too. For each data file it gives what the file holds: the
 variables of a MATLAB file and the fields of each structure, the first row
@@ -197,7 +197,7 @@ for it in `work/materials/files.md`, by file name and by the names saved
 in the files: authors often keep results such as selected units or fitted
 values next to the code that made them. Add gaps as the audit finds them. The report
 lists them at the top, and each claim's card links to the gaps that affect
-it; `rigoraudit check` fails if a gap names a claim not in the record.
+it; `miragold check` fails if a gap names a claim not in the record.
 
 Some journals print part of the paper in a separate PDF: often the figure
 supplements' legends, which the paper's PDF gives only as titles. Name that
@@ -210,8 +210,8 @@ the project's link as the code's `repository` (no commit is needed) and the
 guide offers the download, or run:
 
 ```
-rigoraudit osf https://osf.io/<id>/ materials/code --list   # see what is there
-rigoraudit osf https://osf.io/<id>/ materials/code          # download it
+miragold osf https://osf.io/<id>/ materials/code --list   # see what is there
+miragold osf https://osf.io/<id>/ materials/code          # download it
 ```
 
 Files over 10 MB (usually data) are left out unless you add `--max-mb` or
@@ -255,7 +255,7 @@ Central but do not share their XML, and older papers often have none.
 ## 2. Extract information
 
 ```
-rigoraudit extract
+miragold extract
 ```
 
 (the guide runs it for you) writes, in `work/extract/`:
@@ -285,10 +285,10 @@ and fix the paragraph before segmenting. With the PDF alone, the breaks between
 paragraphs are a best guess: open the file and fix any paragraph that was
 split or run together before going on. Do it before segmenting, since claim
 IDs follow the paragraph numbers. If you find the XML later, put it beside
-the PDF and run `rigoraudit extract --replace`; without `--replace` an
+the PDF and run `miragold extract --replace`; without `--replace` an
 existing paragraphs file, which may hold your corrections, is left alone.
 Extracting again after later steps is safe as long as the paragraphs keep
-their numbers: the next time the record is built (`rigoraudit record`, or
+their numbers: the next time the record is built (`miragold record`, or
 the guide's last step), each quote is found again in its paragraph, and
 takes in what the new text puts in from the PDF (a "∼", an "x̄", an
 item's "2.", a formula; never a word). A quote whose words changed
@@ -300,10 +300,10 @@ is marked `"transcribed": true`: its quotes cannot be found in the PDF's
 text, so the check reports them as unchecked rather than as mismatches.
 
 **Doubtful breaks.** To have an assistant look at the breaks the tool is
-unsure of, run `rigoraudit handoff breaks` (the guide offers it). The
+unsure of, run `miragold handoff breaks` (the guide offers it). The
 handoff holds only those places, each with the text around it, and the
 assistant answers whether a new paragraph starts there;
-`rigoraudit import breaks` checks the answer and makes the splits and joins.
+`miragold import breaks` checks the answer and makes the splits and joins.
 The answer holds no text, so no word can change.
 
 **GROBID.** Without the XML, GROBID (a free program that reads scientific
@@ -317,7 +317,7 @@ settings:
     grobid: http://localhost:8070
 ```
 
-or add `--grobid http://localhost:8070` to `rigoraudit extract`. The PDF is
+or add `--grobid http://localhost:8070` to `miragold extract`. The PDF is
 sent to that server, so use one you run. Anything GROBID could not place is
 put at the end under "Unplaced text", for you to move. If the server does
 not answer, the tool reads the PDF itself and says so.
@@ -331,9 +331,9 @@ text: a mark such as `[Equation 3]` stands where each is set. See
 Each of these steps is done by an assistant, one file at a time:
 
 ```
-rigoraudit handoff segment             # writes work/segment/handoffs/*.md
+miragold handoff segment             # writes work/segment/handoffs/*.md
 # paste or attach each file in the chat; save the reply as a text file
-rigoraudit import segment reply.txt --by "<assistant>"
+miragold import segment reply.txt --by "<assistant>"
 ```
 
 A reply with problems is not saved: the tool prints them in a block to paste
@@ -341,7 +341,7 @@ back to the assistant. Accepted replies are kept in `work/<step>/answers/`,
 with who wrote them and when. The guide runs these commands for you.
 When a step's instructions change, answers accepted under the older version
 stay in use; the guide lists them each time it runs. To redo one, delete
-its file in `work/<step>/answers/` and run `rigoraudit audit` again.
+its file in `work/<step>/answers/` and run `miragold audit` again.
 
 - **docs.** Before anyone runs the authors' code, an assistant reads their
   documentation: every README and dependency file, the text cells of each
@@ -371,7 +371,7 @@ its file in `work/<step>/answers/` and run `rigoraudit audit` again.
   rounding of the printed statistic. Every p is compared to 3 decimal
   places, so any p below 0.0005 counts as 0.000: a printed p = 10⁻³⁰⁰
   agrees with any p below 0.0005, and so does p < 10⁻³⁰⁰. These findings are the tool's own;
-  `rigoraudit record` adds them to the record. A test it cannot work out
+  `miragold record` adds them to the record. A test it cannot work out
   (a rank test, say, or one printed without its degrees of freedom) is
   *not verifiable*, with the reason
   ([0015](decisions/0015-statistical-tests.md)).
@@ -414,8 +414,8 @@ Where a value has to be reproduced, a derivation recomputes it: a script in
 the data. An assistant writes one for every ten claims or so:
 
 ```
-rigoraudit handoff derive              # writes work/derive/handoffs/*.md
-rigoraudit import derive reply.txt --by "<assistant>"
+miragold handoff derive              # writes work/derive/handoffs/*.md
+miragold import derive reply.txt --by "<assistant>"
 ```
 
 Each handoff covers up to ten claims. It gives the numbers each claim
@@ -468,7 +468,7 @@ flagged script runs only once you have read it and agreed; open it in a
 text editor (or ask your assistant to explain it). The check catches
 mistakes, not a script written to get past it.
 
-A script runs the authors' MATLAB code through `rigoraudit.matlab`, which
+A script runs the authors' MATLAB code through `miragold.matlab`, which
 finds MATLAB on the computer. If the code includes MATLAB files, the guide
 asks once whether scripts may start MATLAB without asking each time, and
 saves the answer in the manifest. The check still flags anything else in
@@ -489,7 +489,7 @@ settings:
     programs: [matlab]  # start MATLAB without asking; [] to ask each time
 ```
 
-A derivation saves its results with `rigoraudit.values.write_values`. It
+A derivation saves its results with `miragold.values.write_values`. It
 records the script's checksum and its inputs', so the check can tell when a
 value is out of date:
 
@@ -515,9 +515,9 @@ source, and the findings that compare them. An assistant writes the
 findings, up to ten claims at a time:
 
 ```
-rigoraudit handoff compare             # writes work/compare/handoffs/*.md
-rigoraudit import compare reply.txt --by "<assistant>"
-rigoraudit record                      # builds record/record.json
+miragold handoff compare             # writes work/compare/handoffs/*.md
+miragold import compare reply.txt --by "<assistant>"
+miragold record                      # builds record/record.json
 ```
 
 Each handoff lists, for each facet of each claim, what each source says,
@@ -532,14 +532,14 @@ the values the code sets, compared exactly. The reply gives the
 findings by those labels: which items each compares, the basis, and the
 comparisons; the tool computes each status from the values. A finding the
 record's rules refuse (a comparison with one source, a status that
-contradicts the values) is sent back with the reason. `rigoraudit record`
+contradicts the values) is sent back with the reason. `miragold record`
 then puts every claim of step 3, these findings, and the tool's findings on
 each copied test together, with the lines shown beside each test (the
 record's `context`).
 
 A record can also be built by a Python script of the audit's own,
-`record/record.py`, which constructs it with `rigoraudit.schema`; the guide
-and `rigoraudit record` then leave the record to it. Building it in code
+`record/record.py`, which constructs it with `miragold.schema`; the guide
+and `miragold record` then leave the record to it. Building it in code
 means a malformed record is rejected at once: an unknown claim type, a
 claim marked traced with no findings, a status set by hand. The accepted
 answers of steps 3 and 4 can be turned into record items with
@@ -547,7 +547,7 @@ answers of steps 3 and 4 can be turned into record items with
 `trace.trace_observations`, and `derive.derived_observations`. A made-up claim, built by hand:
 
 ```python
-from rigoraudit.schema import Claim, ClaimType, ManuscriptAnchor
+from miragold.schema import Claim, ClaimType, ManuscriptAnchor
 
 text = paragraphs[("Results › Learning", 2)]
 quote = "accuracy rose from 62% to 81% over 12 sessions"
@@ -578,7 +578,7 @@ item, with helpers worth copying.
 ## 6. Check claims
 
 ```
-rigoraudit check
+miragold check
 ```
 
 checks the record (with the review log applied) against the materials:
@@ -624,8 +624,8 @@ which values are about the same thing: the same quantity, for the same
 population and condition:
 
 ```
-rigoraudit handoff crosscheck          # writes work/crosscheck/handoffs/crosscheck.md
-rigoraudit import crosscheck reply.txt --by "<assistant>"
+miragold handoff crosscheck          # writes work/crosscheck/handoffs/crosscheck.md
+miragold import crosscheck reply.txt --by "<assistant>"
 ```
 
 The handoff lists every printed value, claim by claim, and candidate groups
@@ -647,7 +647,7 @@ is not done.
 ### The report
 
 ```
-rigoraudit report
+miragold report
 ```
 
 writes `report/audit.html` from the record with the review log applied, and
@@ -656,7 +656,7 @@ paper's sections in order, each paragraph with its claims marked, beside a
 card for each claim that sets out what the Results, Methods, code, and data
 say, with the evidence behind each statement. A finding that differs
 names, in bold, the printed values that do not agree with what was found
-(`rigoraudit show` marks those comparisons in bold too). The gaps in the materials
+(`miragold show` marks those comparisons in bold too). The gaps in the materials
 come first, after the summary, then the values printed in more than one
 claim (step 6), each also noted on the cards of the claims it involves. Filters pick claims by type, section, and
 finding. The page shows the paragraphs of the audited sections
@@ -669,8 +669,8 @@ with the paper, what the audit covers, and where each material came from
 Write it yourself, or have an assistant draft it:
 
 ```
-rigoraudit handoff header              # writes work/header/handoffs/header.md
-rigoraudit import header reply.txt --by "<assistant>"
+miragold handoff header              # writes work/header/handoffs/header.md
+miragold import header reply.txt --by "<assistant>"
 ```
 
 The assistant answers with the parts in plain text, from the manifest and
@@ -684,7 +684,7 @@ status paragraph in the workspace's `README.md`, between markers.
 ### Review
 
 ```
-rigoraudit review
+miragold review
 ```
 
 shows the report at http://127.0.0.1:8765/ (on this computer only), with
@@ -711,7 +711,7 @@ an action whose claim or finding changed is marked as needing re-review
 ### One claim
 
 ```
-rigoraudit show R1.2.a
+miragold show R1.2.a
 ```
 
 prints everything the audit holds on claim R1.2.a, as text: the claim; what
@@ -719,7 +719,7 @@ each source says about each facet, labelled `O1`, `O2`, … as in the compare
 step; the values that could not be recomputed and why; the findings, with
 their comparisons; the gaps that name it; and the review actions on it. It
 works at any step after segment, from the accepted answers, so it shows the
-latest even before `rigoraudit record`, and says when `record/record.json`
+latest even before `miragold record`, and says when `record/record.json`
 is older than them. An audit with its own `record/record.py` is shown from
 `record/record.json`.
 
@@ -752,7 +752,7 @@ p26@530: null
 
 To check equations in a derivation, type them in LaTeX in
 `derivations/equations.yaml`, by number or place key, and run
-`rigoraudit equations`:
+`miragold equations`:
 
 ```yaml
 "3": '\frac{dx}{dt} = -\lambda x'
@@ -767,7 +767,7 @@ connection: each equation's picture as printed, beside your version drawn as
 maths, so a slip in the typing can be told from a slip in the paper. It
 lists typed keys that match no equation, and LaTeX it could not draw. It
 also applies `equation_numbers.yaml` to `equations.json`; the marks in the
-paragraphs change at the next `rigoraudit extract --replace`.
+paragraphs change at the next `miragold extract --replace`.
 
 ## Practical advice
 
@@ -790,12 +790,12 @@ paragraphs change at the next `rigoraudit extract --replace`.
 
 ## Feedback
 
-Each `rigoraudit audit`, `handoff`, `import`, and `extract` adds to the
+Each `miragold audit`, `handoff`, `import`, and `extract` adds to the
 audit's one feedback report, `work/feedback/report.md`: the tool's version,
 the steps run and how each ended, and the kinds of problems found in
 assistants' answers. Its summary at the top says this in plain sentences,
 and whether the report is worth sending. It holds no text, values, or file
-names from your materials, and the tool never sends it. `rigoraudit
+names from your materials, and the tool never sends it. `miragold
 feedback` shows where the report is and how to
 send it, if you choose to; `--include <file>` adds a file you want the
 developers to see, marked as audit material. How the developers read
@@ -813,11 +813,11 @@ everything in it by these fixed paths:
 | `work/materials/files.md` | Every file in `materials/`, what each data file holds, and what the code reads (step 1; written at every run of the guide) |
 | `work/extract/` | The paper's text, outline, paragraphs, and equations (step 2) |
 | `work/<step>/` | Handoffs to an assistant, its accepted answers, every reply it gave (`replies/`, unless you saved them as files yourself), and a coding assistant's replies still to check (`inbox/`) (steps 3 to 6, and the report's header in step 7). For a coding assistant, `work/trace/methods.md` holds the Methods once, and each trace task points to it |
-| `work/checks.json` | The results of the latest `rigoraudit check` |
+| `work/checks.json` | The results of the latest `miragold check` |
 | `work/crosscheck/findings.json` | Values printed in more than one claim, compared (step 6); the handoff and answer that grouped them are beside it, as for every step |
 | `work/feedback/` | The feedback report and its log |
 | `derivations/` | Scripts that rerun the authors' code or recompute values (one for each task an assistant did, named for its claims, step 4); their outputs in `derivations/output/` |
-| `record/` | `record.json` (written by `rigoraudit record`, or by the audit's own `record.py`), and `coverage_exclusions.json` |
+| `record/` | `record.json` (written by `miragold record`, or by the audit's own `record.py`), and `coverage_exclusions.json` |
 | `review/log.json` | Every review action |
 | `report/` | `audit.html`, and the audit's own `header.html` and `footer.html` |
 | `notes/` | The auditor's notes |

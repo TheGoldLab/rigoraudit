@@ -10,8 +10,8 @@ from types import SimpleNamespace
 
 import pytest
 
-from rigoraudit import report, review
-from rigoraudit.schema import (
+from miragold import report, review
+from miragold.schema import (
     RECORD,
     AuditRecord,
     Claim,
@@ -53,7 +53,7 @@ def test_each_claim_and_finding_is_marked_for_the_review_page(ws):
 
 
 def test_paragraph_text_less_the_labels_is_the_extracted_text(ws):
-    from rigoraudit.paragraphs import read_paragraphs
+    from miragold.paragraphs import read_paragraphs
 
     html, _ = report.render(ws)
     paragraphs = {(p.section, p.number): p.text for p in
@@ -226,7 +226,7 @@ def test_a_finding_that_differs_names_the_values_that_do_not_agree():
 def test_an_equation_mark_is_followed_by_its_picture(ws):
     import json
 
-    from rigoraudit.extract import EQUATIONS_FILE, FOLDER
+    from miragold.extract import EQUATIONS_FILE, FOLDER
 
     path = ws / "work/extract/paragraphs.json"
     paragraphs = json.loads(path.read_text(encoding="utf-8"))

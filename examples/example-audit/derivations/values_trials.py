@@ -2,7 +2,7 @@
 
 Reads the raw trials and writes every value the record cites, with the
 checksums of this script and its input, to output/values/trials.json.
-rigoraudit.verify reads the values back by key and reports them as stale if
+miragold.verify reads the values back by key and reports them as stale if
 this script or the data change.
 
 Accuracy is recomputed as the Methods describe it: trials with response
@@ -17,7 +17,7 @@ data, with none excluded.
 import json
 from pathlib import Path
 
-from rigoraudit.values import write_values
+from miragold.values import write_values
 
 HERE = Path(__file__).parent
 WORKSPACE = HERE.parent

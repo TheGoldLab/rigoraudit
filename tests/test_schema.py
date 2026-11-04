@@ -7,7 +7,7 @@ import pytest
 from conftest import DRAFTER
 from pydantic import ValidationError
 
-from rigoraudit.schema import (
+from miragold.schema import (
     AuditRecord,
     Basis,
     Claim,
@@ -686,13 +686,13 @@ def test_person_drafter_has_no_model_fields():
 
 
 def test_tool_drafter_names_its_stage():
-    Drafter(kind=DrafterKind.TOOL, name="rigoraudit", stage="stats", date=DAY)
+    Drafter(kind=DrafterKind.TOOL, name="miragold", stage="stats", date=DAY)
     with pytest.raises(ValidationError, match="the tool names its stage"):
-        Drafter(kind=DrafterKind.TOOL, name="rigoraudit", date=DAY)
+        Drafter(kind=DrafterKind.TOOL, name="miragold", date=DAY)
     with pytest.raises(ValidationError, match="model drafter only"):
         Drafter(
             kind=DrafterKind.TOOL,
-            name="rigoraudit",
+            name="miragold",
             stage="stats",
             model_id="x",
             date=DAY,

@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from rigoraudit import matlab
+from miragold import matlab
 
 
 def test_matlab_is_found_on_the_path_or_where_it_is_installed(tmp_path, monkeypatch):

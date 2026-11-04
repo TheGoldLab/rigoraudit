@@ -7,8 +7,8 @@ import subprocess
 import pytest
 from conftest import DRAFTER
 
-from rigoraudit import stats
-from rigoraudit.schema import (
+from miragold import stats
+from miragold.schema import (
     AuditRecord,
     Basis,
     Claim,
@@ -24,8 +24,8 @@ from rigoraudit.schema import (
     Trace,
     Value,
 )
-from rigoraudit.values import write_values
-from rigoraudit.verify import (
+from miragold.values import write_values
+from miragold.verify import (
     ManuscriptText,
     Outcome,
     check_code_anchor,

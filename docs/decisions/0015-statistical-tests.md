@@ -178,7 +178,7 @@ workspaces.
 
 ## Notes
 
-- 2026-11-02: Items 1–4 are built (`rigoraudit.stats`). Two choices made
+- 2026-11-02: Items 1–4 are built (`miragold.stats`). Two choices made
   in building them:
   - **Rounding of the printed statistic.** A printed t of 2.10 stands for
     any t from 2.095 to 2.105. Each value worked out from a statistic is

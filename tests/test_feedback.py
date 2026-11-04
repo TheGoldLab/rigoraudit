@@ -6,7 +6,7 @@ import json
 
 import pytest
 
-from rigoraudit import cli, feedback
+from miragold import cli, feedback
 
 RESULTS = "Mean dwell time was 412 ms in the bright arena."
 SECRET = "bright arena"
@@ -59,7 +59,7 @@ def test_runs_are_reported_by_kind_without_the_materials(ws, capsys):
     assert "| sent back |" in text and "quote-not-found ×1" in text
     assert "| accepted |" in text
     assert "- segment: 2" in text  # tries for the one accepted answer
-    assert "- handoff trace: ValueError at rigoraudit/trace.py:" in text
+    assert "- handoff trace: ValueError at miragold/trace.py:" in text
     # the summary says the same in words
     assert "- Steps worked on: segment, trace." in text
     assert "- The assistant's answers: 1 accepted, 1 sent back to be fixed." in text

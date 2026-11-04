@@ -1,6 +1,6 @@
 # Tone discrimination learning in mice
 
-A made-up paper for the rigoraudit example audit. Pages are separated by form feeds; a real audit uses the published PDF's text layer.
+A made-up paper for the miragold example audit. Pages are separated by form feeds; a real audit uses the published PDF's text layer.
 
 ## Methods
 

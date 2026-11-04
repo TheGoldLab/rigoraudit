@@ -6,15 +6,15 @@ import json
 
 import pytest
 
-from rigoraudit import cli, decompose, derive, instructions, segment, settings
-from rigoraudit.schema import Facet, Source
-from rigoraudit.verify import shown_in
+from miragold import cli, decompose, derive, instructions, segment, settings
+from miragold.schema import Facet, Source
+from miragold.verify import shown_in
 
 RESULTS = "Mice were correct on 75% of trials in block A."
 SCRIPT = """from pathlib import Path
 import json
 
-from rigoraudit.values import write_values
+from miragold.values import write_values
 
 HERE = Path(__file__).resolve().parent
 WORKSPACE = HERE.parent
@@ -299,8 +299,8 @@ def test_the_script_checks_flag_what_a_person_should_look_at():
     assert concerns("from os import remove") == [
         "imports os.remove, which can start programs and change or delete files"
     ]
-    [unknown] = concerns("from rigoraudit import derive")
-    assert unknown.startswith("imports rigoraudit.derive, which is not one of")
+    [unknown] = concerns("from miragold import derive")
+    assert unknown.startswith("imports miragold.derive, which is not one of")
     assert concerns("(HERE.parent / 'materials' / 'x').write_text('1')") == [
         "writes outside derivations/"
     ]
@@ -340,9 +340,9 @@ def test_the_script_checks_flag_what_a_person_should_look_at():
 
 def test_a_script_may_start_matlab_if_the_manifest_allows_it():
     head = "from pathlib import Path\n"
-    script = head + "from rigoraudit import matlab\nmatlab.run('x = 1', Path('.'))\n"
+    script = head + "from miragold import matlab\nmatlab.run('x = 1', Path('.'))\n"
     [concern] = derive.script_concerns(script)
-    assert concern.startswith("line 2: imports rigoraudit.matlab, which starts MATLAB")
+    assert concern.startswith("line 2: imports miragold.matlab, which starts MATLAB")
     assert derive.script_concerns(script, ["matlab"]) == []
     assert derive.script_concerns("import subprocess", ["matlab"]) == [
         "line 1: imports subprocess, which starts other programs"
@@ -367,7 +367,7 @@ TWO = "Mice were correct on 75% of trials in block A, over 4 trials."
 BOTH = """from pathlib import Path
 import json
 
-from rigoraudit.values import write_values
+from miragold.values import write_values
 
 HERE = Path(__file__).resolve().parent
 WORKSPACE = HERE.parent
@@ -456,7 +456,7 @@ def test_claims_share_a_task_and_one_script(ws_two):
 TESTED = "12 mice ran faster in block A than in block B, t(10) = 2.50, p = 0.031."
 TEST_SCRIPT = """from pathlib import Path
 
-from rigoraudit.values import write_values
+from miragold.values import write_values
 
 HERE = Path(__file__).resolve().parent
 WORKSPACE = HERE.parent
@@ -528,8 +528,8 @@ def test_the_handoff_lists_the_tests_and_what_is_wrong_is_sent_back(ws_test):
 
 
 def test_n_and_unit_are_compared_with_the_text_and_the_data_described(ws_test):
-    from rigoraudit import stats
-    from rigoraudit.schema import Status
+    from miragold import stats
+    from miragold.schema import Status
 
     s = settings.load(ws_test)
     reply = reply_for_test(stated_unit={"says": "animal", "quote": "12 mice"})
@@ -564,7 +564,7 @@ def test_a_saved_unit_must_be_one_of_the_words(ws_test):
     ],
 )
 def test_a_rerun_p_is_compared_with_the_printed_p(ws_test, rerun, resamples, status):
-    from rigoraudit import stats
+    from miragold import stats
 
     saved = f'"n": 12, "p": {rerun}, '
     p = {"key": "test_1/p", "how": "recomputed"}

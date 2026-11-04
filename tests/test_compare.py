@@ -6,8 +6,8 @@ import json
 import pytest
 from test_derive import GOOD, A, B, both, reply, ws, ws_two  # noqa: F401  (fixtures)
 
-from rigoraudit import cli, compare, derive, instructions, settings
-from rigoraudit.schema import RECORD, AuditRecord, Status, Trace
+from miragold import cli, compare, derive, instructions, settings
+from miragold.schema import RECORD, AuditRecord, Status, Trace
 
 
 @pytest.fixture

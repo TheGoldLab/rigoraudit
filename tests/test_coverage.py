@@ -4,8 +4,8 @@
 import pytest
 from conftest import DRAFTER
 
-from rigoraudit.coverage import Exclusion, check, items, record_coverage, sentences
-from rigoraudit.schema import AuditRecord
+from miragold.coverage import Exclusion, check, items, record_coverage, sentences
+from miragold.schema import AuditRecord
 
 TEXT = (
     "Subjects were faster in block A (Figure 3D, Figure 3—figure supplement 2B; Smith et al., 2015). "

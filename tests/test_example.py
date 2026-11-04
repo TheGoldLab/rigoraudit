@@ -12,10 +12,10 @@ from pathlib import Path
 
 import pytest
 
-from rigoraudit import cli, status
-from rigoraudit.schema import RECORD, AuditRecord
-from rigoraudit.values import sha256
-from rigoraudit.verify import Outcome
+from miragold import cli, status
+from miragold.schema import RECORD, AuditRecord
+from miragold.values import sha256
+from miragold.verify import Outcome
 
 EXAMPLE = Path(__file__).resolve().parents[1] / "examples" / "example-audit"
 BUILT = (
@@ -45,7 +45,7 @@ def rebuilt(tmp_path_factory) -> Path:
                 capture_output=True,
                 env=os.environ | {"PYTHONUTF8": "1"},
             )
-        elif m := re.match(r"uv run rigoraudit (\w+) \$W", line):
+        elif m := re.match(r"uv run miragold (\w+) \$W", line):
             cli.main([m[1], str(ws)])
     return ws
 

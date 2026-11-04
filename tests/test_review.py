@@ -11,8 +11,8 @@ from http.server import ThreadingHTTPServer
 import pytest
 from conftest import DRAFTER
 
-from rigoraudit import review
-from rigoraudit.schema import (
+from miragold import review
+from miragold.schema import (
     AuditRecord,
     Basis,
     Claim,
@@ -33,7 +33,7 @@ from rigoraudit.schema import (
     Trace,
     Value,
 )
-from rigoraudit.server import ReviewError, make_handler, save_entry
+from miragold.server import ReviewError, make_handler, save_entry
 
 QUOTE = "C = 41 sessions"
 PARAGRAPH = QUOTE + " and 12 mice in total."

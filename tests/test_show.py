@@ -5,8 +5,8 @@ import pytest
 from test_compare import PRECISION, SILENT, answer, derived  # noqa: F401  (fixtures)
 from test_derive import ws  # noqa: F401  (fixture)
 
-from rigoraudit import cli, compare, settings, show
-from rigoraudit.schema import RECORD
+from miragold import cli, compare, settings, show
+from miragold.schema import RECORD
 
 
 def test_before_compare_it_gives_what_each_source_says(derived):  # noqa: F811

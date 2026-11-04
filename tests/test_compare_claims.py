@@ -6,7 +6,7 @@ import importlib.util
 import sys
 from pathlib import Path
 
-from rigoraudit.schema import ClaimType
+from miragold.schema import ClaimType
 
 SCRIPT = Path(__file__).parent.parent / "scripts" / "compare_claims.py"
 spec = importlib.util.spec_from_file_location("compare_claims", SCRIPT)

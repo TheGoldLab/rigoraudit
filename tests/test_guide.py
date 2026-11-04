@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 from conftest import make_pdf
 
-from rigoraudit import (
+from miragold import (
     api,
     docs,
     feedback,
@@ -22,8 +22,8 @@ from rigoraudit import (
     settings,
     trace,
 )
-from rigoraudit.extract import write_text_layer
-from rigoraudit.sections import Heading
+from miragold.extract import write_text_layer
+from miragold.sections import Heading
 
 CODE = """def accuracy(trials):
     kept = [t for t in trials if t["rt"] <= 2.0]
@@ -36,7 +36,7 @@ TITLE = "Accuracy in two blocks"
 DERIVE = """import json
 from pathlib import Path
 
-from rigoraudit.values import write_values
+from miragold.values import write_values
 
 HERE = Path(__file__).resolve().parent
 WORKSPACE = HERE.parent
@@ -363,7 +363,7 @@ def test_code_on_osf_is_fetched_without_its_large_files(tmp_path, monkeypatch):
 
     from test_osf import FakeOsf
 
-    from rigoraudit import osf
+    from miragold import osf
 
     fake = FakeOsf()
     monkeypatch.setattr(osf, "MAX_BYTES", 1000)
@@ -403,7 +403,7 @@ def test_the_guide_checks_the_record_and_writes_the_report(tmp_path):
     script = Script()
     g = guide.Guide(ws, ask=script.ask, say=script.say)
     assert g.check_and_report(settings.load(ws)) == "finished", script.text
-    assert "All checks pass." in script.text and "rigoraudit review" in script.text
+    assert "All checks pass." in script.text and "miragold review" in script.text
     assert (ws / "report" / "audit.html").is_file()
 
     # a quote the paper does not have fails the check, and no report is written
@@ -684,7 +684,7 @@ def test_the_guide_asks_once_whether_scripts_may_start_matlab(tmp_path, monkeypa
     code = ws / "materials" / "code"
     code.mkdir()
     (code / "analysis.py").write_text(CODE, encoding="utf-8")
-    monkeypatch.setattr("rigoraudit.matlab.find", lambda: Path("/opt/matlab"))
+    monkeypatch.setattr("miragold.matlab.find", lambda: Path("/opt/matlab"))
 
     def ask(*answers):
         script = Script(*answers)

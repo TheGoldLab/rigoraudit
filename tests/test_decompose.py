@@ -7,15 +7,15 @@ from pathlib import Path
 
 import pytest
 
-from rigoraudit import cli, decompose, instructions, segment
-from rigoraudit.decompose import (
+from miragold import cli, decompose, instructions, segment
+from miragold.decompose import (
     AnswerError,
     check_answer,
     parse_answer,
     read_printed,
     results_observations,
 )
-from rigoraudit.schema import Facet, Relation
+from miragold.schema import Facet, Relation
 
 TEXT = (
     "Rats pressed faster in block A (Figure 2). Twelve rats completed 40 trials each."

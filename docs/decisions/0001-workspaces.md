@@ -30,4 +30,4 @@ being committed by accident.
   exclusions; earlier `gold/`, from when every record was built by hand),
   `review/`, `report/`, and `notes/`. The manifest also says which sections
   are audited (`settings: scope`), and the checksums it lists are the ones
-  `rigoraudit check` compares data files against.
+  `miragold check` compares data files against.

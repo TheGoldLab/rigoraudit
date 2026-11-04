@@ -1,6 +1,6 @@
 {
  "script": "derivations/values_trials.py",
- "script_sha256": "a93aff1b699cf4be912d0d8efade24720d71724281d8d062ceac3ab3f78f61cd",
+ "script_sha256": "d7e0812304e7f5f9d72e2d2fd11a89996887dbb13ea65dc9424f85823a726d59",
  "inputs": {
   "materials/data/trials.json": "0683388ec4cfe53bb417b7ba2b971a103eb6435881bacd251109793ecab62210"
  },

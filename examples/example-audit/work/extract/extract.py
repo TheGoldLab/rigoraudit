@@ -1,10 +1,10 @@
 """Extract the manuscript's pages and paragraphs (step 2).
 
-A real audit runs `rigoraudit extract`, which reads the published PDF. This
+A real audit runs `miragold extract`, which reads the published PDF. This
 example's manuscript is plain text instead (a PDF is not kept in the tool's
 repository), with pages separated by form feeds and headings marked "##"
 (section) and "###" (subsection), so this script stands in for it. It
-writes, beside itself, the same three files `rigoraudit extract` does:
+writes, beside itself, the same three files `miragold extract` does:
 
 - published.txt: the text of each page; quotes are checked against it.
 - outline.json: the headings and their pages; the report is laid out by

@@ -125,7 +125,7 @@ tracing, keeps tracing effort from being spent on claims that change.
   repeating it on every item. The log is `review/log.json` and replaces
   `review/overrides.json`, which is converted once. Its entries hold every
   operation in rule 3; only overrides are applied so far.
-- 2026-10-31: Rule 9 is built (`rigoraudit.status`). Check scripts save
+- 2026-10-31: Rule 9 is built (`miragold.status`). Check scripts save
   their results with the digest of the record they checked, so the
   paragraph cannot report checks on an earlier version as current.
 - 2026-10-31: Rules 5, 7, and 8 are built (`review.apply`). Claims that
@@ -143,11 +143,11 @@ tracing, keeps tracing effort from being spent on claims that change.
   evidence, and numeric comparisons, are still added in the record, since
   they name a derivation. The status paragraph counts the mechanical checks
   only when they were run on the reviewed record (rule 6), and the report
-  page (`rigoraudit report`) moved into the tool and shows the reviewed
+  page (`miragold report`) moved into the tool and shows the reviewed
   record.
 - 2026-10-31: `review/overrides.json` is no longer converted or read; the
   log is the only record of review actions. The review page always uses
-  the tool's report, and the checks are run with `rigoraudit check`, so a
+  the tool's report, and the checks are run with `miragold check`, so a
   workspace needs no scripts of its own to render or check the record.
 - 2026-11-02: A third kind of drafter, the tool, for findings it works out
   with no judgment, such as p from a printed t

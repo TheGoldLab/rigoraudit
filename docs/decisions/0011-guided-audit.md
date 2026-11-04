@@ -18,7 +18,7 @@ order and the next step known only to whoever has done one before.
 ## Decision
 
 1. **One guided command takes the user through the whole audit.** A
-   single command (name to be chosen; `rigoraudit audit <workspace>` for
+   single command (name to be chosen; `miragold audit <workspace>` for
    now) creates the workspace if it does not exist, works out from the
    files present which steps are done, and does the next one:
    - steps the tool does itself (extracting the text, checking, building
@@ -95,24 +95,24 @@ everyone.
   itself.
 - How the code index is built for each programming language.
 - How large a handoff file can be, which depends on the assistant.
-- When to build it. `rigoraudit new` and `rigoraudit verify`, deferred
+- When to build it. `miragold new` and `miragold verify`, deferred
   until the steps are better tested (design.md, Deferred), become parts of
   this command; the deferral itself stands.
 
 ## Notes
 
-- 2026-10-31: Both deferred commands exist now. `rigoraudit new` is the
-  first run of `rigoraudit audit`, which makes the workspace and its
-  manifest. The verify step is `rigoraudit check`, a command of its own
+- 2026-10-31: Both deferred commands exist now. `miragold new` is the
+  first run of `miragold audit`, which makes the workspace and its
+  manifest. The verify step is `miragold check`, a command of its own
   that runs the anchor and coverage checks from the workspace's fixed
   layout; the guide does not run it yet.
-- 2026-10-31: The guide now runs `rigoraudit check` once there is a record,
+- 2026-10-31: The guide now runs `miragold check` once there is a record,
   and writes the report when every check passes.
 - 2026-10-31: Item 6 is built as the derive step: an assistant writes a
   script for each claim's numbers, and the tool runs it only after the
   user, told the script can do anything they can, has agreed.
 - 2026-10-31: The record is now built by the tool too (the compare step
-  and `rigoraudit record`): an assistant names the observations and
+  and `miragold record`): an assistant names the observations and
   comparisons for each facet, and the schema computes each status. An
   audit's own `record/record.py` still takes precedence.
 - 2026-10-31: The second way in item 3 is built: the guide can send each
@@ -131,5 +131,5 @@ everyone.
   authors' code includes MATLAB files, the guide now asks once, at the
   start, whether scripts may start MATLAB, and saves the answer in the
   manifest (`settings: derive: programs`). If yes, a script that starts it
-  through `rigoraudit.matlab` runs without asking; anything else the check
+  through `miragold.matlab` runs without asking; anything else the check
   finds still waits for the user.

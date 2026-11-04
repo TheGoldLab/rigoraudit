@@ -1,6 +1,6 @@
 """Build the example audit's record (steps 3-7) and write record.json.
 
-Each claim and finding is constructed with rigoraudit.schema, so a malformed
+Each claim and finding is constructed with miragold.schema, so a malformed
 record fails here: an unknown type, a traced claim without findings, a
 status that contradicts its comparisons. Quotes are taken from the extracted
 paragraphs by text, never typed by hand, and values from the derivation's
@@ -13,7 +13,7 @@ import datetime
 import json
 from pathlib import Path
 
-from rigoraudit.schema import (
+from miragold.schema import (
     AuditRecord,
     Basis,
     Claim,
@@ -35,7 +35,7 @@ from rigoraudit.schema import (
     Trace,
     Value,
 )
-from rigoraudit.values import read_values
+from miragold.values import read_values
 
 HERE = Path(__file__).parent
 WORKSPACE = HERE.parent

@@ -52,7 +52,7 @@ commit message, and push, and refuse any that contain:
 - a material file: a PDF, data or archive file, or any file over 1 MB.
 
 The check looks for workspaces in `../audit_examples/`, beside the
-repository, or in the folders listed in `RIGORAUDIT_PRIVATE_ROOTS`. If it
+repository, or in the folders listed in `MIRAGOLD_PRIVATE_ROOTS`. If it
 finds none, it checks file types only and says so. To check every tracked
 file at any time, run `uv run python scripts/check_no_audit_content.py`.
 
@@ -72,7 +72,7 @@ What it may open depends on the job it is doing:
 - **Developing the tool or reviewing results:** the record through the
   tool's own outputs (task files, `work/checks.json`,
   `work/materials/files.md`, the report), not the files in `work/` and
-  `record/` themselves, which are long. `rigoraudit show <claim>` gives
+  `record/` themselves, which are long. `miragold show <claim>` gives
   one claim's part of the record. Needing one of those files is a sign
   the tool lacks a view; add the view.
 - **Changing an answer:** through the tool only. To redo a task, delete its
@@ -93,13 +93,13 @@ your own `.claude/settings.local.json`.
 
 | Module | Does |
 |---|---|
-| `cli` | The `rigoraudit` command |
-| `guide` | The guided audit, `rigoraudit audit`: works out which steps are done and takes the user through the rest, with the same functions as the separate commands |
+| `cli` | The `miragold` command |
+| `guide` | The guided audit, `miragold audit`: works out which steps are done and takes the user through the rest, with the same functions as the separate commands |
 | `clipboard` | Carries a task to a chat and its reply back, on the computer's clipboard |
 | `api` | Optional: sends a task to Claude with the user's own API key (API mode) |
 | `settings` | Reads the manifest (`audit.yaml`): the paper, the code and its commit, the checksums, the audited sections, and other settings |
 | `osf` | Downloads an OSF project's files, checking each against OSF's checksum |
-| `materials` | Lists every file in the materials, what each data file holds, and what the code reads (`rigoraudit materials`) |
+| `materials` | Lists every file in the materials, what each data file holds, and what the code reads (`miragold materials`) |
 | `extract` | Writes the paper's text, outline, and paragraphs, from the publisher's XML or the PDF |
 | `grobid` | Optional: reads the PDF with a GROBID server the user runs |
 | `breaks` | For paragraphs cut from a PDF: the breaks the tool is unsure of, handed to an assistant, and its decisions applied |
@@ -115,12 +115,12 @@ your own `.claude/settings.local.json`.
 | `matlab` | Starts MATLAB from a derivation script |
 | `verify` | Checks every quote, value, and checksum in a record against the materials |
 | `coverage` | Lists checkable statements in the audited text that no claim covers |
-| `check` | `rigoraudit check`: runs `verify` and `coverage` on a workspace and saves the results |
+| `check` | `miragold check`: runs `verify` and `coverage` on a workspace and saves the results |
 | `status` | The generated paragraph on where an audit stands |
 | `review` | The review log, and the reviewed record (the draft with the log applied) |
-| `report` | The report page, `rigoraudit report` |
-| `show` | One claim's part of the record, as text, `rigoraudit show` |
-| `server` | The review page, `rigoraudit review` |
+| `report` | The report page, `miragold report` |
+| `show` | One claim's part of the record, as text, `miragold show` |
+| `server` | The review page, `miragold review` |
 | `feedback` | The feedback report each run writes, which only the user sends |
 | `words` | Wording shared by the tool's messages |
 

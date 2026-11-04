@@ -1,7 +1,7 @@
 # Copyright (c) 2026, Joshua I. Gold
 # SPDX-License-Identifier: BSD-2-Clause
 
-from rigoraudit.clipboard import Clipboard
+from miragold.clipboard import Clipboard
 
 
 def test_text_goes_on_the_clipboard_and_comes_back(tmp_path):

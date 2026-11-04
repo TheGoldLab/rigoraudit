@@ -1,4 +1,4 @@
-# rigoraudit — design
+# miragold — design
 
 This file describes the current overall design, including work in progress. Settled choices and their reasons are recorded in [`decisions/`](decisions/).
 
@@ -38,7 +38,7 @@ traced and compared separately.
 
 ### Evidence graph
 
-Defined in [`src/rigoraudit/schema.py`](../src/rigoraudit/schema.py).
+Defined in [`src/miragold/schema.py`](../src/miragold/schema.py).
 
 - **Anchors** — precise locations, each carrying a verbatim quote: manuscript
   (section, paragraph, character span, page and line number if present), code
@@ -93,19 +93,19 @@ stale if the values change. See [0007](decisions/0007-structured-values.md).
 
 ## Verification
 
-`rigoraudit.verify` checks a record against the materials independently of
+`miragold.verify` checks a record against the materials independently of
 how the record was built. Manuscript quotes are checked against the PDF text
 layer and their stated page, code quotes against git at the anchor's commit,
 and data anchors against the manifest's checksums. Values the audit derived
-are read back by key from their derivation's output (`rigoraudit.values`).
+are read back by key from their derivation's output (`miragold.values`).
 An output whose script or inputs have changed since it was written is
 reported as stale. Every value must appear in the quote the reader sees,
 except a test setting stated in fixed words, which is a reading of the code
-(`paired` for a paired t-test call; `rigoraudit.stats.READINGS`), and a statement about data may cite only numbers its quote shows (a
+(`paired` for a paired t-test call; `miragold.stats.READINGS`), and a statement about data may cite only numbers its quote shows (a
 derived value's statement, which says how it was computed, is exempt).
 Statuses are checked against their rule by the schema itself (0007).
 
-`rigoraudit.coverage` looks for what the record leaves out. Every number,
+`miragold.coverage` looks for what the record leaves out. Every number,
 comparison word, and named statistical test in the audited text must lie
 inside a claim, inside a manuscript quote used as evidence, or inside an
 exclusion that gives its reason (often that the text restates another
@@ -116,8 +116,8 @@ plain prose, or paragraphs that were never extracted.
 
 ## Review
 
-`rigoraudit review` serves the report locally with the review operations
-on each claim and finding (`rigoraudit.server`): Confirm, Edit, Split,
+`miragold review` serves the report locally with the review operations
+on each claim and finding (`miragold.server`): Confirm, Edit, Split,
 Merge, Remove, Add finding on claims; Confirm, Override, Edit trace, Remove
 on findings; Confirm and Override on cross-claim findings; and Add claim from a text selection in a manuscript
 paragraph. Selections give the quotes for Edit, Split, and Add; the server
@@ -126,7 +126,7 @@ does not match it. New evidence for a finding is a selected manuscript
 passage or lines of code, read from the local copy at the record's commit;
 evidence from data or outputs, and numeric comparisons, name a derivation,
 so they are added in the record. Every review action is an entry in one
-log, `review/log.json` (`rigoraudit.review`): the operation, its target,
+log, `review/log.json` (`miragold.review`): the operation, its target,
 reviewer, date, a required reason, and a fingerprint of the target as the
 reviewer saw it (for a claim: type, quote, and what it cites or rests on;
 for a finding: status, comparisons, and evidence; for a cross-claim
@@ -156,17 +156,17 @@ or derivation names its own drafter only when it differs (schema version 4,
 [0010](decisions/0010-provenance-and-review.md)).
 
 Each audit carries a generated paragraph on where it stands
-(`rigoraudit.status`): who drafted it, the mechanical results, how many
+(`miragold.status`): who drafted it, the mechanical results, how many
 claims and findings review has covered (an item counts once it has a
 review action whose fingerprint still matches), the independent annotation
-and authors' response if any, and the next step. `rigoraudit check` saves
+and authors' response if any, and the next step. `miragold check` saves
 its results to `work/checks.json` with the digest of the record it
 checked; if the record has changed since, the paragraph says the checks
 were not run on this version. The checks are of the reviewed record (the
 draft with the review log applied, 0010 rule 6). The report puts the
 paragraph in its header and between markers in the workspace README.
 
-The report (`rigoraudit.report`) shows the reviewed record (`review.apply`), and marks claims
+The report (`miragold.report`) shows the reviewed record (`review.apply`), and marks claims
 (`data-claim-id`), findings (`data-finding-id`), and paragraph text
 (`data-section`, `data-paragraph`, with claim labels inside marked
 `data-not-text`) for the page's script.
@@ -176,9 +176,9 @@ yet enforced).
 
 ## Report organization
 
-The report (`rigoraudit report`, `rigoraudit.report`)
+The report (`miragold report`, `miragold.report`)
 follows the manuscript's own major sections, named and ordered as
-in the PDF outline (`rigoraudit.sections`): a summary of potential issues,
+in the PDF outline (`miragold.sections`): a summary of potential issues,
 then one collapsible block per major section with its text beside its claim
 cards. Subsections appear as headings inside a block. Figure legends and
 panel text go with the subsection that cites the figure most often. Sections
@@ -216,14 +216,14 @@ named is in the record, and points out names a gap gives that are in the
 materials after all ([guide](guide.md#1-collect-materials)).
 
 `derivations/` holds scripts that run the authors' code or recompute values
-independently, the values they write (read back by `rigoraudit.values`), and
+independently, the values they write (read back by `miragold.values`), and
 any stand-ins for toolbox functions the audit environment lacks. Each
 stand-in is named in the manifest's gaps. Equations typed in for a
 derivation are kept, in LaTeX, in `derivations/equations.yaml`, so
-`rigoraudit equations` can show each beside its picture as printed. They
+`miragold equations` can show each beside its picture as printed. They
 are keyed by the number printed, never renumbered; the auditor's
 corrections to numbers the tool misread are in
-`derivations/equation_numbers.yaml` (`rigoraudit.numbering`).
+`derivations/equation_numbers.yaml` (`miragold.numbering`).
 
 Materials are never reorganized. The manifest maps whatever structure they
 arrive in onto roles (manuscript, supplement, code, data, figures), and
@@ -236,17 +236,17 @@ for now the manifest is written by hand.
 | Stage | Does | Built |
 |---|---|---|
 | inventory | materials → every file, what each data file holds, and what the code reads; draft manifest (human-confirmed) | the list, `work/materials/files.md`, written at every guided run (`materials`, [0014](decisions/0014-list-the-materials.md)); manifests are hand-written |
-| extract | manuscript → structured text with anchors; code and data indexed | `rigoraudit extract`: paragraphs from the publisher's XML (with characters it leaves out put in from the PDF), or a best guess from the PDF (the tool's own, or GROBID's if a server is named); code indexed for trace (`codeindex`). Each build of the record finds every quote again in the paragraphs as now extracted, so extracting again after later steps is safe (`Paragraph.locate`) |
+| extract | manuscript → structured text with anchors; code and data indexed | `miragold extract`: paragraphs from the publisher's XML (with characters it leaves out put in from the PDF), or a best guess from the PDF (the tool's own, or GROBID's if a server is named); code indexed for trace (`codeindex`). Each build of the record finds every quote again in the paragraphs as now extracted, so extracting again after later steps is safe (`Paragraph.locate`) |
 | segment | text → claims | instructions, files to paste into an assistant, the check and import of its reply, and record claims built from accepted replies (`segment`) |
 | classify | claim → type | done in the same pass as segment (instructions v2) |
 | decompose | new-result claim → facets | instructions, the check and import of an assistant's reply, and the Results observations built from it (`decompose`); values are read from the text as printed. Each reported test is copied part by part, and the tool works out p, N, and the effect size from it and builds those findings itself, drafted by the tool (`stats`, [0015](decisions/0015-statistical-tests.md)) |
 | docs | the authors' documentation → what each file says about running the code | listing, handoff, and check (`docs`); the guided command does it before segment, and derive hands its notes to the assistant writing scripts |
 | trace | facets, and procedures whole → methods statements → code → data/outputs | Methods and code, with an assistant that browses the public repository at the manifest's commit or, failing that, reads an index of the code and asks for lines (`trace`, `codeindex`); every citation is checked against the local copy. For each copied test it also cites the test's settings and any check of its assumptions, and the tool compares them (`stats`, [0015](decisions/0015-statistical-tests.md)) |
-| derive | facets → recomputed values | an assistant writes one script for up to ten claims; the tool checks it, runs it (once the user agrees, if the script checks flag it; starting MATLAB through `rigoraudit.matlab` is not flagged if the manifest allows it), and builds output and data observations from what it saved, and code observations from the lines that set a value (`derive`). For each test the script recomputes, it saves the N, what one value is, the values in each group, and, if it reruns the test, its p; the tool compares the N, the unit, and p with the text (p widened for resampling error) and describes the values, with no status (`stats`, [0015](decisions/0015-statistical-tests.md)) |
-| compare | sources → status per link | an assistant names the observations and comparisons for each facet, or for a procedure as a whole ([0017](decisions/0017-procedures-traced-whole.md)); statuses are computed from them (`compare`, `schema`), and `rigoraudit record` builds the record from the answers |
-| cross-check | record → values printed in more than one claim, compared with each other | rules R1–R3 (restates, same place, same label) propose groups; an assistant confirms, splits, or adds them (R4); the tool compares within each group, in `rigoraudit check`, and writes `work/crosscheck/findings.json` (`crosscheck`, [0016](decisions/0016-cross-claim-checks.md)) |
-| verify | record → checks of every quote, value, and status against the materials | `rigoraudit check` (`verify`, `values`, `coverage`) |
-| report | evidence graph → human-readable report | `rigoraudit report`, and the review page (`rigoraudit review`); one claim as text (`rigoraudit show`); an assistant drafts the page's header from the manifest and the paper's first page, as plain text the tool checks and writes out (`header`) |
+| derive | facets → recomputed values | an assistant writes one script for up to ten claims; the tool checks it, runs it (once the user agrees, if the script checks flag it; starting MATLAB through `miragold.matlab` is not flagged if the manifest allows it), and builds output and data observations from what it saved, and code observations from the lines that set a value (`derive`). For each test the script recomputes, it saves the N, what one value is, the values in each group, and, if it reruns the test, its p; the tool compares the N, the unit, and p with the text (p widened for resampling error) and describes the values, with no status (`stats`, [0015](decisions/0015-statistical-tests.md)) |
+| compare | sources → status per link | an assistant names the observations and comparisons for each facet, or for a procedure as a whole ([0017](decisions/0017-procedures-traced-whole.md)); statuses are computed from them (`compare`, `schema`), and `miragold record` builds the record from the answers |
+| cross-check | record → values printed in more than one claim, compared with each other | rules R1–R3 (restates, same place, same label) propose groups; an assistant confirms, splits, or adds them (R4); the tool compares within each group, in `miragold check`, and writes `work/crosscheck/findings.json` (`crosscheck`, [0016](decisions/0016-cross-claim-checks.md)) |
+| verify | record → checks of every quote, value, and status against the materials | `miragold check` (`verify`, `values`, `coverage`) |
+| report | evidence graph → human-readable report | `miragold report`, and the review page (`miragold review`); one claim as text (`miragold show`); an assistant drafts the page's header from the manifest and the paper's first page, as plain text the tool checks and writes out (`header`) |
 
 Segment, classify, decompose, trace, derive, compare, cross-check, the report's header, and the inventory's script map are
 expected to use a language model; the other stages never do. A model's
@@ -254,7 +254,7 @@ output passes the same checks as a hand-built record before it is accepted.
 See [0009](decisions/0009-language-models.md).
 
 The instructions for each step that needs judgment are written into the
-package (`rigoraudit/instructions/`), versioned, and given to whichever
+package (`miragold/instructions/`), versioned, and given to whichever
 assistant does the step; one guided command takes the user through every
 step: tasks carried to and from a chat on the clipboard (or as files), an
 inbox a coding assistant writes its replies to, or, only if the user
@@ -263,7 +263,7 @@ confirms the cost, a model asked through the API (`guide`, `clipboard`,
 
 Each stage writes its accepted answers to `work/<stage>/`, so stages can
 be run, evaluated, and replaced independently. The record is assembled
-from those answers by `rigoraudit record` (`compare.write_record`), or by
+from those answers by `miragold record` (`compare.write_record`), or by
 a script in the workspace (`record/record.py`), from the same answers
 (`segment.record_claims`, `decompose.results_observations`,
 `trace.trace_observations`, `derive.derived_observations`) or by hand. The

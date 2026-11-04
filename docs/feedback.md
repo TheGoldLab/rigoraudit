@@ -38,7 +38,7 @@ It holds no text from the materials unless the user added it.
 3. **Give it one outcome**, and write it on the issue:
    - *Fixed*: a code change, with the commit;
    - *Instructions revised*: a new version of the step's instructions
-     (`src/rigoraudit/instructions/`), with the version number;
+     (`src/miragold/instructions/`), with the version number;
    - *Documented*: a change to the README or docs;
    - *Deferred to a decision*: a record in `docs/decisions/`, proposed;
    - *Declined*: with the reason.

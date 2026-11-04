@@ -11,7 +11,7 @@ materials:
     description: >-
       The paper's text, pages separated by form feeds. A real audit keeps
       the published PDF here and extracts its text layer.
-    sha256: df393465df7abfcbc2f9307ce1890210eb799523d16bb425d699c41bc6a046f7
+    sha256: 415db5a43045611cc7b6604aeef8bfb68c6e6ce69d884ae98af94d39c40a8e40
   code:
     path: code/
     version: >-

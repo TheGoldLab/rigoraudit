@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
-title: rigoraudit
+title: miragold
 abstract: "Audit scientific manuscripts against their code and data for transparency and consistency."
 type: software
 authors:
@@ -10,5 +10,5 @@ authors:
     orcid: "https://orcid.org/0000-0002-6018-0483"
 license: BSD-2-Clause
 version: 0.1.0
-repository-code: "https://github.com/TheGoldLab/rigoraudit"
+repository-code: "https://github.com/TheGoldLab/miragold"
 # At the first release, add date-released and the Zenodo DOI (doi: ...).

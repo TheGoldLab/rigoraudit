@@ -6,7 +6,7 @@ import zlib
 
 from conftest import make_pdf
 
-from rigoraudit import pictures
+from miragold import pictures
 
 
 def size(image: bytes) -> tuple[int, int]:

@@ -4,7 +4,7 @@
 
 ## Problem
 
-The first independent check of a gold record (`rigoraudit.verify`, run on
+The first independent check of a gold record (`miragold.verify`, run on
 the first example audit) confirmed every manuscript and code quote it could
 reach. It could not check any of the data quotes, and it could not check any
 status, because the record holds both as free text. In synthetic form:
@@ -73,7 +73,7 @@ prints. This decision makes it reproducible *by the tool*.
    *recomputed* values.
 
 5. **Reviewers override from the report; overrides live in `review/`.**
-   - `rigoraudit review <workspace>` serves the report locally. Each finding
+   - `miragold review <workspace>` serves the report locally. Each finding
      has an *Override* button that opens a short form (status, reason) and
      writes the entry to `review/overrides.json`, with the reviewer and date
      (JSON rather than YAML, so the tool needs no YAML dependency).

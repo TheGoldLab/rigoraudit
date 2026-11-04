@@ -10,9 +10,9 @@ from conftest import make_pdf
 from pypdf import PdfWriter
 from pypdf.generic import ArrayObject, DecodedStreamObject, DictionaryObject, NameObject
 
-from rigoraudit import cli, extract
-from rigoraudit.paragraphs import PARAGRAPHS, read_paragraphs
-from rigoraudit.verify import ManuscriptText
+from miragold import cli, extract
+from miragold.paragraphs import PARAGRAPHS, read_paragraphs
+from miragold.verify import ManuscriptText
 
 FULL = "is a full line of made-up text that runs across the whole width of the column"
 HEADER = "Journal of Examples 2026 | page {}"
@@ -576,7 +576,7 @@ def test_headings_below_the_outline(tmp_path):
 def test_run_in_headings_from_the_outline(tmp_path):
     # the outline lists the headings; each runs into its paragraph's first
     # line, after its own line or on its own, in larger type
-    from rigoraudit.sections import Heading
+    from miragold.sections import Heading
 
     def para(word):
         return [body(f"{word} {k} {FULL}") for k in range(5)] + [body("It ends.")]

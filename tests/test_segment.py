@@ -8,10 +8,10 @@ from pathlib import Path
 
 import pytest
 
-from rigoraudit import cli, instructions
-from rigoraudit.paragraphs import read_paragraphs
-from rigoraudit.schema import AuditRecord
-from rigoraudit.segment import (
+from miragold import cli, instructions
+from miragold.paragraphs import read_paragraphs
+from miragold.schema import AuditRecord
+from miragold.segment import (
     Accepted,
     AnswerError,
     Handoff,
@@ -296,7 +296,7 @@ def test_import_returns_problems_and_saves_nothing(tmp_path):
 def test_import_needs_a_waiting_handoff(tmp_path):
     ws = workspace_with(tmp_path)
     assert import_answer(ws, reply(GOOD), "M")[1] == [
-        "No handoff is waiting for an answer; run rigoraudit handoff segment."
+        "No handoff is waiting for an answer; run miragold handoff segment."
     ]
     write_handoffs(ws)
     claim = {**GOOD[0], "id": "R7.1.a", "paragraph": "R7.1", "quote": "x"}
@@ -334,7 +334,7 @@ def test_cli_import_prints_problems_to_paste_back(tmp_path, capsys):
     cli.main(["import", "segment", str(bad), str(ws), "--by", "M"])
     out = capsys.readouterr().out
     assert out.startswith("Accepted segment-R1.1: 2 claims and 0 left-out pieces")
-    assert "Next: run rigoraudit handoff segment" in out
+    assert "Next: run miragold handoff segment" in out
 
 
 # --- Claim types -------------------------------------------------------------

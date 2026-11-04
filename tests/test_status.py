@@ -7,10 +7,10 @@ from collections import Counter
 from conftest import DRAFTER
 from test_review import override, record
 
-from rigoraudit import review, status
-from rigoraudit.coverage import Report
-from rigoraudit.schema import Drafter, DrafterKind, Status
-from rigoraudit.verify import AnchorCheck, Outcome
+from miragold import review, status
+from miragold.coverage import Report
+from miragold.schema import Drafter, DrafterKind, Status
+from miragold.verify import AnchorCheck, Outcome
 
 
 def anchors(*outcomes: Outcome) -> list[AnchorCheck]:

@@ -53,7 +53,7 @@ this repository stays private. (Its history once contained audit content; on
      file: `Copyright (c) 2026, Joshua I. Gold` and `SPDX-License-Identifier:
      BSD-2-Clause`.
    - [x] Bundled code keeps its own license: KaTeX (MIT) in
-     `src/rigoraudit/katex/`, with its `LICENSE`, named in `README.md`.
+     `src/miragold/katex/`, with its `LICENSE`, named in `README.md`.
    - [x] `pyproject.toml`: `license = "BSD-2-Clause AND MIT"` (MIT for
      KaTeX) and `license-files` listing both licenses; author name and a contact address meant
      to be public.

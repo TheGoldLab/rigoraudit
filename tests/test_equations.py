@@ -4,9 +4,9 @@ import json
 
 import pytest
 
-from rigoraudit import equations, pictures
-from rigoraudit.cli import main
-from rigoraudit.extract import EQUATIONS_FILE, PICTURES
+from miragold import equations, pictures
+from miragold.cli import main
+from miragold.extract import EQUATIONS_FILE, PICTURES
 
 # a 1×1 PNG
 PNG = bytes.fromhex(
@@ -85,5 +85,5 @@ def test_equations_command(workspace, capsys):
     main(["equations", str(workspace)])
     assert (workspace / equations.PAGE).is_file()
     assert "2 equations, 0 typed in" in capsys.readouterr().out
-    with pytest.raises(SystemExit, match="run rigoraudit extract first"):
+    with pytest.raises(SystemExit, match="run miragold extract first"):
         main(["equations", str(workspace / "elsewhere")])

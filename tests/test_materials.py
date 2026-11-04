@@ -4,8 +4,8 @@
 import numpy as np
 import scipy.io
 
-from rigoraudit import materials
-from rigoraudit.settings import Gap, Settings
+from miragold import materials
+from miragold.settings import Gap, Settings
 
 S = Settings(manuscript="paper/paper.pdf")
 

@@ -7,7 +7,7 @@ import subprocess
 
 import pytest
 
-from rigoraudit import cli, docs, instructions, settings
+from miragold import cli, docs, instructions, settings
 
 README = """# Dwell analysis
 

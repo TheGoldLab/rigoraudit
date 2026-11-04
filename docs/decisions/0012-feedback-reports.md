@@ -41,14 +41,14 @@ would leak it.
      do, and what went wrong or was confusing.
 
 3. **Nothing is sent by the tool.** The tool never connects to the network
-   to report. `rigoraudit feedback` shows the latest report, says exactly
+   to report. `miragold feedback` shows the latest report, says exactly
    what it contains, and gives the two ways to send it: a new issue on the
    tool's public repository (with a form that has a place for the report),
    or email to the developers. It says plainly that an issue is public.
 
 4. **The user may add more, by choice.** If a problem cannot be understood
    without an example, such as an assistant's reply that the checks
-   refused, the user can include it. `rigoraudit feedback --include <file>`
+   refused, the user can include it. `miragold feedback --include <file>`
    adds it in a section marked as audit material, and recommends email
    rather than a public issue.
 

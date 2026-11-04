@@ -27,7 +27,7 @@ def root(tmp_path, monkeypatch):
     (space / "release_terms.txt").write_text(
         "# comment\nZorblatt\nsubject Q7\n", encoding="utf-8"
     )
-    monkeypatch.setenv("RIGORAUDIT_PRIVATE_ROOTS", str(tmp_path))
+    monkeypatch.setenv("MIRAGOLD_PRIVATE_ROOTS", str(tmp_path))
     return tmp_path
 
 
@@ -136,5 +136,5 @@ def test_material_files_are_refused():
 
 
 def test_no_workspaces_means_file_checks_only(tmp_path, monkeypatch):
-    monkeypatch.setenv("RIGORAUDIT_PRIVATE_ROOTS", str(tmp_path))
+    monkeypatch.setenv("MIRAGOLD_PRIVATE_ROOTS", str(tmp_path))
     assert check.workspaces(check.private_roots()) == []

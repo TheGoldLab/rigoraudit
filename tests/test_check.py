@@ -5,8 +5,8 @@ import json
 import shutil
 from pathlib import Path
 
-from rigoraudit import check, crosscheck, segment
-from rigoraudit.coverage import EXCLUSIONS
+from miragold import check, crosscheck, segment
+from miragold.coverage import EXCLUSIONS
 
 EXAMPLE = Path(__file__).resolve().parents[1] / "examples" / "example-audit"
 

@@ -110,7 +110,7 @@ on it stays valid.
 
 ## Notes
 
-- 2026-11-02: R1–R3 are built (`rigoraudit.crosscheck`). Choices made in
+- 2026-11-02: R1–R3 are built (`miragold.crosscheck`). Choices made in
   building them:
   - **R3 needs a subject.** R3 joins two values only if both name a
     subject; a value with no subject is joined only by R1 or R2. Without
@@ -122,7 +122,7 @@ on it stays valid.
     values to have no subject.
   - **Two bounds** agree if some value meets both (p < 0.05 and p < 0.001
     agree; p > 0.1 and p < 0.05 differ).
-  - **Where the findings are.** `rigoraudit check` (and `rigoraudit
+  - **Where the findings are.** `miragold check` (and `miragold
     crosscheck`) write them to `work/crosscheck/findings.json`. The report
     works them out from the record it shows, so it is never out of date;
     no stage is added to the guided audit, which runs them as part of the
@@ -139,7 +139,7 @@ on it stays valid.
   the rules miss. The tool compares every pair within a confirmed group
   from different claims and different printed text. This adds a step to
   the guided audit, `crosscheck`, after compare, and removes the command
-  `rigoraudit crosscheck`; the check writes the findings. The answer keeps
+  `miragold crosscheck`; the check writes the findings. The answer keeps
   the values it was given, and is used only while the record gives the
   same ones.
 - 2026-11-03: Two changes after reviewing a real audit. **A value printed

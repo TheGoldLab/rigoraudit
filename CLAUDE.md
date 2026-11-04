@@ -1,4 +1,4 @@
-# rigoraudit — instructions for working in this repository
+# miragold — instructions for working in this repository
 
 - **No audit content, ever.** This repository holds the tool only. Never
   write into it anything taken from an audit: quotes, values, claim IDs from

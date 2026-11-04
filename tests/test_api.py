@@ -7,7 +7,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from rigoraudit import api, settings
+from miragold import api, settings
 
 # ask() reads anthropic's error types, even with a stand-in client
 needs_anthropic = pytest.mark.skipif(

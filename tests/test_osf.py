@@ -6,7 +6,7 @@ import json
 
 import pytest
 
-from rigoraudit import osf
+from miragold import osf
 
 API = "https://api.osf.io/v2/nodes/ab3cd/files/osfstorage/"
 CONTENT = {

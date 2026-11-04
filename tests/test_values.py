@@ -6,7 +6,7 @@ from fractions import Fraction
 
 import pytest
 
-from rigoraudit.values import flatten, read_values, sha256, write_values
+from miragold.values import flatten, read_values, sha256, write_values
 
 
 def test_flatten_nests_keys_and_converts_numeric_types():

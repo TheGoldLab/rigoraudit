@@ -6,11 +6,11 @@ import json
 
 import pytest
 
-from rigoraudit import compare, decompose, segment, settings
-from rigoraudit.decompose import Design, EffectName, EffectSize, ReportedTest, Statistic
-from rigoraudit.paragraphs import Paragraph
-from rigoraudit.schema import Drafter, DrafterKind, Obtained, Status, Trace
-from rigoraudit.stats import (
+from miragold import compare, decompose, segment, settings
+from miragold.decompose import Design, EffectName, EffectSize, ReportedTest, Statistic
+from miragold.paragraphs import Paragraph
+from miragold.schema import Drafter, DrafterKind, Obtained, Status, Trace
+from miragold.stats import (
     claim_test_findings,
     implied_n,
     resampling_margin,
@@ -20,7 +20,7 @@ from rigoraudit.stats import (
 
 TOOL = Drafter(
     kind=DrafterKind.TOOL,
-    name="rigoraudit",
+    name="miragold",
     stage="stats",
     date=datetime.date(2026, 1, 2),
 )
@@ -154,7 +154,7 @@ def test_the_record_holds_the_tools_findings(tmp_path):
 
 
 def test_each_test_says_what_it_assumes():
-    from rigoraudit.stats import assumes
+    from miragold.stats import assumes
 
     def line(**test):
         return assumes(ReportedTest(quote="q", value="1", **test))
@@ -168,7 +168,7 @@ def test_each_test_says_what_it_assumes():
 
 
 def test_the_data_are_described_without_a_judgment():
-    from rigoraudit.stats import data_facts
+    from miragold.stats import data_facts
 
     text = data_facts({"": [0, 0, 1, 1, 1, 0.5]}, rank=True, bounds=(0, 1))
     assert text == (

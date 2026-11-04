@@ -3,7 +3,7 @@
 
 import pytest
 
-from rigoraudit import settings
+from miragold import settings
 
 MANIFEST = """\
 materials:

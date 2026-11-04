@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from rigoraudit import header, report, settings
+from miragold import header, report, settings
 
 EXAMPLE = Path(__file__).resolve().parents[1] / "examples" / "example-audit"
 

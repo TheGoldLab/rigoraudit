@@ -3,7 +3,7 @@
 
 import json
 
-from rigoraudit.sections import (
+from miragold.sections import (
     Heading,
     Place,
     Sections,

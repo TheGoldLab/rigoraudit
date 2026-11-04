@@ -4,9 +4,9 @@
 import datetime
 import json
 
-from rigoraudit import crosscheck
-from rigoraudit.crosscheck import agree
-from rigoraudit.schema import (
+from miragold import crosscheck
+from miragold.crosscheck import agree
+from miragold.schema import (
     AuditRecord,
     Claim,
     ClaimType,

@@ -28,3 +28,6 @@ explain how it got there.
 | [0015](0015-statistical-tests.md) | Statistical tests: each reported number is checked against the others, the Methods, and the code |
 | [0016](0016-cross-claim-checks.md) | Values that disagree between claims are found by grouping, in a stage after compare |
 | [0017](0017-procedures-traced-whole.md) | Procedure claims are traced and compared whole, not split into facets |
+
+2026-11-04: The tool was renamed from rigoraudit to miragold. The name
+was replaced in the records above, and nothing else in them was changed.

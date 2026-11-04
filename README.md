@@ -1,6 +1,6 @@
-# rigoraudit
+# miragold: the gold standard for manuscript integrity and rigor audits
 
-Audits a scientific paper together with its code and data. The audit identifies every claim, along with its supporting evidence (Methods, code, and data), in the paper (**transparency**) and checks for agreement between each claim and its evidence (**consistency**).
+Audits a scientific paper together with its code and data. The audit identifies every claim, along with its supporting evidence (methods, code, and data), in the paper (**transparency**) and checks for agreement between each claim and its evidence (**consistency**).
 
 Several stages of the audit can be (tediously) done by hand but are typically done with an AI assistant. These stages include extracting claims from the paper; parsing them into testable components; aligning them with appropriate sections of methods, code, and data; and running the relevant code. The remaining stages, involving cross-checking the claims and writing the report, are done by code included in this repository.
 
@@ -35,7 +35,7 @@ This tool has been designed and tested primarily using neuroscience studies and 
    the browser, confirming or correcting each claim and finding, with a
    reason for each change.
 
-The tool guides every step (`rigoraudit audit`), with whichever AI
+The tool guides every step (`miragold audit`), with whichever AI
 assistant you have; the review in step 7 is yours. The
 [user guide](docs/guide.md) covers every step.
 
@@ -70,7 +70,7 @@ this repository:
 uv tool install --editable .
 ```
 
-This puts the `rigoraudit` command on your path, so it can be run from any
+This puts the `miragold` command on your path, so it can be run from any
 folder. (Changes to the repository take effect without reinstalling.) To
 let the tool send tasks to Claude itself with your Anthropic API key
 (optional, and it costs money: see the guide's
@@ -88,7 +88,7 @@ and open it in the review page:
 
 ```
 examples/example-audit/rebuild.sh
-rigoraudit review examples/example-audit
+miragold review examples/example-audit
 ```
 
 Then open http://127.0.0.1:8765/ in a browser. Press Ctrl-C in the terminal
@@ -97,7 +97,7 @@ to stop.
 ## Start an audit
 
 ```
-rigoraudit audit my-audit
+miragold audit my-audit
 ```
 
 makes the folder `my-audit` with a manifest to fill in, and then takes you
@@ -107,7 +107,7 @@ left off. See the [user guide](docs/guide.md).
 ## Commands
 
 Each command works on the current folder, or on the workspace you name last
-(e.g., `rigoraudit check my-audit`). `rigoraudit <command> --help` gives the
+(e.g., `miragold check my-audit`). `miragold <command> --help` gives the
 details.
 
 | Command | Does |
@@ -139,6 +139,6 @@ details.
 ## License
 
 Copyright (c) 2026, Joshua I. Gold. Released under the BSD 2-Clause License;
-see [LICENSE](LICENSE). The package bundles KaTeX (`src/rigoraudit/katex/`),
+see [LICENSE](LICENSE). The package bundles KaTeX (`src/miragold/katex/`),
 which draws the maths on the equations page, under the MIT License; see
-[its license](src/rigoraudit/katex/LICENSE).
+[its license](src/miragold/katex/LICENSE).

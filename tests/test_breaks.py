@@ -1,7 +1,7 @@
 import json
 
-from rigoraudit import breaks, cli, handoffs
-from rigoraudit.paragraphs import PARAGRAPHS
+from miragold import breaks, cli, handoffs
+from miragold.paragraphs import PARAGRAPHS
 
 TOOK = "Mice licked more after the reward tone."
 LATER = "Licking began 120 ms after onset."
@@ -158,4 +158,4 @@ def test_command_says_what_changed_and_what_comes_next(tmp_path, capsys):
         "Accepted the paragraph breaks: 1 paragraph split in two and 1 pair "
         f"joined into one, in {PARAGRAPHS}."
     )
-    assert out.rstrip().endswith("Next: rigoraudit handoff segment")
+    assert out.rstrip().endswith("Next: miragold handoff segment")

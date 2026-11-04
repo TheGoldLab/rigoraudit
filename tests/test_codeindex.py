@@ -3,7 +3,7 @@
 
 import json
 
-from rigoraudit import codeindex
+from miragold import codeindex
 
 
 def test_python_functions_and_first_assignments():

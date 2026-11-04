@@ -5,7 +5,7 @@ import json
 
 import pytest
 
-from rigoraudit.paragraphs import (
+from miragold.paragraphs import (
     Paragraph,
     in_scope,
     join_page_starts,
