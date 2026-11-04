@@ -75,6 +75,18 @@ def test_the_status_is_computed_and_the_record_built(derived):
     assert record.drafted_by.prompt_version == instructions.load("compare").label
 
 
+def test_the_record_names_the_instructions_an_answer_followed(derived):
+    saved, problems = compare.import_answer(derived, answer(PRECISION, SILENT), "T")
+    assert problems == [] and saved is not None
+    current = instructions.load("compare").label
+    saved.write_text(
+        saved.read_text(encoding="utf-8").replace(current, "compare v1"),
+        encoding="utf-8",
+    )
+    record = compare.build_record(derived, settings.load(derived))
+    assert record.drafted_by.prompt_version == "compare v1"
+
+
 def test_a_finding_the_record_would_refuse_is_sent_back(derived):
     one_source = {**PRECISION, "observations": ["O1"]}
     _, problems = compare.import_answer(derived, answer(one_source, SILENT), "T")

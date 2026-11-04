@@ -572,17 +572,22 @@ def import_answer(
 # --- The record ---------------------------------------------------------------
 
 
-def _drafter(name: str, stage: str, when: str) -> Drafter:
-    """An assistant as drafter; the name it was given ("Claude (website)")
-    stands for its model too."""
+def _drafter(a: Accepted | segment.Accepted, stage: str) -> Drafter:
+    """The assistant that gave an accepted answer, as drafter: the name it
+    was given ("Claude (website)") stands for its model too, and the
+    instructions are the ones the answer followed."""
     return Drafter(
         kind=DrafterKind.MODEL,
-        name=name,
-        model_id=name,
+        name=a.drafted_by,
+        model_id=a.drafted_by,
         stage=stage,
-        prompt_version=instructions.load(stage).label,
-        date=datetime.date.fromisoformat(when),
+        prompt_version=a.answer.instructions,
+        date=datetime.date.fromisoformat(a.imported),
     )
+
+
+def _same(a: Drafter, b: Drafter) -> bool:
+    return (a.name, a.prompt_version) == (b.name, b.prompt_version)
 
 
 def build_record(workspace: Path, settings: Settings) -> AuditRecord:
@@ -600,7 +605,7 @@ def build_record(workspace: Path, settings: Settings) -> AuditRecord:
         raise ValueError("there are no claims yet: the segment step comes first")
     first = accepted[0] if accepted else split[0]
     stage = STEP if accepted else segment.STEP
-    drafter = _drafter(first.drafted_by, stage, first.imported)
+    drafter = _drafter(first, stage)
     by_claim = {c.id: a for a in split for c in a.answer.claims}
     findings = [f for a in accepted for f in a.findings]
     checked = tool_findings(workspace, settings)
@@ -616,13 +621,11 @@ def build_record(workspace: Path, settings: Settings) -> AuditRecord:
         else:
             state = Trace.PENDING
         a = by_claim[c.id]
-        own = None
-        if a.drafted_by != drafter.name:
-            own = _drafter(a.drafted_by, segment.STEP, a.imported)
+        own = None if a.drafted_by == drafter.name else _drafter(a, segment.STEP)
         claims.append(c.model_copy(update={"trace": state, "drafted_by": own}))
     for a in accepted:
-        if a.drafted_by != drafter.name:
-            own = _drafter(a.drafted_by, STEP, a.imported)
+        own = _drafter(a, STEP)
+        if not _same(own, drafter):
             findings = [
                 f.model_copy(update={"drafted_by": own})
                 if f.claim_id in a.claims
