@@ -54,7 +54,7 @@ def ws(tmp_path):
     assert not problems
     decompose.write_handoffs(ws)
     _, problems = decompose.import_answer(ws, json.dumps({
-        "instructions": "decompose v3", "claims": [{"id": "R1.1.a", "facets": [
+        "instructions": "decompose v4", "claims": [{"id": "R1.1.a", "facets": [
         {"facet": "quantity", "quote": "correct on 75% of trials", "states": "s",
          "values": [{"name": "accuracy", "printed": "75%", "subject": "block A"}]},
         {"facet": "condition", "quote": "in block A", "states": "s"}]}]}), "T")  # fmt: skip
@@ -63,7 +63,7 @@ def ws(tmp_path):
 
 
 def reply(values, cannot=(), script=SCRIPT):
-    answer = {"instructions": "derive v4", "claims": [{"claim": "R1.1.a",
+    answer = {"instructions": "derive v5", "claims": [{"claim": "R1.1.a",
               "values": values, "cannot": list(cannot)}]}  # fmt: skip
     text = f"```json\n{json.dumps(answer)}\n```\n"
     return text + (f"\n```python\n{script}```\n" if script else "")
@@ -191,7 +191,7 @@ def test_a_number_the_code_sets_is_quoted_from_the_code(ws):
     def answer(**setting):
         entry = {"for": "V1", "file": "fit.py", "lines": [2, 2], "value": 75}
         claims = [{"claim": "R1.1.a", "in_code": [{**entry, **setting}]}]
-        return json.dumps({"instructions": "derive v4", "claims": claims})
+        return json.dumps({"instructions": "derive v5", "claims": claims})
 
     def kinds(**setting):
         _, problems = derive.import_answer(ws, s, answer(**setting), "T",
@@ -407,7 +407,7 @@ def ws_two(tmp_path):
     assert not problems
     decompose.write_handoffs(ws)
     _, problems = decompose.import_answer(ws, json.dumps({
-        "instructions": "decompose v3", "claims": [
+        "instructions": "decompose v4", "claims": [
         {"id": "R1.1.a", "facets": [{"facet": "quantity", "quote": "correct on 75% of trials",
          "states": "s", "values": [{"name": "accuracy", "printed": "75%"}]}]},
         {"id": "R1.1.b", "facets": [{"facet": "population", "quote": "over 4 trials",
@@ -417,7 +417,7 @@ def ws_two(tmp_path):
 
 
 def both(*claims):
-    answer = {"instructions": "derive v4", "claims": list(claims)}
+    answer = {"instructions": "derive v5", "claims": list(claims)}
     return f"```json\n{json.dumps(answer)}\n```\n\n```python\n{BOTH}```\n"
 
 
@@ -494,7 +494,7 @@ def ws_test(tmp_path):
     assert not problems
     decompose.write_handoffs(ws)
     _, problems = decompose.import_answer(ws, json.dumps({
-        "instructions": "decompose v3", "claims": [{"id": "R1.1.a", "facets": [
+        "instructions": "decompose v4", "claims": [{"id": "R1.1.a", "facets": [
         {"facet": "population", "quote": "12 mice", "states": "s",
          "values": [{"name": "mice", "printed": "12"}]},
         {"facet": "analysis", "quote": "t(10) = 2.50, p = 0.031", "states": "s",
@@ -510,7 +510,7 @@ def ws_test(tmp_path):
 def reply_for_test(**test):
     entry = {"test": 1, "n": "test_1/n", "unit": "test_1/unit",
              "source": "data/trials.json", "groups": "test_1/groups"} | test  # fmt: skip
-    answer = {"instructions": "derive v4", "claims": [{"claim": "R1.1.a",
+    answer = {"instructions": "derive v5", "claims": [{"claim": "R1.1.a",
               "cannot": [{"for": f"V{i}", "reason": "r"} for i in (1, 2, 3)],
               "tests": [entry]}]}  # fmt: skip
     return f"```json\n{json.dumps(answer)}\n```\n\n```python\n{TEST_SCRIPT}```\n"
@@ -553,3 +553,42 @@ def test_a_saved_unit_must_be_one_of_the_words(ws_test):
             '"session"', '"mouse"'), "T", approve=lambda p, c: True
     )  # fmt: skip
     assert [p.kind for p in problems] == ["bad-unit"]
+
+
+@pytest.mark.parametrize(
+    ("rerun", "resamples", "status"),
+    [
+        (0.0312, None, "consistent"),
+        (0.040, None, "differs"),
+        (0.040, 1000, "consistent"),  # within the margin for resampling error
+    ],
+)
+def test_a_rerun_p_is_compared_with_the_printed_p(ws_test, rerun, resamples, status):
+    from rigoraudit import stats
+
+    saved = f'"n": 12, "p": {rerun}, '
+    p = {"key": "test_1/p", "how": "recomputed"}
+    if resamples:
+        saved += f'"resamples": {resamples}, '
+        p["resamples"] = "test_1/resamples"
+    reply = reply_for_test(p=p).replace('"n": 12, ', saved)
+    s = settings.load(ws_test)
+    _, problems = derive.import_answer(
+        ws_test, s, reply, "T", approve=lambda p, c: True
+    )
+    assert problems == []
+    found = {f.scope: f for f in stats.derived_test_findings(ws_test, s)}
+    f = found["p from the data"]
+    assert f.status == status
+    if resamples:
+        assert "not stated, so taken as the rerun's (1000)" in f.summary
+
+
+def test_a_saved_p_must_be_a_number_from_0_to_1(ws_test):
+    reply = reply_for_test(p={"key": "test_1/p", "how": "recomputed"}).replace(
+        '"n": 12, ', '"n": 12, "p": 3, '
+    )
+    _, problems = derive.import_answer(
+        ws_test, settings.load(ws_test), reply, "T", approve=lambda p, c: True
+    )
+    assert [p.kind for p in problems] == ["not-a-p"]

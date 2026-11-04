@@ -28,7 +28,7 @@ WHERE = {"R1.1.a": "R1.1", "R1.1.b": "R1.1"}
 PARAS = {"R1.1": TEXT}
 
 
-def answer(claims, version="decompose v3"):
+def answer(claims, version="decompose v4"):
     return parse_answer(json.dumps({"instructions": version, "claims": claims}))
 
 
@@ -167,6 +167,18 @@ def test_copied_tests_are_checked():
     assert [p.kind for p in problems(p="= .05")] == ["value-not-in-quote"]
     assert [p.kind for p in problems(df=["22", "1"])] == ["df-count"]
     assert [p.kind for p in problems(n_quote=None)] == ["value-not-in-quote"]
+    assert [p.kind for p in problems(statistic=None)] == ["statistic-missing"]
+    assert [p.kind for p in problems(statistic=None, value=None)] == ["test-unnamed"]
+
+
+def test_a_test_printed_with_p_only_is_copied_by_its_name():
+    text = "Rats pressed faster in block A (permutation test, p = 0.003)."
+    claims = {"R1.1.a": "Rats pressed faster in block A"}
+    facets = [{"facet": "quantity", "quote": "permutation test, p = 0.003",
+               "states": "Rats pressed faster."}]  # fmt: skip
+    test = {"quote": "p = 0.003", "named": "permutation test", "p": "= 0.003"}
+    a = answer([{"id": "R1.1.a", "facets": facets, "tests": [test]}])
+    assert check_answer(a, claims, {"R1.1.a": "R1.1"}, {"R1.1": text}) == []
 
 
 def test_every_claim_answered_once_and_only_those_given():
@@ -211,7 +223,7 @@ def test_bad_facet_name_is_described():
     with pytest.raises(
         AnswerError, match="In claim 1, facet 1, facet: Input should be"
     ):
-        parse_answer(json.dumps({"instructions": "decompose v3", "claims": bad}))
+        parse_answer(json.dumps({"instructions": "decompose v4", "claims": bad}))
 
 
 # --- From segment answers to observations ------------------------------------
@@ -243,7 +255,7 @@ def test_example_audit_from_segment_to_results_observations(tmp_path, capsys):
     assert "decompose-R1.2.a.md" in capsys.readouterr().out
     reply = tmp_path / "reply.txt"
     dec = {
-        "instructions": "decompose v3",
+        "instructions": "decompose v4",
         "claims": [
             {"id": "R1.2.a", "facets": [
                 {"facet": "population", "quote": "Twelve mice", "states": "12 mice.",

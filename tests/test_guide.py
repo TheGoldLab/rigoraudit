@@ -117,7 +117,7 @@ def replies(ws):
     save("segment", {"instructions": "segment v3", "claims": [
         {"id": "R1.1.a", "paragraph": "R1.1", "type": "new_result",
          "quote": "Accuracy was 80% in block A"}]})  # fmt: skip
-    save("decompose", {"instructions": "decompose v3", "claims": [{"id": "R1.1.a",
+    save("decompose", {"instructions": "decompose v4", "claims": [{"id": "R1.1.a",
         "facets": [{"facet": "quantity", "quote": "80%", "states": "s",
                     "values": [{"name": "accuracy", "printed": "80%"}]}]}]})  # fmt: skip
     save("trace", {"instructions": "trace v4", "claims": [{"id": "R1.1.a", "facets": [
@@ -127,7 +127,7 @@ def replies(ws):
     data = ws / "materials" / "data" / "correct.json"
     data.parent.mkdir(parents=True, exist_ok=True)
     data.write_text("[1, 1, 1, 1, 0]", encoding="utf-8")
-    answer = {"instructions": "derive v4", "claims": [{"claim": "R1.1.a", "values": [
+    answer = {"instructions": "derive v5", "claims": [{"claim": "R1.1.a", "values": [
         {"for": "V1", "key": "accuracy", "how": "recomputed",
          "source": "data/correct.json", "derivation": "percent correct"}]}]}  # fmt: skip
     script = DERIVE
@@ -136,7 +136,7 @@ def replies(ws):
         f"{json.dumps(answer)}\n\n```python\n{script}```\n", encoding="utf-8"
     )
     out["derive"] = str(path)
-    save("compare", {"instructions": "compare v5", "claims": [{"claim": "R1.1.a",
+    save("compare", {"instructions": "compare v6", "claims": [{"claim": "R1.1.a",
         "findings": [{"facet": "quantity", "observations": ["O1", "O3"],
          "basis": "reported_precision",
          "comparisons": [{"kind": "precision", "stated": ["O1.v1"], "observed": ["O3.v1"]}],

@@ -217,11 +217,21 @@ class Kind(StrEnum):
     """Every observed value within the stated low and high values."""
     SIGN = "sign"
     """Observed has the stated sign (stated value +1 or -1)."""
+    P = "p"
+    """A p value: observed agrees with the stated p to 3 decimal places, or
+    at the decimals shown if fewer, so any p below 0.0005 counts as 0.000
+    (decision 0015, note of 2026-11-04); for a stated inequality, a bound
+    below 0.0005 is read as 0.0005. ``amount``, when given, widens this by
+    the error a resampled p carries."""
+
+
+P_PLACES = 3
+"""The decimal places to which a p value is compared (:attr:`Kind.P`)."""
 
 
 _KINDS_FOR_BASIS = {
     Basis.EXACT: {Kind.EXACT},
-    Basis.REPORTED_PRECISION: {Kind.PRECISION, Kind.INEQUALITY, Kind.RELATIVE},
+    Basis.REPORTED_PRECISION: {Kind.PRECISION, Kind.INEQUALITY, Kind.RELATIVE, Kind.P},
     Basis.DESIGN_VS_REALIZATION: {Kind.RELATIVE, Kind.ABSOLUTE, Kind.RANGE},
     Basis.DIRECTION: {Kind.SIGN, Kind.INEQUALITY},
 }
@@ -440,7 +450,7 @@ class Comparison(Frozen):
     predicted: Value | None = None
     amount: float | None = Field(default=None, gt=0)
     """Tolerance for ``relative`` (a fraction, 0.05 for ±5%) or ``absolute``
-    (in the values' unit)."""
+    (in the values' unit); for ``p``, an optional margin for resampling error."""
     hedge: str | None = None
     """Wording that set the tolerance, e.g. ``~140``; for an inequality, the
     wording it reads, e.g. ``no reliable difference`` read as p ≥ 0.05; for a
@@ -455,7 +465,9 @@ class Comparison(Frozen):
         k, stated = self.kind, self.stated
         if (len(stated) == 2) != (k is Kind.RANGE):
             raise ValueError("range compares against two stated values; others one")
-        if (self.amount is not None) != (k in (Kind.RELATIVE, Kind.ABSOLUTE)):
+        if k is not Kind.P and (self.amount is not None) != (
+            k in (Kind.RELATIVE, Kind.ABSOLUTE)
+        ):
             raise ValueError("amount is required for relative and absolute only")
         if self.predicted is not None and k not in (
             Kind.EXACT,
@@ -473,7 +485,10 @@ class Comparison(Frozen):
         if k is not Kind.EXACT and any(isinstance(v.value, bool | str) for v in values):
             raise ValueError(f"a {k} comparison needs numeric values")
         relations = {v.relation for v in stated}
-        if k is Kind.INEQUALITY:
+        if k is Kind.P:
+            if len(relations) != 1 or not relations <= {Relation.EQ, *_INEQUALITIES}:
+                raise ValueError("a p comparison needs a stated =, <, ≤, >, or ≥ value")
+        elif k is Kind.INEQUALITY:
             if not relations <= set(_INEQUALITIES):
                 raise ValueError(
                     "an inequality comparison needs a stated <, ≤, >, or ≥"
@@ -492,10 +507,13 @@ class Comparison(Frozen):
         if any(v.relation is not Relation.EQ for v in self.observed):
             raise ValueError("observed values are stated with =")
         if self.span is not None:
-            if k not in (Kind.PRECISION, Kind.INEQUALITY) or len(self.observed) != 1:
+            if (
+                k not in (Kind.PRECISION, Kind.INEQUALITY, Kind.P)
+                or len(self.observed) != 1
+            ):
                 raise ValueError(
-                    "a span is for one observed value, compared by precision or "
-                    "inequality"
+                    "a span is for one observed value, compared by precision, "
+                    "inequality, or p"
                 )
             low, high = (v.value for v in self.span)
             x = self.observed[0].value
@@ -521,6 +539,8 @@ class Comparison(Frozen):
         assert not isinstance(ref, bool | str)  # enforced by _well_formed
         obs = [float(o.value) for o in self.observed]
         slack = 1e-9 * max(1.0, abs(ref))
+        if k is Kind.P:
+            return self._p_agrees(float(ref), obs, slack)
         if self.span is not None:
             low, high = (float(v.value) for v in self.span)
             if k is Kind.PRECISION:
@@ -548,6 +568,30 @@ class Comparison(Frozen):
                 return all(math.copysign(1, x) == ref and x != 0 for x in obs)
         raise AssertionError(k)
 
+    def _p_agrees(self, ref: float, obs: list[float], slack: float) -> bool:
+        """:attr:`Kind.P`: each observed value, or its span, widened by
+        ``amount``, against the stated p at :data:`P_PLACES` decimals."""
+        margin = (self.amount or 0.0) + slack
+        if self.span is not None:
+            ranges = [(float(self.span[0].value), float(self.span[1].value))]
+        else:
+            ranges = [(x, x) for x in obs]
+        floor = 0.5 * 10.0**-P_PLACES
+        relation = Relation(self.stated[0].relation)
+        if relation is Relation.EQ:
+            decimals = self.stated[0].decimals
+            shown = 0.5 * 10.0 ** -(decimals if decimals is not None else P_PLACES)
+            half = max(shown, floor)
+            return all(
+                low - margin <= ref + half and high + margin >= ref - half
+                for low, high in ranges
+            )
+        compare = _INEQUALITIES[relation]
+        if compare(0, 1):  # < or ≤: the low end decides
+            bound = max(ref, floor)
+            return all(compare(low - margin, bound) for low, _ in ranges)
+        return all(compare(high + margin, ref) for _, high in ranges)
+
     def values_text(self) -> str:
         """The stated value beside what was found, short enough for the report:
         ``SD (for block A) 0.20 vs 0.236``."""
@@ -570,6 +614,16 @@ class Comparison(Frozen):
         elif k is Kind.PRECISION:
             d = self.stated[0].decimals
             text = f"to the {d} decimal{'s' if d != 1 else ''} shown"
+        elif k is Kind.P:
+            s = self.stated[0]
+            text = (
+                f"to {P_PLACES} decimal places"
+                if s.relation is Relation.EQ
+                else f"as the stated inequality (p {s.relation} {s.value})"
+            )
+            text += ", any p below 0.0005 counting as 0.000"
+            if self.amount:
+                text += f", ±{self.amount:.2g} for resampling error"
         elif k is Kind.INEQUALITY:
             s = self.stated[0]
             if self.hedge:  # wording with a threshold, e.g. "no reliable difference"

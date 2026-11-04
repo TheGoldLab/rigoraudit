@@ -162,6 +162,18 @@ class StatedUnit(Frozen):
     """The words that state it, in the claim's paragraph or the Methods."""
 
 
+class RerunP(Frozen):
+    """The p of a test the script reruns (decision 0015, note of 2026-11-04)."""
+
+    key: NonEmptyStr
+    """The key of the p the rerun gives."""
+    how: Literal["executed", "recomputed"]
+    """Executed: the authors' code, run. Recomputed: the audit's own test."""
+    resamples: str | None = None
+    """For a bootstrap or permutation test: the key of the number of
+    resamples the rerun drew."""
+
+
 class TestData(Frozen):
     """What the script saves about one reported test it recomputes
     (decision 0015, items 6 and 11)."""
@@ -181,6 +193,8 @@ class TestData(Frozen):
     """The lowest and highest the values can be, for proportions and counts."""
     stated_unit: StatedUnit | None = None
     """Only when the text states it."""
+    p: RerunP | None = None
+    """Only when the script reruns the test itself, not just its values."""
 
 
 class ClaimValues(Frozen):
@@ -975,6 +989,26 @@ def _test_output_problems(claim: str, t: TestData, saved: Mapping) -> Problems:
             "bad-unit",
             f"For {where}, {t.unit} is {unit!r}; save one of {', '.join(UNITS)}.",
         )
+    if t.p is not None:
+        rerun = saved.get(t.p.key)
+        if rerun is not None and not (
+            isinstance(rerun, int | float)
+            and not isinstance(rerun, bool)
+            and 0 <= rerun <= 1
+        ):
+            problems.add(
+                "not-a-p",
+                f"For {where}, {t.p.key} is {rerun!r}; save p as a number from 0 to 1.",
+            )
+        drawn = saved.get(t.p.resamples) if t.p.resamples else None
+        if drawn is not None and not (
+            isinstance(drawn, int) and not isinstance(drawn, bool) and drawn > 0
+        ):
+            problems.add(
+                "not-a-count",
+                f"For {where}, {t.p.resamples} is {drawn!r}; save the number of "
+                "resamples as a whole number.",
+            )
     if t.groups is not None:
         found = group_values(saved, t.groups)
         if not found or any(
@@ -986,6 +1020,12 @@ def _test_output_problems(claim: str, t: TestData, saved: Mapping) -> Problems:
                 f"{t.groups}/<group>.",
             )
     return problems
+
+
+def _p_keys(t: TestData) -> tuple[str, ...]:
+    if t.p is None:
+        return ()
+    return (t.p.key, t.p.resamples) if t.p.resamples else (t.p.key,)
 
 
 def group_values(saved: Mapping, prefix: str) -> dict[str, list]:
@@ -1038,7 +1078,8 @@ def import_answer(
     if problems:
         return None, problems
     keys = {
-        c.claim: [v.key for v in c.values] + [k for t in c.tests for k in (t.n, t.unit)]
+        c.claim: [v.key for v in c.values]
+        + [k for t in c.tests for k in (t.n, t.unit, *_p_keys(t))]
         for c in answer.claims
         if c.values or c.tests
     }

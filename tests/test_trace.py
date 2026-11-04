@@ -66,7 +66,7 @@ def ws(tmp_path):
     seg = {"instructions": "segment v3", "claims": [claim]}
     assert segment.import_answer(tmp_path, json.dumps(seg), "t")[1] == []
     decompose.write_handoffs(tmp_path)
-    dec = {"instructions": "decompose v3", "claims": [{"id": "R1.1.a", "facets": [
+    dec = {"instructions": "decompose v4", "claims": [{"id": "R1.1.a", "facets": [
         {"facet": "quantity", "quote": "80%", "states": "Accuracy was 80%.",
          "values": [{"name": "accuracy", "printed": "80%"}]},
         {"facet": "analysis", "quote": "above chance (t(9) = 3.10, p = 0.013)",
@@ -542,7 +542,7 @@ WHOLE = {"observations": ["O1", "O2"], "basis": "exact",
 
 
 def whole_answer(*findings):
-    return json.dumps({"instructions": "compare v5", "claims": [
+    return json.dumps({"instructions": "compare v6", "claims": [
         {"claim": "M1.1.a", "findings": list(findings)}]})  # fmt: skip
 
 

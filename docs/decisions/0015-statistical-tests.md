@@ -237,3 +237,25 @@ workspaces.
   answers, so nothing else uses it. Answers from before tests now only
   appear in the guide's list of answers that followed older instructions;
   to redo one, delete it and run the audit again.
+- 2026-11-04: Open question 1 is settled, and a test may be printed with
+  p only.
+  - **Every p is compared to 3 decimal places** (comparison kind `p`), or
+    at the decimals shown if fewer, so any p below 0.0005 counts as 0.000,
+    and a bound below 0.0005 (`p < 10⁻³⁰⁰`) is read as 0.0005. This applies
+    to p worked out from a printed statistic too: a p printed far below
+    0.001 is not taken at face value. It is looser than statcheck, which
+    would flag a printed 0.0003 worked out as 0.0009.
+  - **A resampled p.** A derive reply may name where its script saves the
+    p of a test it reruns (instructions v5) and, for a bootstrap or
+    permutation test, the number of resamples drawn. The comparison is
+    widened by 2·√(p(1 − p)(1/n₁ + 1/n₂)), twice the standard error of the
+    difference between two runs of n₁ and n₂ resamples. The authors' n is
+    the one trace found in the code or the Methods; if neither states it,
+    the rerun's n is assumed and the finding says so. No margin is added
+    when the rerun runs the authors' code and trace found that it sets a
+    seed. The compare assistant uses the same kind `p` for any p it
+    compares (instructions v6).
+  - **A test printed with p only** ("permutation test, p = 0.003") is
+    copied by its name and p, with no statistic (decompose instructions
+    v4). The tool has nothing to work p out from, so it gives no finding
+    for that; the settings and a rerun's p are compared as for any test.

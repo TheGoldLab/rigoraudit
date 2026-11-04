@@ -23,7 +23,7 @@ def derived(ws):  # noqa: F811
 
 
 def answer(*findings):
-    return json.dumps({"instructions": "compare v5", "claims": [
+    return json.dumps({"instructions": "compare v6", "claims": [
         {"claim": "R1.1.a", "findings": list(findings)}]})  # fmt: skip
 
 
@@ -144,7 +144,7 @@ def test_claims_share_a_task_and_every_one_needs_findings(ws_two):  # noqa: F811
 
     a = {"claim": "R1.1.a", "findings": [finding("O1", "O2")]}
     b = {"claim": "R1.1.b", "findings": [finding("O3", "O4")]}
-    reply_ = {"instructions": "compare v5", "claims": [a]}
+    reply_ = {"instructions": "compare v6", "claims": [a]}
     _, problems = compare.import_answer(ws_two, json.dumps(reply_), "T")
     assert [p.kind for p in problems] == ["claim-missing"]
     reply_["claims"] = [a, b]

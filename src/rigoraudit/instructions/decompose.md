@@ -1,6 +1,6 @@
 ---
 step: decompose
-version: 3
+version: 4
 ---
 
 # Split each claim into its parts
@@ -65,6 +65,9 @@ not print or state.
 - `statistic`: one of `t`, `F`, `chi2` (χ²), `r`, `z`, `U`, `W`, or
   `other`.
 - `value`: the statistic as printed ("2.10", "−3.4").
+  If the paragraph prints p but no statistic ("permutation test,
+  p = 0.003"), leave out `statistic` and `value`, and give `named`
+  and `p`.
 - `df`: the degrees of freedom as printed, one for t, χ², and r ("22"), two
   for F (`["2", "40"]`), none for z.
 - `p`: p as printed, with its relation if the paper prints one ("= 0.047",
@@ -88,7 +91,7 @@ Reply with a single JSON block and nothing else, in this form:
 
 ```json
 {
-  "instructions": "decompose v3",
+  "instructions": "decompose v4",
   "claims": [
     {"id": "R1.2.a", "facets": [
       {"facet": "quantity", "quote": "exact text", "states": "one sentence",
@@ -122,7 +125,7 @@ Answer:
 
 ```json
 {
-  "instructions": "decompose v3",
+  "instructions": "decompose v4",
   "claims": [
     {"id": "R2.1.a", "facets": [
       {"facet": "quantity", "quote": "licked more often",

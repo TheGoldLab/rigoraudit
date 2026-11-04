@@ -714,3 +714,36 @@ def test_item_drafter_overrides_the_records():
         "A. Reviewer",
         "B. Reviewer",
     ]
+
+
+def _p(stated: Value, *observed: float, **kw) -> bool:
+    seen = tuple(Value(name="p", value=x) for x in observed)
+    return Comparison(kind=Kind.P, stated=(stated,), observed=seen, **kw).agrees()
+
+
+def test_p_is_compared_to_three_decimal_places():
+    four = Value(name="p", value=0.0473, decimals=4)
+    assert _p(four, 0.0476)  # 0.047 and 0.048 are within 0.0005
+    assert not _p(four, 0.0482)
+    two = Value(name="p", value=0.05, decimals=2)
+    assert _p(two, 0.054)  # fewer decimals shown: those decimals decide
+    tiny = Value(name="p", value=1e-300)
+    assert _p(tiny, 0.0004)  # any p below 0.0005 counts as 0.000
+    assert not _p(tiny, 0.0006)
+
+
+def test_a_p_bound_below_three_decimals_is_read_as_0_0005():
+    assert _p(Value(name="p", value=1e-10, relation=Relation.LT), 1e-5)
+    assert not _p(Value(name="p", value=0.001, relation=Relation.LT), 0.0012)
+    assert _p(Value(name="p", value=0.05, relation=Relation.GT), 0.2)
+
+
+def test_a_p_margin_widens_the_comparison_for_resampling():
+    stated = Value(name="p", value=0.031, decimals=3)
+    assert not _p(stated, 0.040)
+    assert _p(stated, 0.040, amount=0.0175)
+    c = Comparison(
+        kind=Kind.P, stated=(stated,), observed=(Value(name="p", value=0.04),),
+        amount=0.0175,
+    )  # fmt: skip
+    assert "±0.018 for resampling error" in c.describe()

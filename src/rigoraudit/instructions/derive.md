@@ -1,6 +1,6 @@
 ---
 step: derive
-version: 4
+version: 5
 ---
 
 # Recompute the claims' numbers
@@ -138,6 +138,12 @@ it is run on, add an entry to the claim's `tests`:
   the words above, and `quote`, the words that say it, copied exactly from
   the claim's paragraph or the Methods ("twelve mice", "all trials were
   pooled").
+- `p` (only if the script reruns the test itself): `key`, where the
+  script saves the p it gets; `how`, `executed` (the authors' code,
+  run) or `recomputed` (your own test); and, for a bootstrap or
+  permutation test, `resamples`, the key of the number of resamples the
+  rerun drew. The tool compares this p with the printed p, allowing for
+  the chance difference between two runs that resample.
 
 Leave a test out if the script does not recompute it.
 
@@ -148,7 +154,7 @@ script in a `python` block, and nothing else:
 
 ```json
 {
-  "instructions": "derive v4",
+  "instructions": "derive v5",
   "claims": [
     {"claim": "R1.2.a",
      "values": [

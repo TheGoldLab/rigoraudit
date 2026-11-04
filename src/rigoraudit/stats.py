@@ -7,13 +7,15 @@ Decompose copies each test a claim reports, part by part
 tool, not a model, works out three things and compares each with what the
 text prints:
 
-- p, from the statistic and its degrees of freedom (t, F, χ², r, z);
+- p, from the statistic and its degrees of freedom (t, F, χ², r, z), when
+  the text prints a statistic (a permutation test may print p only);
 - N, from the degrees of freedom (t and r), when the text states N;
 - the effect size, from the statistic (d, r, partial η²).
 
 A printed statistic is rounded, so each worked-out value is given with the
 lowest and highest it can be for any statistic that rounds to the printed
-one; it agrees if any value in that span does (as statcheck does). A test
+one; it agrees if any value in that span does (as statcheck does). Every p
+is compared to 3 decimal places (:attr:`~rigoraudit.schema.Kind.P`). A test
 the tool cannot work out from the text gets a *not verifiable* finding with
 the reason.
 
@@ -28,7 +30,8 @@ each, in fixed words, and the tool sets the status (items 5, 7, 8, and 10).
 
 :func:`derived_test_findings` compares the N and the unit of analysis that a
 derivation saves for a test it recomputes with what the text states (item
-6), and :func:`test_context` gives the lines a claim card shows beside each
+6), and the p of a test it reruns with the printed p, widened for a resampled
+p by its resampling error (:func:`resampling_margin`, item 8); and :func:`test_context` gives the lines a claim card shows beside each
 test, with no status: the test as printed (so a claim that reports several
 can name them "test 1", "test 2"), what it assumes (:func:`assumes`, item 9), and
 plain facts about the values the derivation saved (:func:`data_facts`, item
@@ -130,8 +133,8 @@ def worked_p(t: ReportedTest) -> Worked | str:
     df = _df(t)
     if len(df) != decompose.DF_COUNT[t.statistic]:
         return "the text does not print the degrees of freedom"
-    stat = _read(t.value)
-    x, low, high = _ends(stat)
+    assert t.value is not None  # decompose gives a statistic with its value
+    x, low, high = _ends(_read(t.value))
     one_sided = t.statistic in (Statistic.F, Statistic.CHI2)
     tails = t.tails or 2
     note = (
@@ -199,6 +202,7 @@ def worked_effect(t: ReportedTest) -> Worked | str:
             f"the tool cannot work out the effect size {t.effect.printed!r} "
             f"from {_name(t)}"
         )
+    assert t.value is not None  # every formula above needs a statistic
     x, low, high = _ends(_read(t.value))
     worked = Worked(formula(x), formula(low), formula(high), note)
     if _read(t.effect.printed).value < 0:  # the text gives the effect its sign
@@ -287,7 +291,7 @@ def claim_test_findings(
         )
 
     out = []
-    if t.p is not None:
+    if t.p is not None and t.statistic is not None:
         stated = _value("p", t.p)
         scope = "p from the statistic"
         result = worked_p(t)
@@ -297,7 +301,7 @@ def claim_test_findings(
             reason = "p is printed as approximate"
             out.append(_unverifiable(finding, Facet.QUANTITY, scope, shown, reason))
         else:
-            values, comparison = _compare("p", stated, result)
+            values, comparison = _compare("p", stated, result, Kind.P)
             text = f"Worked out from {_statistic(t)}, p = {_fmt(result)}."
             out.append(
                 finding(
@@ -377,14 +381,18 @@ def _unverifiable(
     )
 
 
-def _compare(name: str, stated: Value, w: Worked) -> tuple[list[Value], Comparison]:
-    """The worked-out values, and their comparison with the stated one."""
+def _compare(
+    name: str, stated: Value, w: Worked, kind: Kind | None = None
+) -> tuple[list[Value], Comparison]:
+    """The worked-out values, and their comparison with the stated one: by
+    ``kind``, or at the stated precision or inequality."""
     values = [
         Value(name=name, value=w.value),
         Value(name=f"{name}, lowest", value=w.low),
         Value(name=f"{name}, highest", value=w.high),
     ]
-    kind = Kind.PRECISION if stated.relation is Relation.EQ else Kind.INEQUALITY
+    if kind is None:
+        kind = Kind.PRECISION if stated.relation is Relation.EQ else Kind.INEQUALITY
     comparison = Comparison(
         kind=kind, stated=(stated,), observed=(values[0],), span=(values[1], values[2])
     )
@@ -411,8 +419,9 @@ def _df(t: ReportedTest) -> tuple[float, ...]:
 
 
 def _printed_values(t: ReportedTest) -> list[Value]:
-    symbol = SYMBOL.get(t.statistic, t.statistic.value)
-    values = [_value(symbol, t.value)]
+    values = []
+    if t.statistic is not None and t.value is not None:
+        values.append(_value(SYMBOL.get(t.statistic, t.statistic.value), t.value))
     names = ["df"] if len(t.df) == 1 else ["df1", "df2"]
     values += [_value(n, d) for n, d in zip(names, t.df, strict=False)]
     values += [_value("p", t.p)] if t.p else []
@@ -425,6 +434,8 @@ def _printed_values(t: ReportedTest) -> list[Value]:
 
 
 def _statistic(t: ReportedTest) -> str:
+    if t.statistic is None or t.value is None:
+        return f"the {t.named}"  # decompose requires the name of such a test
     symbol = SYMBOL.get(t.statistic, t.statistic.value)
     df = f"({', '.join(d.strip() for d in t.df)})" if t.df else ""
     return f"{symbol}{df} = {t.value.strip()}"
@@ -435,11 +446,9 @@ def _shown(t: ReportedTest) -> str:
 
 
 def _name(t: ReportedTest) -> str:
-    return (
-        f"a {t.named}"
-        if t.named
-        else f"a {SYMBOL.get(t.statistic, t.statistic.value)} statistic"
-    )
+    if t.named or t.statistic is None:
+        return f"a {t.named}"
+    return f"a {SYMBOL.get(t.statistic, t.statistic.value)} statistic"
 
 
 def _fmt(w: Worked) -> str:
@@ -720,10 +729,12 @@ def _setting_value(setting: Setting, says: str) -> Value:
 
 def derived_test_findings(workspace: Path, settings: Settings) -> list[Finding]:
     """The findings comparing the N and the unit of analysis that accepted
-    derive answers save for a test with what the text states.
+    derive answers save for a test with what the text states, and the p of a
+    test the script reruns with the printed p.
 
     N is compared when the text prints it. The unit is compared with the one
-    the text states; when the text does not say, it is not described.
+    the text states; when the text does not say, it is not described. For p,
+    see :func:`resampling_margin`.
     """
     paragraphs = {p.label: p for p in read_paragraphs(workspace / PARAGRAPHS)}
     where = {c.id: c.paragraph for c in decompose.to_decompose(workspace)}
@@ -731,6 +742,12 @@ def derived_test_findings(workspace: Path, settings: Settings) -> list[Finding]:
         c.id: c.tests
         for a in decompose.read_accepted(workspace)
         for c in a.answer.claims
+    }
+    traced = {
+        (c.id, entry.test): {s.setting: s for s in entry.settings}
+        for a in trace.read_accepted(workspace)
+        for c in a.answer.claims
+        for entry in c.tests
     }
     out = []
     for a in derive.read_accepted(workspace):
@@ -749,19 +766,154 @@ def derived_test_findings(workspace: Path, settings: Settings) -> list[Finding]:
             for d in c.tests:
                 t = tests[d.test - 1]
                 part = f", test {d.test}" if len(tests) > 1 else ""
+                derivation = Derivation(script=a.script, output=output)
+                paragraph = paragraphs[where[c.claim]]
                 out += _unit_findings(
                     c.claim,
                     t,
                     d,
                     part,
                     saved,
-                    Derivation(script=a.script, output=output),
-                    paragraphs[where[c.claim]],
+                    derivation,
+                    paragraph,
                     workspace,
                     settings.manuscript,
                     drafter,
                 )
+                if d.p is not None and t.p is not None:
+                    out.append(
+                        _rerun_p_finding(
+                            c.claim,
+                            t,
+                            d,
+                            part,
+                            saved,
+                            derivation,
+                            traced.get((c.claim, d.test), {}),
+                            _anchor(paragraph, t.quote, settings.manuscript),
+                            drafter,
+                        )
+                    )
     return out
+
+
+def resampling_margin(p: float, drawn: int, authors: int) -> float:
+    """How far apart two runs of a resampled test can give p by chance:
+    twice the standard error of their difference,
+    2·√(p(1 − p)(1/drawn + 1/authors)), for ``drawn`` resamples in the rerun
+    and ``authors`` in the authors' run."""
+    return 2 * math.sqrt(p * (1 - p) * (1 / drawn + 1 / authors))
+
+
+def _rerun_p_finding(
+    claim: str,
+    t: ReportedTest,
+    d: derive.TestData,
+    part: str,
+    saved: Mapping,
+    derivation: Derivation,
+    traced: Mapping[Setting, trace.SettingTrace],
+    anchor: ManuscriptAnchor,
+    drafter: Drafter,
+) -> Finding:
+    """The printed p against the p of the script's rerun of the test.
+
+    A rerun of a resampled test (``d.p.resamples`` given) draws at random,
+    so the comparison is widened by :func:`resampling_margin`, unless the
+    rerun ran the authors' code with the seed the trace found it sets. The
+    authors' number of resamples is the one the trace found in the code or
+    the Methods; if neither states it, the rerun's number is assumed.
+    """
+    assert d.p is not None and t.p is not None
+    rerun = Value(name="p", value=float(saved[d.p.key]), key=d.p.key)
+    quote = f"{d.p.key} = {rerun.value!r}"
+    notes = []
+    margin = 0.0
+    if d.p.resamples is not None:
+        drawn = int(saved[d.p.resamples])
+        quote += f"; {d.p.resamples} = {drawn}"
+        seed = traced.get(Setting.SEED)
+        if d.p.how == "executed" and seed and seed.code and seed.code.says == "set":
+            notes.append("the authors' code was run with the seed it sets")
+        else:
+            authors = _resamples(traced.get(Setting.RESAMPLES))
+            if authors is None:
+                authors = drawn
+                notes.append(
+                    f"the authors' number of resamples is not stated, so taken as "
+                    f"the rerun's ({drawn})"
+                )
+            margin = resampling_margin(float(rerun.value), drawn, authors)
+            notes.append(
+                f"widened by ±{margin:.2g} for resampling error ({drawn} resamples "
+                f"in the rerun, {authors} in the authors' run)"
+            )
+    stated = _value("p", t.p)
+    printed = Observation(
+        source=Source.RESULTS,
+        statement=f"The text reports {_shown(t)}.",
+        anchor=anchor,
+        obtained=Obtained.QUOTED,
+        values=(stated,),
+    )
+    ran = "runs the authors' code for" if d.p.how == "executed" else "recomputes"
+    data = Observation(
+        source=Source.DATA,
+        statement=f"The derivation {ran} {_statistic(t)}: p = {rerun.value:.3g}.",
+        anchor=DataAnchor(
+            file=d.source,
+            derivation=f"p of {_statistic(t)}, rerun",
+            produced_by=derivation,
+            quote=quote,
+        ),
+        obtained=Obtained.EXECUTED if d.p.how == "executed" else Obtained.RECOMPUTED,
+        values=(rerun,),
+    )
+    scope = "p from the data" + part
+    summary = (
+        f"The text prints p {t.p.strip()} for {_statistic(t)}; the rerun gives "
+        f"p = {rerun.value:.3g}"
+    )
+    summary += f" ({'; '.join(notes)})." if notes else "."
+    common = {
+        "id": f"{claim}/{Facet.QUANTITY}/{scope.replace(' ', '-').replace(',', '')}",
+        "claim_id": claim,
+        "facet": Facet.QUANTITY,
+        "scope": scope,
+        "summary": summary,
+        "observations": (printed, data),
+        "drafted_by": drafter,
+    }
+    if stated.relation is Relation.APPROX:
+        return Finding(
+            **common,
+            status=Status.NOT_VERIFIABLE,
+            reason="P is printed as approximate.",
+        )
+    return Finding(
+        **common,
+        basis=Basis.REPORTED_PRECISION,
+        comparisons=(
+            Comparison(
+                kind=Kind.P,
+                stated=(stated,),
+                observed=(rerun,),
+                amount=margin or None,
+            ),
+        ),
+    )
+
+
+def _resamples(s: trace.SettingTrace | None) -> int | None:
+    """The authors' number of resamples, from the code or else the Methods."""
+    if s is None:
+        return None
+    for said in (s.code, s.methods):
+        if said is not None:
+            printed = decompose.read_printed(said.says)
+            if printed is not None and printed.value > 0:
+                return int(printed.value)
+    return None
 
 
 def _unit_findings(

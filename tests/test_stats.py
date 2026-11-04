@@ -10,7 +10,13 @@ from rigoraudit import compare, decompose, segment, settings
 from rigoraudit.decompose import Design, EffectName, EffectSize, ReportedTest, Statistic
 from rigoraudit.paragraphs import Paragraph
 from rigoraudit.schema import Drafter, DrafterKind, Obtained, Status, Trace
-from rigoraudit.stats import claim_test_findings, implied_n, worked_effect, worked_p
+from rigoraudit.stats import (
+    claim_test_findings,
+    implied_n,
+    resampling_margin,
+    worked_effect,
+    worked_p,
+)
 
 TOOL = Drafter(
     kind=DrafterKind.TOOL,
@@ -135,7 +141,7 @@ def test_the_record_holds_the_tools_findings(tmp_path):
     assert not problems
     decompose.write_handoffs(ws)
     _, problems = decompose.import_answer(ws, json.dumps({
-        "instructions": "decompose v3", "claims": [{"id": "R1.1.a", "facets": [
+        "instructions": "decompose v4", "claims": [{"id": "R1.1.a", "facets": [
         {"facet": "quantity", "quote": "pressed faster, t(22) = 2.10, p = 0.047",
          "states": "s"}], "tests": [{"quote": "t(22) = 2.10, p = 0.047",
         "statistic": "t", "value": "2.10", "df": ["22"], "p": "= 0.047"}]}]}), "T")  # fmt: skip
@@ -168,3 +174,14 @@ def test_the_data_are_described_without_a_judgment():
     assert text == (
         "Data: N = 6, skew -0.33; tied values 83%; at the floor 33%, at the ceiling 50%."
     )
+
+
+def test_a_test_printed_with_p_only_has_nothing_to_work_out():
+    text = "Rats pressed faster (permutation test, p = 0.003)."
+    found = findings(text, quote="p = 0.003", named="permutation test", p="= 0.003")
+    assert found == {}
+
+
+def test_the_resampling_margin_is_twice_the_error_of_two_runs():
+    assert resampling_margin(0.05, 1000, 1000) == pytest.approx(0.0195, abs=1e-4)
+    assert resampling_margin(0.0, 1000, 1000) == 0.0

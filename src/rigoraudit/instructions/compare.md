@@ -1,6 +1,6 @@
 ---
 step: compare
-version: 5
+version: 6
 ---
 
 # Compare what each source says about each claim
@@ -31,9 +31,12 @@ comparison:
 | `basis` | For | Comparisons it may use |
 |---|---|---|
 | `exact` | counts, identities, codings, code settings, named tests: any mismatch differs | `exact` |
-| `reported_precision` | a reported statistic against the audit's recomputation from the same data | `precision`, `inequality` (for "p < 0.001"), `relative` (for hedged values) |
+| `reported_precision` | a reported statistic against the audit's recomputation from the same data | `precision`, `inequality` (for "p < 0.001"), `relative` (for hedged values), `p` (for any p value) |
 | `design_vs_realization` | a stated design (a probability, a duration, a range) against the recorded trials | `relative`, `absolute`, `range` |
 | `direction` | words such as "higher" or "increased" against the direction in the data | `sign`, `inequality` |
+
+Compare a p value with `p`, printed as `= 0.031` or `< 0.001` alike: it
+agrees to 3 decimal places, so any p below 0.0005 counts as 0.000.
 
 Compare like with like: if a stated value predicts something different
 for the quantity observed (a truncated distribution has a different mean),
@@ -124,7 +127,7 @@ nothing else, in this form:
 
 ```json
 {
-  "instructions": "compare v5",
+  "instructions": "compare v6",
   "claims": [
     {"claim": "R1.2.a",
      "findings": [

@@ -363,10 +363,14 @@ its file in `work/<step>/answers/` and run `rigoraudit audit` again.
   joined by ±, a dash, or "to" (`168.25 ± 4.1 ms`, `5–10%`). It also
   copies each statistical test the claim reports, part by part: the
   statistic, its degrees of freedom, p, N, the tails and whether the test
-  is paired (only if the text says), and the effect size. From these the
+  is paired (only if the text says), and the effect size. A test printed
+  with p only ("permutation test, p = 0.003") is copied by its name and
+  p. From these the
   tool itself works out p, the N the degrees of freedom imply, and the
   effect size, and compares each with what is printed, allowing for the
-  rounding of the printed statistic. These findings are the tool's own;
+  rounding of the printed statistic. Every p is compared to 3 decimal
+  places, so any p below 0.0005 counts as 0.000: a printed p = 10⁻³⁰⁰
+  agrees with any p below 0.0005, and so does p < 10⁻³⁰⁰. These findings are the tool's own;
   `rigoraudit record` adds them to the record. A test it cannot work out
   (a rank test, say, or one printed without its degrees of freedom) is
   *not verifiable*, with the reason
@@ -432,7 +436,16 @@ For each statistical test a claim reports that the script recomputes, the
 reply also says where the script saves the N behind it and what one of
 those values is, in fixed words (a trial, a block, a session, a cell, an
 animal, a participant), with the words of the text that state it, if any.
-It may also save the values in each group. The tool compares the N with
+It may also save the values in each group, and, if the script reruns
+the test, the p it gets. The tool compares that p with the printed p, to
+3 decimal places. A bootstrap or permutation test draws at random, so for
+one the reply also says where the script saves how many resamples it
+drew, and the comparison is widened by twice the chance difference
+between two such runs, 2·√(p(1 − p)(1/n₁ + 1/n₂)) for n₁ and n₂
+resamples (about ±0.02 for p = 0.05 at 1,000 each). The authors' number
+is the one trace found; if none was found, the rerun's is assumed, and
+the finding says so. When the rerun runs the authors' code and trace
+found that it sets a seed, nothing is added. The tool compares the N with
 the N the text states, and the unit with the text's: different is
 *differs*, and a unit the text does not state is *not described*. From the
 values, the claim card shows, with no status, N and skew in each group,

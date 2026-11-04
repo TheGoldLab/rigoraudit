@@ -122,9 +122,10 @@ class ReportedTest(Frozen):
     """The words that report the test, e.g. ``t(22) = 2.10, p = 0.047``."""
     named: str | None = None
     """The test as the paragraph names it, e.g. ``paired t test``."""
-    statistic: Statistic
-    value: NonEmptyStr
-    """The statistic as printed, e.g. ``2.10``."""
+    statistic: Statistic | None = None
+    """``None`` for a test printed with p only, such as a permutation test."""
+    value: str | None = None
+    """The statistic as printed, e.g. ``2.10``; given with ``statistic``."""
     df: tuple[NonEmptyStr, ...] = Field(default=(), max_length=2)
     p: str | None = None
     """p as printed, with its relation, e.g. ``= 0.047`` or ``< 0.01``."""
@@ -420,6 +421,19 @@ def _test_problems(t: ReportedTest, where: str, label: str, text: str) -> Proble
             "quote-not-found",
             f"{where}: the test's name is not in paragraph {label} word for word: "
             f"{t.named!r}",
+        )
+    if (t.statistic is None) != (t.value is None):
+        problems.add(
+            "statistic-missing",
+            f"{where} gives {'value' if t.statistic is None else 'statistic'} "
+            f"without {'statistic' if t.statistic is None else 'value'}; give both, "
+            "or neither for a test printed with p only.",
+        )
+    if t.statistic is t.value is None and (t.named is None or t.p is None):
+        problems.add(
+            "test-unnamed",
+            f"{where} prints no statistic; give the test's name in named and its "
+            "p, or leave the test out.",
         )
     if t.n_quote is not None and t.n is None:
         problems.add(
